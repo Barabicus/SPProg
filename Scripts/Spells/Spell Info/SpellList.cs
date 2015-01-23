@@ -20,6 +20,7 @@ public class SpellList : MonoBehaviour
         {
             if (!_spellDict.ContainsKey(spell.SpellID))
                 _spellDict.Add(spell.SpellID, spell);
+            spell.gameObject.SetActive(false);
         }
 
     }
@@ -32,5 +33,6 @@ public class SpellList : MonoBehaviour
 }
 
 public enum SpellID{
-    Fireball
+    Fireball,
+    IceShard
 }

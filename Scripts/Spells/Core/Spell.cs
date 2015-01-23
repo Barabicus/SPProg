@@ -2,8 +2,16 @@
 using System.Collections;
 using System;
 
+[RequireComponent(typeof(Rigidbody))]
+[RequireComponent(typeof(EffectSetting))]
 public abstract class Spell : MonoBehaviour
 {
+
+    #region Fields
+
+    Rigidbody rigidbody;
+
+    #endregion
 
     #region Properties
     public Entity CastingEntity { get; set; }
@@ -20,12 +28,26 @@ public abstract class Spell : MonoBehaviour
         set;
     }
 
+    public Vector3 SpellStartPosition
+    {
+        get;
+        set;
+    }
+
     public abstract float SpellLiveTime
     {
         get;
     }
 
     public abstract SpellType SpellType
+    {
+        get;
+    }
+
+    /// <summary>
+    /// How much delay this spell leaves before you can cast another spell
+    /// </summary>
+    public abstract float SpellCastDelay
     {
         get;
     }
@@ -40,11 +62,20 @@ public abstract class Spell : MonoBehaviour
 
     #region Events
     public event EventHandler<SpellEventargs> OnDestroy;
+    public event EventHandler<SpellEventargs> OnCollided;
     #endregion
+
+    public virtual void Awake() { }
 
     public virtual void Start()
     {
+        // Ensure the components are properly setup
+        rigidbody = GetComponent<Rigidbody>();
+        rigidbody.isKinematic = true;
+        GetComponent<SphereCollider>().isTrigger = true;
         gameObject.layer = 10;
+
+
         Invoke("DestroySpell", SpellLiveTime);
     }
 
@@ -53,9 +84,13 @@ public abstract class Spell : MonoBehaviour
 
     public abstract SpellID SpellID { get; }
 
-    public void CastSpell(Entity castingEntity)
+    public void CastSpell(Entity castingEntity, Vector3 startPostion)
     {
+        SpellStartPosition = startPostion;
         CastingEntity = castingEntity;
+        transform.position = SpellStartPosition;
+        transform.rotation = CastingEntity.transform.rotation;
+        gameObject.SetActive(true);
     }
 
     public virtual void Update() { }
@@ -67,10 +102,26 @@ public abstract class Spell : MonoBehaviour
     /// </summary>
     protected virtual void DestroySpell()
     {
+        TriggerDestroyEvent();
+        enabled = false;
+    }
+
+
+    #region Trigger Events
+
+    protected void TriggerCollisionEvent()
+    {
+        if (OnCollided != null)
+            OnCollided(this, new SpellEventargs(this, SpellType));
+    }
+
+    protected void TriggerDestroyEvent()
+    {
         if (OnDestroy != null)
             OnDestroy(this, new SpellEventargs(this, SpellType));
-        Destroy(gameObject);
     }
+
+    #endregion
 
 }
 
@@ -90,5 +141,5 @@ public class SpellEventargs : EventArgs
         this.spellType = spellType;
         this.spell = spell;
     }
-    
+
 }

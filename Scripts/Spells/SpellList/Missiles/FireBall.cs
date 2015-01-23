@@ -24,4 +24,15 @@ public class FireBall : MissileSpell {
         get { return new ElementalStats(1f, 0f); }
     }
 
+
+    public override SpellType SpellType
+    {
+        get { return global::SpellType.Missile; }
+    }
+
+    public override float SpellCastDelay
+    {
+        get { return 0.15f; }
+    }
+
 }

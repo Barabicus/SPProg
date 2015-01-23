@@ -1,27 +1,18 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-[RequireComponent(typeof(Rigidbody))]
-[RequireComponent(typeof(SphereCollider))]
-public abstract class MissileSpell : ElementalSpell
-{
-    public float missileSpeed = 5f;
-    private Vector3 direction;
+public abstract class MissileSpell : ElementalSpell {
 
-    Rigidbody rigidbody;
 
-    public override void Start()
+    public override abstract float SpellLiveTime
     {
-        base.Start();
-        // Ensure the components are properly setup
-        rigidbody = GetComponent<Rigidbody>();
-        rigidbody.isKinematic = true;
-        GetComponent<SphereCollider>().isTrigger = true;
-        transform.position = CastingEntity.transform.position;
+        get;
+    }
 
-        direction = (SpellTargetPosition.Value - CastingEntity.transform.position).normalized;
-        direction.y = 0;
 
+    public override abstract SpellType SpellType
+    {
+        get;
     }
 
     public override abstract SpellID SpellID
@@ -29,38 +20,43 @@ public abstract class MissileSpell : ElementalSpell
         get;
     }
 
-    public override SpellType SpellType
-    {
-        get { return SpellType.Missile; }
-    }
-
-    public override void Update()
-    {
-        transform.position += direction * missileSpeed * Time.deltaTime;
-    }
-
-    public override float SpellLiveTime
-    {
-        get { return 2f; }
-    }
-
-    public virtual void OnTriggerEnter(Collider other)
-    {
-        Debug.Log(other.gameObject.layer + " : " + other.gameObject.name);
-        if (other.gameObject != CastingEntity.gameObject && other.gameObject.layer == LayerMask.NameToLayer("Entity"))
-        {
-            DestinationReached();
-            ApplySpell(other.GetComponent<Entity>());
-        }
-    }
-
     public override abstract ElementalStats ElementalPower
     {
         get;
     }
 
-    public virtual void DestinationReached()
+    public override abstract float SpellCastDelay
     {
-        Invoke("DestroySpell", 0f);
+        get;
     }
+
+    protected virtual void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject != CastingEntity.gameObject && other.gameObject.layer == LayerMask.NameToLayer("Entity"))
+        {
+            SpellCollidedWithEntity(other.GetComponent<Entity>());
+            ApplySpell(other.GetComponent<Entity>());
+        }
+        if (other.gameObject != CastingEntity.gameObject && other.gameObject.layer != LayerMask.NameToLayer("Spell"))
+        {
+            SpellCollided(other);
+            TriggerCollisionEvent();
+        }
+    }
+
+    /// <summary>
+    /// Called when the spell collides with anything
+    /// </summary>
+    /// <param name="other"></param>
+    protected virtual void SpellCollided(Collider other)
+    {
+        DestroySpell();
+    }
+
+    /// <summary>
+    /// Called when the spell collides with an entity. Note SpellCollided will still be called.
+    /// </summary>
+    /// <param name="entity"></param>
+    protected virtual void SpellCollidedWithEntity(Entity entity) { }
+
 }
