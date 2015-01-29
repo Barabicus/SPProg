@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class DummyEntity : Entity
+public class ConeBeamMotor : SpellEffect
 {
 
 }

@@ -9,7 +9,9 @@ public class GameplayGUI : MonoBehaviour
 
     public Transform selectedTransform;
     public RectTransform healthAmount;
+    public RectTransform playerHealth;
     public Text selectedEntityText;
+    public Player player;
 
     public bool isMouseOver;
 
@@ -28,7 +30,28 @@ public class GameplayGUI : MonoBehaviour
 
     void Update()
     {
+        UpdatePlayer();
         UpdateTargeted();
+        SelectSpellInput();
+    }
+
+
+    private void SelectSpellInput()
+    {
+        if (Input.GetKeyDown(KeyCode.Alpha1))
+            player.ChangeSpell(0);
+        if (Input.GetKeyDown(KeyCode.Alpha2))
+            player.ChangeSpell(1);
+        if (Input.GetKeyDown(KeyCode.Alpha3))
+            player.ChangeSpell(2);
+        if (Input.GetKeyDown(KeyCode.Alpha4))
+            player.ChangeSpell(3);
+    }
+
+    private void UpdatePlayer()
+    {
+        playerHealth.anchorMax = new Vector2(GetPercent(player.CurrentHP, player.maxHP), playerHealth.anchorMax.y);
+
     }
 
     private void UpdateTargeted()

@@ -25,14 +25,20 @@ public class SpellList : MonoBehaviour
 
     }
 
-    public Spell GetSpell(SpellID spell)
+    public Spell GetNewSpell(SpellID spell)
     {
         return  Instantiate(_spellDict[spell]);
+    }
+
+    public Spell GetSpell(SpellID spell)
+    {
+        return _spellDict[spell];
     }
 
 }
 
 public enum SpellID{
     Fireball,
-    IceShard
+    IceShard,
+    PhysicalAttack
 }

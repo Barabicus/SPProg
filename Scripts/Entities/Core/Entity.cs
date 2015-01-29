@@ -9,24 +9,62 @@ public class Entity : MonoBehaviour
     #region Fields
     public float currentHP;
     public float maxHP;
+    public float spellCastDelay = 0.1f;
     public string EntityName = "NOTSET";
-    public float fire, water;
-
-
+    public float fire = 1, water = 1, kinetic = 1;
+    public Transform castPoint;
     public EntityFlags entityFlags;
-    
-    private ElementalStats _elementalModifier;
-    private Animator animator;
 
+    public event EventHandler<EntityEventArgs> entityKilled;
+
+    private ElementalStats _elementalResistance;
+    private Animator animator;
     private Vector3 _lastPosition;
     private float _currentSpeed;
+    private EntityLivingState _livingState = EntityLivingState.Alive;
 
     protected NavMeshAgent navMeshAgent;
+    protected BeamSpell beamSpell = null;
+    protected Transform selectedTarget;
 
 
     #endregion
 
+    #region States
+
+    public enum EntityLivingState
+    {
+        Alive,
+        Dead
+    }
+
+    #endregion
+
     #region Properties
+
+    public EntityLivingState LivingState
+    {
+        get { return _livingState; }
+        set
+        {
+            switch (value)
+            {
+                case EntityLivingState.Dead:
+                    animator.SetBool("Dead", true);
+                 //   foreach (Collider c in GetComponents<Collider>())
+                  //      Destroy(c);
+                    navMeshAgent.enabled = false;
+                    if (entityKilled != null)
+                        entityKilled(this, new EntityEventArgs(this));
+                    break;
+                case EntityLivingState.Alive:
+                    animator.SetBool("Dead", false);
+                    navMeshAgent.enabled = true;
+                    break;
+            }
+            _livingState = value;
+        }
+    }
 
     public float CurrentHP
     {
@@ -39,9 +77,17 @@ public class Entity : MonoBehaviour
         }
     }
 
+    public bool IsBeamActive
+    {
+        get
+        {
+            return beamSpell != null;
+        }
+    }
+
     public ElementalStats ElementalModifier
     {
-        get { return _elementalModifier; }
+        get { return _elementalResistance; }
     }
 
     #endregion
@@ -56,21 +102,47 @@ public class Entity : MonoBehaviour
 
         // Ensure HP is properly clamped
         CurrentHP = CurrentHP;
-        _elementalModifier = new ElementalStats(fire, water);
+        _elementalResistance = new ElementalStats(fire, water, kinetic);
     }
 
-    public Spell CastSpell(SpellID spell, Vector3 startPosition)
+
+    public Spell CastSpell(SpellID spell)
     {
-        Spell sp = SpellList.Instance.GetSpell(spell);
-        sp.CastSpell(this, startPosition);
+        Spell sp = SpellList.Instance.GetNewSpell(spell);
+        sp.CastSpell(this, castPoint);
+
+        spellCastDelay = sp.SpellCastDelay;
+
+        switch (sp.SpellType)
+        {
+            // Check if spell type is beam and do beam logic
+            case SpellType.Beam:
+                ((BeamSpell)sp).KeepBeamAlive = () => { return Input.GetMouseButton(1); };
+                beamSpell = sp as BeamSpell;
+                beamSpell.OnSpellDestroy += (o, e) => { beamSpell = null; };
+                break;
+        }
+
         return sp;
     }
 
     protected virtual void Update()
     {
-        UpdateSpeed();
-        UpdateAnimation();
+        switch (LivingState)
+        {
+            case EntityLivingState.Alive:
+                UpdateSpeed();
+                UpdateAnimation();
+                LivingUpdate();
+                break;
+            case EntityLivingState.Dead:
+                DeadUpdate();
+                break;
+        }
     }
+
+    protected virtual void LivingUpdate() { }
+    protected virtual void DeadUpdate() { }
 
     private void UpdateAnimation()
     {
@@ -89,9 +161,27 @@ public class Entity : MonoBehaviour
 
     protected virtual void Die()
     {
-        Destroy(gameObject);
+        //  Destroy(gameObject);
+        LivingState = EntityLivingState.Dead;
+
     }
 
+    /// <summary>
+    /// Called when a spell applys itself to an entity. The spell event agrs include details
+    /// about the spell effect occuring on this entity
+    /// </summary>
+    public virtual void SpellCastBy(SpellEventargs args) { }
+
+}
+
+public class EntityEventArgs : EventArgs
+{
+    public Entity entity;
+
+    public EntityEventArgs(Entity entity)
+    {
+        this.entity = entity;
+    }
 }
 
 [Flags]

@@ -32,4 +32,5 @@ public abstract class ElementalSpell : Spell
             entity.CurrentHP += ElementalPower.GetElementalStat(e) * -entity.ElementalModifier.GetElementalStat(e);
         }
     }
+
 }

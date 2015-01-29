@@ -26,9 +26,9 @@ public class DimLight : SpellEffect {
         }
     }
 
-    protected override void OnSpellDestroy()
+    protected override void effectSetting_OnSpellDestroy(object sender, SpellEventargs e)
     {
-        base.OnSpellDestroy();
+        base.effectSetting_OnSpellDestroy(sender, e);
         StartCoroutine(BeginDim());
     }
 }

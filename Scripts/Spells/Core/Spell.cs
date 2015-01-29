@@ -2,7 +2,6 @@
 using System.Collections;
 using System;
 
-[RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(EffectSetting))]
 public abstract class Spell : MonoBehaviour
 {
@@ -34,6 +33,12 @@ public abstract class Spell : MonoBehaviour
         set;
     }
 
+    public Transform SpellStartTransform
+    {
+        get;
+        set;
+    }
+
     public abstract float SpellLiveTime
     {
         get;
@@ -52,6 +57,15 @@ public abstract class Spell : MonoBehaviour
         get;
     }
 
+    /// <summary>
+    /// Creates a transform when the spell is created. This transform will be associated with
+    /// SpellTarget when the spell is destroyed this transform is also destroyed.
+    /// </summary>
+    public virtual bool CreateTransformOnLoad
+    {
+        get { return false; }
+    }
+
     #endregion
 
     #region States
@@ -61,20 +75,17 @@ public abstract class Spell : MonoBehaviour
     #endregion
 
     #region Events
-    public event EventHandler<SpellEventargs> OnDestroy;
-    public event EventHandler<SpellEventargs> OnCollided;
-    #endregion
+
+    public event EventHandler<SpellEventargs> OnSpellDestroy;
+
+    #endregion 
+
 
     public virtual void Awake() { }
 
     public virtual void Start()
     {
-        // Ensure the components are properly setup
-        rigidbody = GetComponent<Rigidbody>();
-        rigidbody.isKinematic = true;
-        GetComponent<SphereCollider>().isTrigger = true;
         gameObject.layer = 10;
-
 
         Invoke("DestroySpell", SpellLiveTime);
     }
@@ -84,41 +95,49 @@ public abstract class Spell : MonoBehaviour
 
     public abstract SpellID SpellID { get; }
 
-    public void CastSpell(Entity castingEntity, Vector3 startPostion)
+    public void CastSpell(Entity castingEntity, Transform startPosition)
     {
-        SpellStartPosition = startPostion;
         CastingEntity = castingEntity;
+        SpellStartTransform = startPosition;
+        SpellStartPosition = startPosition.position;
         transform.position = SpellStartPosition;
         transform.rotation = CastingEntity.transform.rotation;
+        if (CreateTransformOnLoad)
+            SpellTarget = new GameObject("Target: " + gameObject.name).transform;
         gameObject.SetActive(true);
     }
 
+
     public virtual void Update() { }
     public virtual void FixedUpdate() { }
-    public virtual void ApplySpell(Entity entity) { }
+    public virtual void ApplySpell(Entity entity)
+    {
+        entity.SpellCastBy(new SpellEventargs(this));
+    }
 
     /// <summary>
     /// Called when the spell is destroyed
     /// </summary>
-    protected virtual void DestroySpell()
+    public virtual void DestroySpell()
     {
-        TriggerDestroyEvent();
+        DestroyEvent();
         enabled = false;
+        // Destroy the target transform if it was one that was created on load
+        if (CreateTransformOnLoad)
+            Destroy(SpellTarget.gameObject);
     }
 
 
     #region Trigger Events
 
-    protected void TriggerCollisionEvent()
+    public virtual void CollisionEvent(Collider other)
     {
-        if (OnCollided != null)
-            OnCollided(this, new SpellEventargs(this, SpellType));
     }
 
-    protected void TriggerDestroyEvent()
+    public virtual void DestroyEvent()
     {
-        if (OnDestroy != null)
-            OnDestroy(this, new SpellEventargs(this, SpellType));
+        if (OnSpellDestroy != null)
+            OnSpellDestroy(this, new SpellEventargs(this));
     }
 
     #endregion
@@ -128,17 +147,17 @@ public abstract class Spell : MonoBehaviour
 public enum SpellType
 {
     Missile,
-    SelfCast
+    SelfCast,
+    Beam,
+    Physical
 }
 
 public class SpellEventargs : EventArgs
 {
     public Spell spell;
-    public SpellType spellType;
 
-    public SpellEventargs(Spell spell, SpellType spellType)
+    public SpellEventargs(Spell spell)
     {
-        this.spellType = spellType;
         this.spell = spell;
     }
 

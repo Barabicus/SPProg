@@ -1,7 +1,10 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System;
 
-public abstract class BeamSpell : MissileSpell {
+public abstract class BeamSpell : ElementalSpell
+{
+    private float _lastApplyTime;
 
     public override abstract float SpellLiveTime
     {
@@ -18,9 +21,17 @@ public abstract class BeamSpell : MissileSpell {
         get;
     }
 
-    public override abstract SpellType SpellType
+    public virtual float BeamSpellApplyDelay
     {
-        get;
+        get { return 0.05f; }
+    }
+
+    public override SpellType SpellType
+    {
+        get
+        {
+            return global::SpellType.Beam;
+        }
     }
 
     public override abstract float SpellCastDelay
@@ -28,12 +39,31 @@ public abstract class BeamSpell : MissileSpell {
         get;
     }
 
+    public override void CollisionEvent(Collider other)
+    {
+        base.CollisionEvent(other);
+        if (Time.time - _lastApplyTime > BeamSpellApplyDelay && other.gameObject.layer == LayerMask.NameToLayer("Entity"))
+        {
+            ApplySpell(other.GetComponent<Entity>());
+            _lastApplyTime = Time.time;
+        }
+    }
+
+    public Func<bool> KeepBeamAlive;
+
+    public override void Start()
+    {
+        base.Start();
+        _lastApplyTime = Time.time;
+        if (KeepBeamAlive == null)
+            DestroySpell();
+    }
+
     public override void Update()
     {
         base.Update();
-        if (!Input.GetMouseButton(1))
-        {
-            TriggerDestroyEvent();
-        }
+        if (!KeepBeamAlive())
+            DestroySpell();
+
     }
 }

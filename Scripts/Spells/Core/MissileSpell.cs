@@ -10,11 +10,6 @@ public abstract class MissileSpell : ElementalSpell {
     }
 
 
-    public override abstract SpellType SpellType
-    {
-        get;
-    }
-
     public override abstract SpellID SpellID
     {
         get;
@@ -30,33 +25,22 @@ public abstract class MissileSpell : ElementalSpell {
         get;
     }
 
-    protected virtual void OnTriggerEnter(Collider other)
+    public override void CollisionEvent(Collider other)
     {
+        base.CollisionEvent(other);
         if (other.gameObject != CastingEntity.gameObject && other.gameObject.layer == LayerMask.NameToLayer("Entity"))
         {
-            SpellCollidedWithEntity(other.GetComponent<Entity>());
             ApplySpell(other.GetComponent<Entity>());
         }
         if (other.gameObject != CastingEntity.gameObject && other.gameObject.layer != LayerMask.NameToLayer("Spell"))
         {
-            SpellCollided(other);
-            TriggerCollisionEvent();
+            DestroySpell();
         }
     }
 
-    /// <summary>
-    /// Called when the spell collides with anything
-    /// </summary>
-    /// <param name="other"></param>
-    protected virtual void SpellCollided(Collider other)
+
+    public override SpellType SpellType
     {
-        DestroySpell();
+        get { return global::SpellType.Missile; }
     }
-
-    /// <summary>
-    /// Called when the spell collides with an entity. Note SpellCollided will still be called.
-    /// </summary>
-    /// <param name="entity"></param>
-    protected virtual void SpellCollidedWithEntity(Entity entity) { }
-
 }
