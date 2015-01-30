@@ -7,12 +7,12 @@ namespace Spells.SpellList
     {
         public override float SpellLiveTime
         {
-            get { return 5.5f; }
+            get { return 60.5f; }
         }
 
         public override SpellID SpellID
         {
-            get { return global::SpellID.IceShard; }
+            get { return global::SpellID.Steam; }
         }
 
         public override ElementalStats ElementalPower

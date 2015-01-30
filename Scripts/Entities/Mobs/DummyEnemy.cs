@@ -7,6 +7,9 @@ public class DummyEnemy : Entity
     public float detectDistance;
     public float attackDistance;
     public SpellID attackSpell;
+    public float attackSpeed = 1f;
+
+    private float _lastAttackTime;
 
     bool attack = false;
 
@@ -14,6 +17,7 @@ public class DummyEnemy : Entity
     {
         base.Start();
         player = GameplayGUI.instance.player;
+        _lastAttackTime = Time.time;
       //  entityKilled += (o, a) => { Invoke("Resurrect", 25f); };
 
     }
@@ -31,10 +35,11 @@ public class DummyEnemy : Entity
     {
         if (attack)
         {
-            if (Vector3.Distance(player.transform.position, transform.position) <= attackDistance)
+            if (Time.time - _lastAttackTime >= attackSpeed && Vector3.Distance(player.transform.position, transform.position) <= attackDistance)
             {
                 Spell spell = CastSpell(attackSpell);
                 spell.SpellTarget = player.transform;
+                _lastAttackTime = Time.time;
             }
         }
     }

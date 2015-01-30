@@ -23,7 +23,7 @@ namespace Spells.SpellList {
 
         public override ElementalStats ElementalPower
         {
-            get { return new ElementalStats(2f, 0f, 0f); }
+            get { return new ElementalStats(12f, 0f, 0f); }
         }
 
 

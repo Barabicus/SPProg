@@ -5,9 +5,10 @@ public class BeamMotor : SpellEffect
 {
 
     public float speed = 2f;
+    public float maxDistance = 50f;
     public bool triggerStopMovement = true;
 
-    private float moveMultiplier = 1;
+    private float distance = 1;
 
     private Vector3 entityOffset;
 
@@ -29,6 +30,14 @@ public class BeamMotor : SpellEffect
         }
     }
 
+    public Vector3 BeamLocation
+    {
+        get
+        {
+            return transform.position + (transform.forward * distance);
+        }
+    }
+
     protected override void Start()
     {
         base.Start();
@@ -40,20 +49,26 @@ public class BeamMotor : SpellEffect
         base.Update();
             transform.parent.rotation = effectSetting.spell.CastingEntity.transform.rotation;
             transform.parent.position = effectSetting.spell.SpellStartTransform.position;
-            Debug.DrawRay(transform.position, transform.forward * moveMultiplier, Color.red);
+            Debug.DrawRay(transform.position, transform.forward * distance, Color.red);
             RaycastHit hit;
-            if (Physics.Raycast(new Ray(transform.position, transform.forward), out hit, moveMultiplier))
+            if (Physics.Raycast(new Ray(transform.position, transform.forward), out hit, distance))
             {
                 if (hit.collider.gameObject == effectSetting.spell.CastingEntity.gameObject)
                     return;
-                moveMultiplier = hit.distance;
-                if (hit.collider.gameObject.layer == LayerMask.NameToLayer("Entity"))
+                distance = hit.distance;
+                if (hit.collider.gameObject.layer != LayerMask.NameToLayer("Ground"))
                 {
-                    effectSetting.TriggerCollision(hit.collider);
+                    effectSetting.TriggerCollision(new ColliderEventArgs(hit.point), hit.collider);
                 }
             }
             else
-                moveMultiplier += speed * Time.deltaTime;
+                distance = Mathf.Min(distance +  (speed * Time.deltaTime), maxDistance);
+    }
+
+    protected override void effectSetting_OnSpellDestroy(object sender, SpellEventargs e)
+    {
+        base.effectSetting_OnSpellDestroy(sender, e);
+        enabled = false;
     }
 
 }

@@ -26,7 +26,7 @@ public class MissileMotor : SpellEffect
         if (other.gameObject != effectSetting.spell.CastingEntity.gameObject && other.gameObject.layer != LayerMask.NameToLayer("Spell") && other.gameObject.layer != LayerMask.NameToLayer("Ground") && other.gameObject.layer != LayerMask.NameToLayer("Ignore Raycast"))
         {
             Debug.Log(other.gameObject.name);
-            effectSetting.TriggerCollision(other);
+            effectSetting.TriggerCollision(new ColliderEventArgs(), other);
         }
     }
 

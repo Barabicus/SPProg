@@ -39,6 +39,7 @@ public class SpellList : MonoBehaviour
 
 public enum SpellID{
     Fireball,
-    IceShard,
-    PhysicalAttack
+    Steam,
+    PhysicalAttack,
+    IceShard
 }

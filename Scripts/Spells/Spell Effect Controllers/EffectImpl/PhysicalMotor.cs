@@ -11,7 +11,7 @@ public class PhysicalMotor : SpellEffect {
 
         if (Vector3.Distance(effectSetting.spell.SpellTarget.position, effectSetting.spell.CastingEntity.transform.position) <= range)
         {
-            effectSetting.TriggerCollision(effectSetting.spell.SpellTarget.GetComponent<Collider>());
+            effectSetting.TriggerCollision(new ColliderEventArgs(), effectSetting.spell.SpellTarget.GetComponent<Collider>());
         }
 
     }

@@ -10,7 +10,7 @@ public class EffectSetting : MonoBehaviour
     public bool destroyOnCollision;
     public float destroyTimeDelay = 0f;
     public event EventHandler<SpellEventargs> OnSpellDestroy;
-    public event Action<Collider> OnSpellCollision;
+    public event Action<ColliderEventArgs, Collider> OnSpellCollision;
 
     void Start()
     {
@@ -26,11 +26,11 @@ public class EffectSetting : MonoBehaviour
         Invoke("DestroyGameObject", destroyTimeDelay);
     }
 
-    public void TriggerCollision(Collider other)
+    public void TriggerCollision(ColliderEventArgs args, Collider other)
     {
         spell.CollisionEvent(other);
         if (OnSpellCollision != null)
-            OnSpellCollision(other);
+            OnSpellCollision(args, other);
         if (destroyOnCollision)
         {
             spell.DestroySpell();

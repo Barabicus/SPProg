@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System;
 
 public abstract class SpellEffect : MonoBehaviour
 {
@@ -19,7 +20,7 @@ public abstract class SpellEffect : MonoBehaviour
 
     }
 
-    protected virtual void effectSetting_OnSpellCollision(Collider obj)
+    protected virtual void effectSetting_OnSpellCollision(ColliderEventArgs args, Collider obj)
     {
     }
 
@@ -28,5 +29,20 @@ public abstract class SpellEffect : MonoBehaviour
     }
 
     protected virtual void Update() { }
+
+}
+
+public class ColliderEventArgs : EventArgs
+{
+    public Vector3 collPoints;
+
+    public ColliderEventArgs(Vector3 collPoints)
+    {
+        this.collPoints = collPoints;
+    }
+
+    public ColliderEventArgs()
+    {
+    }
 
 }

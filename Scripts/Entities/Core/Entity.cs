@@ -51,8 +51,11 @@ public class Entity : MonoBehaviour
             {
                 case EntityLivingState.Dead:
                     animator.SetBool("Dead", true);
-                 //   foreach (Collider c in GetComponents<Collider>())
-                  //      Destroy(c);
+                    foreach (Collider c in GetComponents<Collider>())
+                        Destroy(c);
+                    foreach (Transform t in transform)
+                        foreach (Collider c in t.GetComponents<Collider>())
+                            Destroy(c);
                     navMeshAgent.enabled = false;
                     if (entityKilled != null)
                         entityKilled(this, new EntityEventArgs(this));

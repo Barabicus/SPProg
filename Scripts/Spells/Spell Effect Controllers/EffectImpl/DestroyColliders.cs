@@ -20,9 +20,9 @@ public class DestroyColliders : SpellEffect
         Invoke("DestroyCollider", destroyDelay);
     }
 
-    protected override void effectSetting_OnSpellCollision(Collider obj)
+    protected override void effectSetting_OnSpellCollision(ColliderEventArgs args, Collider obj)
     {
-        base.effectSetting_OnSpellCollision(obj);
+        base.effectSetting_OnSpellCollision(args, obj);
         Invoke("DestroyCollider", destroyDelay);        
     }
 
