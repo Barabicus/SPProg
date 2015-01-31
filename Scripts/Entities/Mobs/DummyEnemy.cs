@@ -6,7 +6,7 @@ public class DummyEnemy : Entity
     private Player player;
     public float detectDistance;
     public float attackDistance;
-    public SpellID attackSpell;
+    public Spell attackSpell;
     public float attackSpeed = 1f;
 
     private float _lastAttackTime;
@@ -37,9 +37,12 @@ public class DummyEnemy : Entity
         {
             if (Time.time - _lastAttackTime >= attackSpeed && Vector3.Distance(player.transform.position, transform.position) <= attackDistance)
             {
-                Spell spell = CastSpell(attackSpell);
-                spell.SpellTarget = player.transform;
-                _lastAttackTime = Time.time;
+                Spell spell;
+                if (CastSpell(attackSpell, out spell))
+                {
+                    spell.SpellTarget = player.transform;
+                    _lastAttackTime = Time.time;
+                }
             }
         }
     }

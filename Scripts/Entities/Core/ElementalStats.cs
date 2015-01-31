@@ -7,6 +7,12 @@ public struct ElementalStats
 
     private Dictionary<Element, float> elementalStats;
 
+    public float this[Element e]
+    {
+        get { return GetElementalStat(e); }
+        set { elementalStats[e] = value; }
+    }
+
     public ElementalStats(float fire, float water, float kinetic)
     {
         elementalStats = new Dictionary<Element, float>();

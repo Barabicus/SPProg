@@ -2,7 +2,6 @@
 using System.Collections;
 using System;
 
-[RequireComponent(typeof(Spell))]
 public class EffectSetting : MonoBehaviour
 {
 

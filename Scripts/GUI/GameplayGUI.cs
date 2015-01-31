@@ -7,9 +7,15 @@ public class GameplayGUI : MonoBehaviour
 
     public static GameplayGUI instance;
 
+    public RectTransform hitTextPrefab;
+
     public Transform selectedTransform;
     public RectTransform healthAmount;
     public RectTransform playerHealth;
+    public RectTransform fireCharge;
+    public RectTransform waterCharge;
+    public RectTransform airCharge;
+    public RectTransform earthCharge;
     public Text selectedEntityText;
     public Player player;
 
@@ -35,17 +41,36 @@ public class GameplayGUI : MonoBehaviour
         SelectSpellInput();
     }
 
+    public Text CreateHitText()
+    {
+        RectTransform rt = Instantiate(hitTextPrefab) as RectTransform;
+        rt.parent = transform;
+        return rt.GetComponent<Text>();
+    }
 
     private void SelectSpellInput()
     {
-        if (Input.GetKeyDown(KeyCode.Alpha1))
+        if (Input.GetKeyDown(KeyCode.Q))
             player.ChangeSpell(0);
-        if (Input.GetKeyDown(KeyCode.Alpha2))
+        if (Input.GetKeyDown(KeyCode.W))
             player.ChangeSpell(1);
-        if (Input.GetKeyDown(KeyCode.Alpha3))
+        if (Input.GetKeyDown(KeyCode.E))
             player.ChangeSpell(2);
-        if (Input.GetKeyDown(KeyCode.Alpha4))
+        if (Input.GetKeyDown(KeyCode.R))
             player.ChangeSpell(3);
+        if (Input.GetKeyDown(KeyCode.A))
+            player.ChangeSpell(4);
+        if (Input.GetKeyDown(KeyCode.S))
+            player.ChangeSpell(5);
+        if (Input.GetKeyDown(KeyCode.D))
+            player.ChangeSpell(6);
+        if (Input.GetKeyDown(KeyCode.F))
+            player.ChangeSpell(7);
+    }
+
+    private void UpdateElementCharge()
+    {
+        fireCharge.anchorMax = new Vector2(fireCharge.anchorMax.x, GetPercent(player.CurrentElementalCharge[Element.Fire], player.MaxElementalCharge[Element.Fire]));
     }
 
     private void UpdatePlayer()

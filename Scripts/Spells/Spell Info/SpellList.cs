@@ -9,28 +9,30 @@ public class SpellList : MonoBehaviour
 
     public static SpellList Instance;
 
-    private Dictionary<SpellID, Spell> _spellDict;
+    private Dictionary<string, Spell> _spellDict;
 
     public void Awake()
     {
         Instance = this;
-        _spellDict = new Dictionary<SpellID, Spell>();
+        _spellDict = new Dictionary<string, Spell>();
 
         foreach (Spell spell in spells)
         {
             if (!_spellDict.ContainsKey(spell.SpellID))
                 _spellDict.Add(spell.SpellID, spell);
+            else
+                Debug.LogWarning("Spell already exists: " + spell.spellID);
             spell.gameObject.SetActive(false);
         }
 
     }
 
-    public Spell GetNewSpell(SpellID spell)
+    public Spell GetNewSpell(string spell)
     {
         return  Instantiate(_spellDict[spell]);
     }
 
-    public Spell GetSpell(SpellID spell)
+    public Spell GetSpell(string spell)
     {
         return _spellDict[spell];
     }

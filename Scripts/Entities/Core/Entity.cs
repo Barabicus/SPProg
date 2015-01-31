@@ -4,6 +4,7 @@ using System;
 
 [RequireComponent(typeof(NavMeshAgent))]
 [RequireComponent(typeof(Animator))]
+[RequireComponent(typeof(EntityHitText))]
 public class Entity : MonoBehaviour
 {
     #region Fields
@@ -15,9 +16,10 @@ public class Entity : MonoBehaviour
     public Transform castPoint;
     public EntityFlags entityFlags;
 
-    public event EventHandler<EntityEventArgs> entityKilled;
 
     private ElementalStats _elementalResistance;
+    private ElementalStats _currentElementalCharge;
+    private ElementalStats _maxElementalCharge;
     private Animator animator;
     private Vector3 _lastPosition;
     private float _currentSpeed;
@@ -29,6 +31,13 @@ public class Entity : MonoBehaviour
 
 
     #endregion
+
+    #region Events
+
+    public event EventHandler<EntityEventArgs> entityKilled;
+    public event Action<float> entityHealthChanged;
+
+    #endregion 
 
     #region States
 
@@ -52,10 +61,10 @@ public class Entity : MonoBehaviour
                 case EntityLivingState.Dead:
                     animator.SetBool("Dead", true);
                     foreach (Collider c in GetComponents<Collider>())
-                        Destroy(c);
+                        c.enabled = false;
                     foreach (Transform t in transform)
                         foreach (Collider c in t.GetComponents<Collider>())
-                            Destroy(c);
+                            c.enabled = false;
                     navMeshAgent.enabled = false;
                     if (entityKilled != null)
                         entityKilled(this, new EntityEventArgs(this));
@@ -74,9 +83,32 @@ public class Entity : MonoBehaviour
         get { return currentHP; }
         set
         {
+            float oldHealth = currentHP;
             currentHP = Mathf.Clamp(value, 0f, maxHP);
+            if (entityHealthChanged != null)
+                entityHealthChanged(currentHP - oldHealth);
             if (currentHP == 0)
                 Die();
+        }
+    }
+
+    public ElementalStats CurrentElementalCharge
+    {
+        get
+        {
+            return _currentElementalCharge;
+        }
+        set
+        {
+            _currentElementalCharge = new ElementalStats(Mathf.Min(value[Element.Fire], _maxElementalCharge[Element.Fire]), Mathf.Min(value[Element.Water], _maxElementalCharge[Element.Water]), Mathf.Min(value[Element.Kinetic], _maxElementalCharge[Element.Kinetic]));
+        }
+    }
+
+    public ElementalStats MaxElementalCharge
+    {
+        get
+        {
+            return _maxElementalCharge;
         }
     }
 
@@ -100,17 +132,31 @@ public class Entity : MonoBehaviour
     {
         navMeshAgent = GetComponent<NavMeshAgent>();
         animator = GetComponent<Animator>();
-
+    
         _lastPosition = transform.position;
+        _currentElementalCharge = new ElementalStats(50, 50, 50);
+        _maxElementalCharge = new ElementalStats(50, 50, 50);
 
         // Ensure HP is properly clamped
-        CurrentHP = CurrentHP;
+        currentHP = Mathf.Clamp(currentHP, 0f, maxHP); ;
+        // Ensure Elemental charge is properly clamped
+        CurrentElementalCharge = CurrentElementalCharge;
         _elementalResistance = new ElementalStats(fire, water, kinetic);
     }
 
-
-    public Spell CastSpell(SpellID spell)
+    public bool CastSpell(Spell spell, out Spell castSpell)
     {
+        return CastSpell(spell.spellID, out castSpell);
+    }
+
+    public bool CastSpell(string spell, out Spell castSpell)
+    {
+        if (!CanCastSpell(spell) || IsBeamActive)
+        {
+            castSpell = null;
+            return false;
+        }
+
         Spell sp = SpellList.Instance.GetNewSpell(spell);
         sp.CastSpell(this, castPoint);
 
@@ -125,8 +171,23 @@ public class Entity : MonoBehaviour
                 beamSpell.OnSpellDestroy += (o, e) => { beamSpell = null; };
                 break;
         }
+        castSpell = sp;
+        return true;
+    }
 
-        return sp;
+    public bool CanCastSpell(string spell)
+    {
+        return CanCastSpell(SpellList.Instance.GetSpell(spell));
+    }
+
+    public bool CanCastSpell(Spell spell)
+    {
+        foreach (Element e in Enum.GetValues(typeof(Element)))
+        {
+            if (CurrentElementalCharge[e] < spell.ElementalCost[e])
+                return false;
+        }
+        return true;
     }
 
     protected virtual void Update()

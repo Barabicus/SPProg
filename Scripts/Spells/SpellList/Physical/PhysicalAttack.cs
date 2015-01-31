@@ -9,10 +9,10 @@ public class PhysicalAttack : ElementalSpell
         get { return 0.5f; }
     }
 
-    public override SpellID SpellID
-    {
-        get { return global::SpellID.PhysicalAttack; }
-    }
+    //public override SpellID SpellID
+    //{
+    //    get { return global::SpellID.PhysicalAttack; }
+    //}
 
     public override ElementalStats ElementalPower
     {

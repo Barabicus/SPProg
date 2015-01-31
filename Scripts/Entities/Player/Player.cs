@@ -5,10 +5,10 @@ public class Player : Entity
 {
 
     #region Fields
-    public SpellID selectedSpell;
+    public string selectedSpell;
     public float spellLookSpeed = 5f;
     public float reselectDelay = 0.5f;
-    public SpellID[] spellList;
+    public string[] spellList;
 
     private float _lastSpellCastTime;
     private float _lastSelectTime;
@@ -19,6 +19,7 @@ public class Player : Entity
         base.Start();
         _lastSpellCastTime = Time.time;
         _lastSelectTime = Time.time;
+        selectedSpell = spellList[0];
     }
 
     // Update is called once per frame
@@ -26,7 +27,7 @@ public class Player : Entity
     {
         base.LivingUpdate();
 
-        if(Input.GetMouseButton(1))
+        if (Input.GetMouseButton(1))
             LookAtMouse();
 
         if (!GameplayGUI.instance.isMouseOver)
@@ -63,24 +64,23 @@ public class Player : Entity
             RaycastHit hit;
             if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hit, 1000f, 1 << LayerMask.NameToLayer("Ground") | 1 << LayerMask.NameToLayer("Entity")))
             {
-                // Check if beam spell is active
-                if (IsBeamActive)
-                    return;
-
                 // Create the spell
-                Spell spell = CastSpell(selectedSpell);
-
-                // If the selected target is not null, aim towards them
-                // Otherwise aim towards the target point
-                if (selectedTarget != null)
+                Spell spell;
+                if (CastSpell(selectedSpell, out spell))
                 {
-                    spell.SpellTargetPosition = selectedTarget.position;
-                    spell.SpellTarget = selectedTarget;
-                }
-                else
-                    spell.SpellTargetPosition = hit.point;
 
-                _lastSpellCastTime = Time.time;
+                    // If the selected target is not null, aim towards them
+                    // Otherwise aim towards the target point
+                    if (selectedTarget != null)
+                    {
+                        spell.SpellTargetPosition = selectedTarget.position;
+                        spell.SpellTarget = selectedTarget;
+                    }
+                    else
+                        spell.SpellTargetPosition = hit.point;
+
+                    _lastSpellCastTime = Time.time;
+                }
 
             }
 
@@ -117,7 +117,7 @@ public class Player : Entity
             if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hit, 1000f, 1 << LayerMask.NameToLayer("Ground")))
             {
                 navMeshAgent.SetDestination(hit.point);
-               // LookAtTarget(hit.point);
+                // LookAtTarget(hit.point);
             }
         }
     }
@@ -138,6 +138,7 @@ public class Player : Entity
 
     public void ChangeSpell(int spellIndex)
     {
-        selectedSpell = spellList[spellIndex];
+        if (spellIndex >= 0 && spellIndex < spellList.Length)
+            selectedSpell = spellList[spellIndex];
     }
 }

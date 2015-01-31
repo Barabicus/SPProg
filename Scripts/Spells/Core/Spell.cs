@@ -10,6 +10,11 @@ public abstract class Spell : MonoBehaviour
 
     Rigidbody rigidbody;
 
+    public string spellID;
+    public float spellLiveTime;
+    public float spellCastDelay;
+    public ElementalStats elementalCost = new ElementalStats(1f, 1f, 1f);
+
     #endregion
 
     #region Properties
@@ -39,9 +44,14 @@ public abstract class Spell : MonoBehaviour
         set;
     }
 
-    public abstract float SpellLiveTime
+    public ElementalStats ElementalCost
     {
-        get;
+        get { return elementalCost; }
+    }
+
+    public virtual float SpellLiveTime
+    {
+        get { return spellLiveTime; }
     }
 
     public abstract SpellType SpellType
@@ -52,9 +62,9 @@ public abstract class Spell : MonoBehaviour
     /// <summary>
     /// How much delay this spell leaves before you can cast another spell
     /// </summary>
-    public abstract float SpellCastDelay
+    public virtual float SpellCastDelay
     {
-        get;
+        get { return spellCastDelay; }
     }
 
     /// <summary>
@@ -65,6 +75,12 @@ public abstract class Spell : MonoBehaviour
     {
         get { return false; }
     }
+
+    public string SpellID
+    {
+        get { return spellID; }
+    }
+
 
     #endregion
 
@@ -78,7 +94,7 @@ public abstract class Spell : MonoBehaviour
 
     public event EventHandler<SpellEventargs> OnSpellDestroy;
 
-    #endregion 
+    #endregion
 
 
     public virtual void Awake() { }
@@ -89,11 +105,6 @@ public abstract class Spell : MonoBehaviour
 
         Invoke("DestroySpell", SpellLiveTime);
     }
-
-    public virtual bool RequireTarget { get { return false; } }
-    public virtual bool RequireTransform { get { return false; } }
-
-    public abstract SpellID SpellID { get; }
 
     public void CastSpell(Entity castingEntity, Transform startPosition)
     {

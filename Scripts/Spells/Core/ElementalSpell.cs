@@ -4,27 +4,22 @@ using System.Collections;
 public abstract class ElementalSpell : Spell
 {
 
-    public override abstract float SpellLiveTime
-    {
-        get;
-    }
-
-    public override abstract SpellID SpellID
-    {
-        get;
-    }
+    public float fire, water, kinetic;
 
     /// <summary>
     /// The Elemental properties of this spell
     /// </summary>
-    public abstract ElementalStats ElementalPower
+    public virtual ElementalStats ElementalPower
     {
-        get;
+        get { return new ElementalStats(fire, water, kinetic); }
     }
 
     public override void ApplySpell(Entity entity)
     {
         base.ApplySpell(entity);
+
+        if (entity.LivingState != Entity.EntityLivingState.Alive)
+            return;
 
         // Apply the spells elemental properties
         foreach (Element e in System.Enum.GetValues(typeof(Element)))

@@ -10,10 +10,10 @@ namespace Spells.SpellList
             get { return 60.5f; }
         }
 
-        public override SpellID SpellID
-        {
-            get { return global::SpellID.Steam; }
-        }
+        //public override SpellID SpellID
+        //{
+        //    get { return global::SpellID.Steam; }
+        //}
 
         public override ElementalStats ElementalPower
         {

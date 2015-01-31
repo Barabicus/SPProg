@@ -2,28 +2,15 @@
 using System.Collections;
 using System;
 
-public abstract class BeamSpell : ElementalSpell
+public class BeamSpell : ElementalSpell
 {
     private float _lastApplyTime;
 
-    public override abstract float SpellLiveTime
-    {
-        get;
-    }
-
-    public override abstract SpellID SpellID
-    {
-        get;
-    }
-
-    public override abstract ElementalStats ElementalPower
-    {
-        get;
-    }
+    public float beamApplyDelay;
 
     public virtual float BeamSpellApplyDelay
     {
-        get { return 0.05f; }
+        get { return beamApplyDelay; }
     }
 
     public override SpellType SpellType
@@ -32,11 +19,6 @@ public abstract class BeamSpell : ElementalSpell
         {
             return global::SpellType.Beam;
         }
-    }
-
-    public override abstract float SpellCastDelay
-    {
-        get;
     }
 
     public override void CollisionEvent(Collider other)
