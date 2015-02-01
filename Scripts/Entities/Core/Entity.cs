@@ -171,8 +171,16 @@ public class Entity : MonoBehaviour
                 beamSpell.OnSpellDestroy += (o, e) => { beamSpell = null; };
                 break;
         }
+
+        // Take spell cost
+        SubtractSpellCost(sp);
         castSpell = sp;
         return true;
+    }
+
+    public void SubtractSpellCost(Spell spell)
+    {
+        CurrentElementalCharge -= spell.ElementalCost;
     }
 
     public bool CanCastSpell(string spell)
@@ -205,7 +213,10 @@ public class Entity : MonoBehaviour
         }
     }
 
-    protected virtual void LivingUpdate() { }
+    protected virtual void LivingUpdate()
+    {
+        CurrentElementalCharge += new ElementalStats(5 * Time.deltaTime, 5 * Time.deltaTime, 1 * Time.deltaTime);
+    }
     protected virtual void DeadUpdate() { }
 
     private void UpdateAnimation()

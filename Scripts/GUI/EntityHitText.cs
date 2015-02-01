@@ -1,25 +1,35 @@
 ﻿using UnityEngine;
 using System.Collections;
 using UnityEngine.UI;
+using System.Collections.Generic;
 
-public class EntityHitText : MonoBehaviour {
+public class EntityHitText : MonoBehaviour
+{
 
     public Color positiveColor = Color.green;
     public Color negativeColor = Color.red;
-    public float waitTime = 2f;
+    // The speed the text moves at
+    public float moveSpeed = 2f;
+    // How long the text lasts before it is destroyed
+    public float moveTime = 5f;
+    /// <summary>
+    /// How long before a new text object should be created otherwise the text is just updated
+    /// </summary>
+    public float newTextTime = 2f;
+
     private Entity entity;
     private Canvas canvas;
-
-    private Text hitText;
-
-
     private float hitAmount = 0;
+    private HitText currentHitText;
+    private float hitTextCreatedTime;
+
+    public List<HitText> _hitTexts = new List<HitText>();
 
     void Start()
     {
         entity = GetComponent<Entity>();
         entity.entityHealthChanged += entity_entityHealthChanged;
-        CreateEntityGUI();       
+        CreateEntityGUI();
     }
 
     private void CreateEntityGUI()
@@ -32,40 +42,103 @@ public class EntityHitText : MonoBehaviour {
         rect.localScale = new Vector3(0.01f, 0.01f, 0.01f);
         rect.localPosition = new Vector3(0, 2.5f, 0);
         rect.sizeDelta = new Vector2(600, 200);
-        
+
     }
 
     void entity_entityHealthChanged(float obj)
     {
-        hitAmount += obj;
-        if (hitText == null)
+        if (obj == 0)
+            return;
+        if (currentHitText != null)
         {
-            GameObject hit = new GameObject("HitText");
-            hitText = hit.AddComponent<Text>();
-            hit.transform.parent = canvas.transform;
-            hitText.font = Font.CreateDynamicFontFromOSFont("Arial", 14);
-            hitText.resizeTextForBestFit = true;
-            hitText.alignment = TextAnchor.MiddleCenter;
-            hit.GetComponent<RectTransform>().localScale = new Vector3(1, 1, 1);
-
-            hit.GetComponent<RectTransform>().localPosition = Vector3.zero;
+            currentHitText.hitAmount += obj;
+        }
+        else
+        {
+            hitAmount += obj;
+            HitText hitText = new HitText(obj, this, canvas);
+            currentHitText = hitText;
         }
     }
 
-
-	// Update is called once per frame
     void Update()
     {
-        if (hitText != null)
+        if (Time.time - hitTextCreatedTime >= newTextTime)
         {
-            hitText.text = hitAmount.ToString();
+            currentHitText = null;
+            hitTextCreatedTime = Time.time;
         }
     }
 
     void LateUpdate()
     {
-        if(hitText != null)
-        hitText.rectTransform.rotation = Camera.main.transform.rotation;
-
+        // Update the rotation of all hit texts to face the camera
+        for(int i = _hitTexts.Count - 1; i >= 0; i--)
+        {
+            if (_hitTexts[i].ShouldDestroy)
+            {
+                Destroy(_hitTexts[i].hitText.gameObject);
+                _hitTexts.RemoveAt(i);
+                continue;
+            }
+            _hitTexts[i].hitText.rectTransform.rotation = Camera.main.transform.rotation;
+            _hitTexts[i].AnimateHitText();
+        }
     }
+
+
+    public class HitText
+    {
+        private EntityHitText entityHitText;
+        private float lastMoveTime;
+        public Text hitText;
+        public float hitAmount;
+        private float animatedTime;
+
+        public bool ShouldDestroy
+        {
+            get
+            {
+                return Time.time - lastMoveTime >= entityHitText.moveTime;
+            }
+        }
+
+        public HitText(float hitAmount, EntityHitText entityHitText, Canvas canvas)
+        {
+            lastMoveTime = Time.time;
+            this.entityHitText = entityHitText;
+            entityHitText._hitTexts.Add(this);
+            this.hitAmount = hitAmount;
+            CreateHitText(canvas);
+        }
+
+        void CreateHitText(Canvas canvas)
+        {
+            GameObject hit = new GameObject("HitText");
+            hitText = hit.AddComponent<Text>();
+            hit.transform.SetParent(canvas.transform);
+            hitText.font = Font.CreateDynamicFontFromOSFont("Arial", 14);
+            hitText.rectTransform.sizeDelta = new Vector2(300, 300);
+            hitText.resizeTextMaxSize = 80;
+            hitText.resizeTextForBestFit = true;
+            hitText.alignment = TextAnchor.MiddleCenter;
+            hitText.rectTransform.localScale = new Vector3(1, 1, 1);
+            hitText.rectTransform.localPosition = Vector3.zero;
+            hitText.text = Mathf.Abs(hitAmount).ToString();
+            hitText.color = hitAmount >= 0 ? entityHitText.positiveColor : entityHitText.negativeColor;
+        }
+
+        public void AnimateHitText()
+        {
+            hitText.text = Mathf.Abs(hitAmount).ToString();
+            hitText.color = hitAmount >= 0 ? entityHitText.positiveColor : entityHitText.negativeColor;
+            hitText.color = Color.Lerp(hitText.color, new Color(hitText.color.r, hitText.color.g, hitText.color.b, 0), animatedTime / entityHitText.moveTime);
+
+            hitText.rectTransform.localPosition = new Vector3(hitText.rectTransform.localPosition.x, hitText.rectTransform.localPosition.y + (entityHitText.moveSpeed * Time.deltaTime), hitText.rectTransform.localPosition.z);
+
+            animatedTime += Time.deltaTime;
+        }
+    }
+
+
 }

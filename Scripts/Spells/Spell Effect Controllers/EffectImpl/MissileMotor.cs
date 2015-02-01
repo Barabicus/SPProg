@@ -19,6 +19,7 @@ public class MissileMotor : SpellEffect
         direction.y = 0;
         GetComponent<Rigidbody>().isKinematic = true;
         GetComponent<SphereCollider>().isTrigger = true;
+        transform.parent.forward = direction;
     }
 
     public void OnTriggerEnter(Collider other)

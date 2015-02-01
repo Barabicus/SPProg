@@ -38,6 +38,7 @@ public class GameplayGUI : MonoBehaviour
     {
         UpdatePlayer();
         UpdateTargeted();
+        UpdateElementCharge();
         SelectSpellInput();
     }
 
@@ -71,6 +72,8 @@ public class GameplayGUI : MonoBehaviour
     private void UpdateElementCharge()
     {
         fireCharge.anchorMax = new Vector2(fireCharge.anchorMax.x, GetPercent(player.CurrentElementalCharge[Element.Fire], player.MaxElementalCharge[Element.Fire]));
+        waterCharge.anchorMax = new Vector2(waterCharge.anchorMax.x, GetPercent(player.CurrentElementalCharge[Element.Water], player.MaxElementalCharge[Element.Water]));
+
     }
 
     private void UpdatePlayer()

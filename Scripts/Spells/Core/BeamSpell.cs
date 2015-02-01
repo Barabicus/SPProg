@@ -7,6 +7,7 @@ public class BeamSpell : ElementalSpell
     private float _lastApplyTime;
 
     public float beamApplyDelay;
+    public bool chargeOnApply = true;
 
     public virtual float BeamSpellApplyDelay
     {
@@ -26,6 +27,15 @@ public class BeamSpell : ElementalSpell
         base.CollisionEvent(other);
         if (Time.time - _lastApplyTime > BeamSpellApplyDelay && other.gameObject.layer == LayerMask.NameToLayer("Entity"))
         {
+            if (chargeOnApply)
+            {
+                if (!CastingEntity.CanCastSpell(this))
+                {
+                    DestroySpell();
+                    return;
+                }
+                CastingEntity.SubtractSpellCost(this);
+            }
             ApplySpell(other.GetComponent<Entity>());
             _lastApplyTime = Time.time;
         }

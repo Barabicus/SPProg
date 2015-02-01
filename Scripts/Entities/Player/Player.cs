@@ -73,10 +73,9 @@ public class Player : Entity
                     // Otherwise aim towards the target point
                     if (selectedTarget != null)
                     {
-                        spell.SpellTargetPosition = selectedTarget.position;
+                      //  spell.SpellTargetPosition = selectedTarget.position;
                         spell.SpellTarget = selectedTarget;
                     }
-                    else
                         spell.SpellTargetPosition = hit.point;
 
                     _lastSpellCastTime = Time.time;

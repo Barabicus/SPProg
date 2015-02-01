@@ -13,7 +13,10 @@ public abstract class Spell : MonoBehaviour
     public string spellID;
     public float spellLiveTime;
     public float spellCastDelay;
-    public ElementalStats elementalCost = new ElementalStats(1f, 1f, 1f);
+    public float fireCost = 1f;
+    public float waterCost = 1f;
+    public float kineticCost = 1f;
+    public ElementalStats elementalCost;
 
     #endregion
 
@@ -46,7 +49,8 @@ public abstract class Spell : MonoBehaviour
 
     public ElementalStats ElementalCost
     {
-        get { return elementalCost; }
+        get { return new ElementalStats(fireCost, waterCost, kineticCost); }
+        private set { elementalCost = value; }
     }
 
     public virtual float SpellLiveTime
@@ -102,7 +106,6 @@ public abstract class Spell : MonoBehaviour
     public virtual void Start()
     {
         gameObject.layer = 10;
-
         Invoke("DestroySpell", SpellLiveTime);
     }
 

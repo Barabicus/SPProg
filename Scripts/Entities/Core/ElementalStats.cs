@@ -35,15 +35,20 @@ public struct ElementalStats
         }
     }
 
-    //public static ElementalStats operator +(ElementalStats e1, ElementalStats e2)
-    //{
-    //    return new ElementalStats(e1.GetElementalStat(Element.Fire) + e2.GetElementalStat(Element.Fire), e1.GetElementalStat(Element.Water) + e2.GetElementalStat(Element.Water));
-    //}
+    public static ElementalStats operator +(ElementalStats e1, ElementalStats e2)
+    {
+        return new ElementalStats(e1[Element.Fire] + e2[Element.Fire], e1[Element.Water] + e2[Element.Water], e1[Element.Kinetic] + e2[Element.Kinetic]);
+    }
 
-    //public ElementalStats Inverse
-    //{
-    //    get { return new ElementalStats(-Fire, -Water, -Air, -Earth); }
-    //}
+    public static ElementalStats operator -(ElementalStats e1, ElementalStats e2)
+    {
+        return new ElementalStats(e1[Element.Fire] - e2[Element.Fire], e1[Element.Water] - e2[Element.Water], e1[Element.Kinetic] - e2[Element.Kinetic]);
+    }
+
+    public override string ToString()
+    {
+        return "(" + this[Element.Fire] + " : " + this[Element.Water] + " : " + this[Element.Kinetic] + ")";
+    }
 }
 
 public enum Element
