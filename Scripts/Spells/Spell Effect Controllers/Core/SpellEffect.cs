@@ -2,10 +2,16 @@
 using System.Collections;
 using System;
 
+/// <summary>
+/// Spell effects modify how the spell behaves. For example the missile motor will control how the spell will move through space
+///  while the beam motor will raycast a beam through world space. Spell effects are intended to be drivers for the actual spell
+///  and will not execute spell logic.
+/// </summary>
 public abstract class SpellEffect : MonoBehaviour
 {
 
     public EffectSetting effectSetting;
+    public bool onlyUpdateOnSpellEnabled = true;
 
     protected virtual void Awake()
     {
@@ -17,7 +23,12 @@ public abstract class SpellEffect : MonoBehaviour
         effectSetting = transform.parent.GetComponent<EffectSetting>();
         effectSetting.OnSpellDestroy += effectSetting_OnSpellDestroy;
         effectSetting.OnSpellCollision += effectSetting_OnSpellCollision;
+        effectSetting.OnEffectDestroy += effectSetting_OnEffectDestroy;
 
+    }
+
+    protected virtual void effectSetting_OnEffectDestroy()
+    {
     }
 
     protected virtual void effectSetting_OnSpellCollision(ColliderEventArgs args, Collider obj)
@@ -28,7 +39,14 @@ public abstract class SpellEffect : MonoBehaviour
     {
     }
 
-    protected virtual void Update() { }
+    private void Update()
+    {
+        if (onlyUpdateOnSpellEnabled && !effectSetting.spell.enabled)
+            return;
+        UpdateSpell();
+    }
+
+    protected virtual void UpdateSpell() { }
 
 }
 

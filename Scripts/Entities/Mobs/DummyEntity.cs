@@ -9,21 +9,30 @@ public class DummyEntity : Entity
     protected override void Start()
     {
         base.Start();
-        StartCoroutine(MoveToPosition());
     }
 
-    IEnumerator MoveToPosition()
+    //Living MoveToPosition()
+    //{
+    //    while (true)
+    //    {
+    //        Vector3 randPosition = new Vector3(Random.Range(-randomRadius, randomRadius), 0f, Random.Range(-randomRadius, randomRadius));
+    //        RaycastHit hit;
+    //        if (Physics.Raycast(new Ray(transform.position + randPosition, -Vector3.up), out hit, 1000f, 1 << LayerMask.NameToLayer("Ground")))
+    //        {
+    //            navMeshAgent.SetDestination(hit.point);
+    //        }
+    //        yield return new WaitForSeconds(Random.Range(1f, 3f));
+    //    }
+    //}
+
+    protected override void LivingUpdate()
     {
-        while (true)
-        {
-            Vector3 randPosition = new Vector3(Random.Range(-randomRadius, randomRadius), 0f, Random.Range(-randomRadius, randomRadius));
-            RaycastHit hit;
-            if (Physics.Raycast(new Ray(transform.position + randPosition, -Vector3.up), out hit, 1000f, 1 << LayerMask.NameToLayer("Ground")))
-            {
-                navMeshAgent.SetDestination(hit.point);
-            }
-            yield return new WaitForSeconds(Random.Range(1f, 3f));
-        }
+        base.LivingUpdate();
+    }
+
+    protected override bool KeepBeamAlive()
+    {
+        return false;
     }
 
 }

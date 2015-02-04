@@ -33,7 +33,7 @@ public class Player : Entity
         if (!GameplayGUI.instance.isMouseOver)
             MouseControl();
 
-        CastSpell();
+        PlayerCastSpell();
     }
 
     private void LookAtMouse()
@@ -56,7 +56,7 @@ public class Player : Entity
         }
     }
 
-    private void CastSpell()
+    private void PlayerCastSpell()
     {
         if (Time.time - _lastSpellCastTime >= spellCastDelay && Input.GetMouseButton(1))
         {
@@ -73,10 +73,10 @@ public class Player : Entity
                     // Otherwise aim towards the target point
                     if (selectedTarget != null)
                     {
-                      //  spell.SpellTargetPosition = selectedTarget.position;
+                        //  spell.SpellTargetPosition = selectedTarget.position;
                         spell.SpellTarget = selectedTarget;
                     }
-                        spell.SpellTargetPosition = hit.point;
+                    spell.SpellTargetPosition = hit.point;
 
                     _lastSpellCastTime = Time.time;
                 }
@@ -91,24 +91,12 @@ public class Player : Entity
 
         if (Input.GetMouseButton(1))
         {
-            if (Time.time - _lastSelectTime >= reselectDelay)
-            {
-                // Select targeted entity
-                RaycastHit hit;
-                if (Physics.SphereCast(Camera.main.ScreenPointToRay(Input.mousePosition), 0.2f, out hit, 1000f, 1 << LayerMask.NameToLayer("Entity")))
-                {
-                    GameplayGUI.instance.SelectedEntity = hit.collider.GetComponent<Entity>();
-                    selectedTarget = hit.collider.transform;
-                }
-                else
-                {
-                    GameplayGUI.instance.SelectedEntity = null;
-                    selectedTarget = null;
-                }
-                _lastSelectTime = Time.time;
-            }
+            SelectEntity();
             navMeshAgent.SetDestination(transform.position);
         }
+
+        if (Input.GetMouseButton(2))
+            SelectEntity();
 
         if (Input.GetMouseButton(0) && !Input.GetMouseButton(1))
         {
@@ -118,6 +106,26 @@ public class Player : Entity
                 navMeshAgent.SetDestination(hit.point);
                 // LookAtTarget(hit.point);
             }
+        }
+    }
+
+    private void SelectEntity()
+    {
+        if (Time.time - _lastSelectTime >= reselectDelay)
+        {
+            // Select targeted entity
+            RaycastHit hit;
+            if (Physics.SphereCast(Camera.main.ScreenPointToRay(Input.mousePosition), 0.2f, out hit, 1000f, 1 << LayerMask.NameToLayer("Entity")))
+            {
+                GameplayGUI.instance.SelectedEntity = hit.collider.GetComponent<Entity>();
+                selectedTarget = hit.collider.transform;
+            }
+            else
+            {
+                GameplayGUI.instance.SelectedEntity = null;
+                selectedTarget = null;
+            }
+            _lastSelectTime = Time.time;
         }
     }
 
@@ -138,6 +146,22 @@ public class Player : Entity
     public void ChangeSpell(int spellIndex)
     {
         if (spellIndex >= 0 && spellIndex < spellList.Length)
-            selectedSpell = spellList[spellIndex];
+        {
+            Spell sp = SpellList.Instance.GetSpell(spellList[spellIndex]);
+            switch (sp.SpellType)
+            {
+                case SpellType.Area:
+                    CastSpell(sp);
+                    break;
+                default:
+                    selectedSpell = spellList[spellIndex];
+                    break;
+            }
+        }
+    }
+
+    protected override bool KeepBeamAlive()
+    {
+        return Input.GetMouseButton(1);
     }
 }

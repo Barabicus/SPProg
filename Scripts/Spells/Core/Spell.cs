@@ -1,9 +1,10 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System;
+using System.Collections.Generic;
 
 [RequireComponent(typeof(EffectSetting))]
-public abstract class Spell : MonoBehaviour
+public class Spell : MonoBehaviour
 {
 
     #region Fields
@@ -13,15 +14,16 @@ public abstract class Spell : MonoBehaviour
     public string spellID;
     public float spellLiveTime;
     public float spellCastDelay;
-    public float fireCost = 1f;
-    public float waterCost = 1f;
-    public float kineticCost = 1f;
+    public float fireCost = 0f;
+    public float waterCost = 0f;
+    public float kineticCost = 0f;
+    public SpellType spellType;
     public ElementalStats elementalCost;
-
     #endregion
 
     #region Properties
     public Entity CastingEntity { get; set; }
+
 
     public Transform SpellTarget
     {
@@ -58,9 +60,9 @@ public abstract class Spell : MonoBehaviour
         get { return spellLiveTime; }
     }
 
-    public abstract SpellType SpellType
+    public SpellType SpellType
     {
-        get;
+        get { return spellType; }
     }
 
     /// <summary>
@@ -144,10 +146,17 @@ public abstract class Spell : MonoBehaviour
 
     #region Trigger Events
 
+    /// <summary>
+    /// Called when a collision is triggered.
+    /// </summary>
+    /// <param name="other"></param>
     public virtual void CollisionEvent(Collider other)
     {
     }
 
+    /// <summary>
+    /// Called when the spell is destroyed.
+    /// </summary>
     public virtual void DestroyEvent()
     {
         if (OnSpellDestroy != null)
@@ -163,7 +172,9 @@ public enum SpellType
     Missile,
     SelfCast,
     Beam,
-    Physical
+    Physical,
+    Attached,
+    Area
 }
 
 public class SpellEventargs : EventArgs

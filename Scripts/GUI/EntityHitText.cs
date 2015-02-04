@@ -9,13 +9,13 @@ public class EntityHitText : MonoBehaviour
     public Color positiveColor = Color.green;
     public Color negativeColor = Color.red;
     // The speed the text moves at
-    public float moveSpeed = 2f;
+    public float moveSpeed = 150f;
     // How long the text lasts before it is destroyed
-    public float moveTime = 5f;
+    public float moveTime = 3f;
     /// <summary>
     /// How long before a new text object should be created otherwise the text is just updated
     /// </summary>
-    public float newTextTime = 2f;
+    public float newTextTime = 1f;
 
     private Entity entity;
     private Canvas canvas;

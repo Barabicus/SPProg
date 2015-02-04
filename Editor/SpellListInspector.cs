@@ -23,6 +23,11 @@ public class SpellListInspector : Editor
         {
             EditorGUILayout.BeginHorizontal("Box");
             Spell spell = spellList.GetArrayElementAtIndex(i).objectReferenceValue as Spell;
+            if (spell == null)
+            {
+                spellList.DeleteArrayElementAtIndex(i);
+                spellList.DeleteArrayElementAtIndex(i);
+            }else
             EditorGUILayout.PropertyField(spellList.GetArrayElementAtIndex(i), new GUIContent(spell.spellID));
             if (GUILayout.Button(new GUIContent("[-]")))
             {

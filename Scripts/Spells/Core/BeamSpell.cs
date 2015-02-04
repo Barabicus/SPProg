@@ -14,17 +14,8 @@ public class BeamSpell : ElementalSpell
         get { return beamApplyDelay; }
     }
 
-    public override SpellType SpellType
-    {
-        get
-        {
-            return global::SpellType.Beam;
-        }
-    }
-
     public override void CollisionEvent(Collider other)
     {
-        base.CollisionEvent(other);
         if (Time.time - _lastApplyTime > BeamSpellApplyDelay && other.gameObject.layer == LayerMask.NameToLayer("Entity"))
         {
             if (chargeOnApply)

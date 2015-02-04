@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public abstract class ElementalSpell : Spell
+public class ElementalSpell : Spell
 {
 
     public float fire, water, kinetic;
@@ -28,4 +28,12 @@ public abstract class ElementalSpell : Spell
         }
     }
 
+    public override void CollisionEvent(Collider other)
+    {
+        base.CollisionEvent(other);
+        if (other.gameObject != CastingEntity.gameObject && other.gameObject.layer == LayerMask.NameToLayer("Entity"))
+        {
+            ApplySpell(other.GetComponent<Entity>());
+        }
+    }
 }

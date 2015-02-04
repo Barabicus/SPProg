@@ -17,9 +17,9 @@ public class BeamChaser : SpellEffect {
      //   chaser.transform.parent = transform;
     }      
 
-    protected override void Update()
+    protected override void UpdateSpell()
     {
-        base.Update();   
+        base.UpdateSpell();   
         chaser.transform.position = (beamMotor.BeamLocation);
         Debug.DrawRay(beamMotor.BeamLocation, Vector3.up * 6f, Color.blue);                 
     }

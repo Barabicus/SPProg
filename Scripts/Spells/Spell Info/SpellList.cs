@@ -32,6 +32,11 @@ public class SpellList : MonoBehaviour
         return  Instantiate(_spellDict[spell]);
     }
 
+    public Spell GetNewSpell(Spell spell)
+    {
+        return GetNewSpell(spell.SpellID);
+    }
+
     public Spell GetSpell(string spell)
     {
         return _spellDict[spell];

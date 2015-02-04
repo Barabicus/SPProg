@@ -26,16 +26,15 @@ public class MissileMotor : SpellEffect
     {
         if (other.gameObject != effectSetting.spell.CastingEntity.gameObject && other.gameObject.layer != LayerMask.NameToLayer("Spell") && other.gameObject.layer != LayerMask.NameToLayer("Ground") && other.gameObject.layer != LayerMask.NameToLayer("Ignore Raycast"))
         {
-            Debug.Log(other.gameObject.name);
             effectSetting.TriggerCollision(new ColliderEventArgs(), other);
         }
     }
 
 
 
-    protected override void Update()
+    protected override void UpdateSpell()
     {
-        base.Update();
+        base.UpdateSpell();
         if (shouldMove)
             effectSetting.transform.position += direction * speed * Time.deltaTime;
     }

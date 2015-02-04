@@ -19,11 +19,6 @@ public class PhysicalAttack : ElementalSpell
         get { return new ElementalStats(0, 0, 1f); }
     }
 
-    public override SpellType SpellType
-    {
-        get { return global::SpellType.Physical; }
-    }
-
     public override float SpellCastDelay
     {
         get { return 0.5f; }

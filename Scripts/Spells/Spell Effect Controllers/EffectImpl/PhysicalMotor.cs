@@ -5,9 +5,9 @@ public class PhysicalMotor : SpellEffect {
 
     public float range = 2f;
 
-    protected override void Update()
+    protected override void UpdateSpell()
     {
-        base.Update();
+        base.UpdateSpell();
 
         if (Vector3.Distance(effectSetting.spell.SpellTarget.position, effectSetting.spell.CastingEntity.transform.position) <= range)
         {

@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.Audio;
 
 public class DummyEnemy : Entity
 {
@@ -8,27 +9,42 @@ public class DummyEnemy : Entity
     public float attackDistance;
     public Spell attackSpell;
     public float attackSpeed = 1f;
+    public float speedIncTime = 3f;
+    public AudioMixerGroup mixer;
 
+    private Transform _moveTarget;
     private float _lastAttackTime;
+    private float _lastSpeedInc;
 
     bool attack = false;
 
     protected override void Start()
     {
         base.Start();
+        _lastSpeedInc = Time.time;
         player = GameplayGUI.instance.player;
         _lastAttackTime = Time.time;
-      //  entityKilled += (o, a) => { Invoke("Resurrect", 25f); };
+        MotionState = EntityMotionState.Static;
+        Invoke("StartMoving", 2f);
 
     }
 
     protected override void LivingUpdate()
     {
         base.LivingUpdate();
-
+        if (Time.time - _lastSpeedInc >= speedIncTime)
+        {
+            AddStatModifier(new EntityStats(1f, 0));
+            _lastSpeedInc = Time.time;
+        }
         Attack();
         DetectEnemy();
+    }
 
+    protected override void NavMeshUpdate()
+    {
+        base.NavMeshUpdate();
+        MoveToPosition();
     }
 
     void Attack()
@@ -52,13 +68,23 @@ public class DummyEnemy : Entity
         if (Vector3.Distance(player.transform.position, transform.position) <= detectDistance)
         {
             attack = true;
-            navMeshAgent.SetDestination(player.transform.position);
+           // navMeshAgent.SetDestination(player.transform.position);
+            _moveTarget = player.transform;
         }
         else
         {
             attack = false;
-            navMeshAgent.SetDestination(transform.position);
+           // navMeshAgent.SetDestination(transform.position);
+            _moveTarget = null;
         }
+    }
+
+    void MoveToPosition()
+    {
+        if (_moveTarget != null)
+            navMeshAgent.SetDestination(_moveTarget.position);
+        else
+            navMeshAgent.SetDestination(transform.position);
     }
 
 
@@ -72,5 +98,20 @@ public class DummyEnemy : Entity
     {
         CurrentHP = maxHP;
         LivingState = EntityLivingState.Alive;
+    }
+
+    void StartMoving()
+    {
+        MotionState = EntityMotionState.Pathfinding;
+    }
+
+    protected override void EntityKilled()
+    {
+        base.EntityKilled();
+    }
+
+    protected override bool KeepBeamAlive()
+    {
+        return false;
     }
 }

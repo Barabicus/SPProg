@@ -10,6 +10,7 @@ public class EffectSetting : MonoBehaviour
     public float destroyTimeDelay = 0f;
     public event EventHandler<SpellEventargs> OnSpellDestroy;
     public event Action<ColliderEventArgs, Collider> OnSpellCollision;
+    public event Action OnEffectDestroy;
 
     void Start()
     {
@@ -40,6 +41,8 @@ public class EffectSetting : MonoBehaviour
 
     private void DestroyGameObject()
     {
+        if (OnEffectDestroy != null)
+            OnEffectDestroy();
         Destroy(gameObject);
     }
 

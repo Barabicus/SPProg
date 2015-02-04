@@ -1,15 +1,19 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System;
+using System.Collections.Generic;
 
 [RequireComponent(typeof(NavMeshAgent))]
 [RequireComponent(typeof(Animator))]
 [RequireComponent(typeof(EntityHitText))]
-public class Entity : MonoBehaviour
+[RequireComponent(typeof(Rigidbody))]
+public abstract class Entity : MonoBehaviour
 {
     #region Fields
     public float currentHP;
     public float maxHP;
+    public float speed = 5f;
+    [HideInInspector]
     public float spellCastDelay = 0.1f;
     public string EntityName = "NOTSET";
     public float fire = 1, water = 1, kinetic = 1;
@@ -24,6 +28,12 @@ public class Entity : MonoBehaviour
     private Vector3 _lastPosition;
     private float _currentSpeed;
     private EntityLivingState _livingState = EntityLivingState.Alive;
+    private List<Spell> _attachedSpells = new List<Spell>();
+    private Rigidbody rigidbody;
+    private EntityMotionState _entityMotionState;
+    private EntityStats _baseStats;
+    private List<EntityStats> _statModifiers = new List<EntityStats>();
+    private EntityStats _cachedStats;
 
     protected NavMeshAgent navMeshAgent;
     protected BeamSpell beamSpell = null;
@@ -37,7 +47,7 @@ public class Entity : MonoBehaviour
     public event EventHandler<EntityEventArgs> entityKilled;
     public event Action<float> entityHealthChanged;
 
-    #endregion 
+    #endregion
 
     #region States
 
@@ -47,9 +57,38 @@ public class Entity : MonoBehaviour
         Dead
     }
 
+    public enum EntityMotionState
+    {
+        Static,
+        Pathfinding,
+        Rigidbody
+    }
+
     #endregion
 
     #region Properties
+
+    public EntityStats BaseStats
+    {
+        get { return _baseStats; }
+        set { _baseStats = value; }
+    }
+
+    public float Speed
+    {
+        get
+        {
+            return _cachedStats.speed;
+        }
+    }
+
+    public float MaxHP
+    {
+        get
+        {
+            return _cachedStats.maxHP;
+        }
+    }
 
     public EntityLivingState LivingState
     {
@@ -65,9 +104,10 @@ public class Entity : MonoBehaviour
                     foreach (Transform t in transform)
                         foreach (Collider c in t.GetComponents<Collider>())
                             c.enabled = false;
-                    navMeshAgent.enabled = false;
+                    MotionState = EntityMotionState.Static;
                     if (entityKilled != null)
                         entityKilled(this, new EntityEventArgs(this));
+                    EntityKilled();
                     break;
                 case EntityLivingState.Alive:
                     animator.SetBool("Dead", false);
@@ -84,7 +124,7 @@ public class Entity : MonoBehaviour
         set
         {
             float oldHealth = currentHP;
-            currentHP = Mathf.Clamp(value, 0f, maxHP);
+            currentHP = Mathf.Clamp(value, 0f, MaxHP);
             if (entityHealthChanged != null)
                 entityHealthChanged(currentHP - oldHealth);
             if (currentHP == 0)
@@ -125,14 +165,49 @@ public class Entity : MonoBehaviour
         get { return _elementalResistance; }
     }
 
-    #endregion
-    protected virtual void Awake() { }
+    public EntityMotionState MotionState
+    {
+        get { return _entityMotionState; }
+        set
+        {
+            switch (value)
+            {
+                case EntityMotionState.Static:
+                    rigidbody.isKinematic = true;
+                    navMeshAgent.enabled = false;
+                    break;
+                case EntityMotionState.Pathfinding:
+                    rigidbody.isKinematic = true;
+                    navMeshAgent.enabled = true;
+                    UpdateStatComponents();
+                    break;
+                case EntityMotionState.Rigidbody:
+                    rigidbody.isKinematic = false;
+                    navMeshAgent.enabled = false;
+                    break;
+            }
+            _entityMotionState = value;
+        }
+    }
 
-    protected virtual void Start()
+    #endregion
+
+    #region Initialization
+    protected virtual void Awake()
     {
         navMeshAgent = GetComponent<NavMeshAgent>();
         animator = GetComponent<Animator>();
-    
+        rigidbody = GetComponent<Rigidbody>();
+    }
+
+    protected virtual void Start()
+    {
+
+        _baseStats = new EntityStats(speed, maxHP);
+        AddStatModifier(_baseStats);
+        rigidbody.constraints = RigidbodyConstraints.FreezeRotationX & RigidbodyConstraints.FreezeRotationZ;
+
+        MotionState = EntityMotionState.Pathfinding;
         _lastPosition = transform.position;
         _currentElementalCharge = new ElementalStats(50, 50, 50);
         _maxElementalCharge = new ElementalStats(50, 50, 50);
@@ -144,9 +219,147 @@ public class Entity : MonoBehaviour
         _elementalResistance = new ElementalStats(fire, water, kinetic);
     }
 
+    #endregion
+
+
+    #region Updates
+    protected virtual void Update()
+    {
+        switch (LivingState)
+        {
+            case EntityLivingState.Alive:
+                UpdateSpeed();
+                UpdateAnimation();
+                LivingUpdate();
+                break;
+            case EntityLivingState.Dead:
+                DeadUpdate();
+                break;
+        }
+        switch (MotionState)
+        {
+            case EntityMotionState.Pathfinding:
+                NavMeshUpdate();
+                break;
+            case EntityMotionState.Rigidbody:
+                RigidBodyUpdate();
+                break;
+            case EntityMotionState.Static:
+                StaticUpdate();
+                break;
+        }
+    }
+
+    /// <summary>
+    /// Called while the entity is Living
+    /// </summary>
+    protected virtual void LivingUpdate()
+    {
+        CurrentElementalCharge += new ElementalStats(5 * Time.deltaTime, 5 * Time.deltaTime, 1 * Time.deltaTime);
+    }
+    /// <summary>
+    /// Called while the entity is Dead
+    /// </summary>
+    protected virtual void DeadUpdate() { }
+
+    /// <summary>
+    /// Called while the rigid body is controlling entity motion
+    /// </summary>
+    protected virtual void RigidBodyUpdate() { }
+    /// <summary>
+    /// Called while the navmesh is controlling entity motion
+    /// </summary>
+    protected virtual void NavMeshUpdate() { }
+    /// <summary>
+    /// Called while the entity motion is not being controlled by anything
+    /// </summary>
+    protected virtual void StaticUpdate() { }
+
+    #endregion
+
+    #region State And Value Changes
+    private void UpdateAnimation()
+    {
+        animator.SetFloat("Speed", _currentSpeed);
+    }
+
+    private void UpdateSpeed()
+    {
+        var moveAmount = transform.position - _lastPosition;
+        _lastPosition = transform.position;
+        _currentSpeed = moveAmount.magnitude / Time.deltaTime;
+        // Normalise speed
+        _currentSpeed /= navMeshAgent.speed;
+    }
+
+    public void AddStatModifier(EntityStats stat)
+    {
+        _statModifiers.Add(stat);
+        _cachedStats += stat;
+        UpdateStatComponents();
+    }
+
+    public void RemoveStatModifier(EntityStats stat)
+    {
+        _statModifiers.Remove(stat);
+        _cachedStats = _cachedStats.Difference(stat);
+        UpdateStatComponents();
+    }
+
+    private void UpdateStatComponents()
+    {
+        navMeshAgent.speed = _cachedStats.speed;
+    }
+
+    #endregion
+
+    #region Entity Events
+
+    protected virtual void Die()
+    {
+        //  Destroy(gameObject);
+        LivingState = EntityLivingState.Dead;
+
+    }
+
+    protected virtual void EntityKilled()
+    {
+
+    }
+
+    /// <summary>
+    /// The logic the entity should use to keep the beam alive should be implemented here
+    /// </summary>
+    /// <returns></returns>
+    protected abstract bool KeepBeamAlive();
+
+    /// <summary>
+    /// Called when a spell applys itself to an entity. The spell event agrs include details
+    /// about the spell effect occuring on this entity. This includes the casting enity and other
+    /// details which detail the origins of the spell.
+    /// </summary>
+    public virtual void SpellCastBy(SpellEventargs args) { }
+
+    #endregion
+
+    #region Spells
+
+
+    public bool CastSpell(Spell spell)
+    {
+        Spell ta;
+        return CastSpell(spell.SpellID, out ta);
+    }
+
+    public bool CastSpell(string spellID)
+    {
+        Spell ta;
+        return CastSpell(spellID, out ta);
+    }
+
     public bool CastSpell(Spell spell, out Spell castSpell)
     {
-        return CastSpell(spell.spellID, out castSpell);
+        return CastSpell(spell.SpellID, out castSpell);
     }
 
     public bool CastSpell(string spell, out Spell castSpell)
@@ -166,9 +379,12 @@ public class Entity : MonoBehaviour
         {
             // Check if spell type is beam and do beam logic
             case SpellType.Beam:
-                ((BeamSpell)sp).KeepBeamAlive = () => { return Input.GetMouseButton(1); };
+                ((BeamSpell)sp).KeepBeamAlive = () => { return KeepBeamAlive(); };
                 beamSpell = sp as BeamSpell;
                 beamSpell.OnSpellDestroy += (o, e) => { beamSpell = null; };
+                break;
+            case SpellType.Attached:
+                AttachSpell(sp);
                 break;
         }
 
@@ -198,54 +414,15 @@ public class Entity : MonoBehaviour
         return true;
     }
 
-    protected virtual void Update()
+    public void AttachSpell(Spell spell)
     {
-        switch (LivingState)
-        {
-            case EntityLivingState.Alive:
-                UpdateSpeed();
-                UpdateAnimation();
-                LivingUpdate();
-                break;
-            case EntityLivingState.Dead:
-                DeadUpdate();
-                break;
-        }
+        _attachedSpells.Add(spell);
+        spell.transform.parent = transform;
+        spell.transform.position = transform.position;
     }
 
-    protected virtual void LivingUpdate()
-    {
-        CurrentElementalCharge += new ElementalStats(5 * Time.deltaTime, 5 * Time.deltaTime, 1 * Time.deltaTime);
-    }
-    protected virtual void DeadUpdate() { }
+    #endregion
 
-    private void UpdateAnimation()
-    {
-        animator.SetFloat("Speed", _currentSpeed);
-    }
-
-    private void UpdateSpeed()
-    {
-        var moveAmount = transform.position - _lastPosition;
-        _lastPosition = transform.position;
-        _currentSpeed = moveAmount.magnitude / Time.deltaTime;
-        // Normalise speed
-        _currentSpeed /= navMeshAgent.speed;
-
-    }
-
-    protected virtual void Die()
-    {
-        //  Destroy(gameObject);
-        LivingState = EntityLivingState.Dead;
-
-    }
-
-    /// <summary>
-    /// Called when a spell applys itself to an entity. The spell event agrs include details
-    /// about the spell effect occuring on this entity
-    /// </summary>
-    public virtual void SpellCastBy(SpellEventargs args) { }
 
 }
 

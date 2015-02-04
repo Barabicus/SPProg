@@ -44,9 +44,9 @@ public class BeamMotor : SpellEffect
         entityOffset = effectSetting.spell.CastingEntity.transform.position - effectSetting.spell.SpellStartPosition;       
     }
 
-    protected override void Update()
+    protected override void UpdateSpell()
     {
-        base.Update();
+        base.UpdateSpell();
             transform.parent.rotation = effectSetting.spell.CastingEntity.transform.rotation;
             transform.parent.position = effectSetting.spell.SpellStartTransform.position;
             Debug.DrawRay(transform.position, transform.forward * distance, Color.red);
@@ -56,7 +56,7 @@ public class BeamMotor : SpellEffect
                 if (hit.collider.gameObject == effectSetting.spell.CastingEntity.gameObject)
                     return;
                 distance = hit.distance;
-                if (hit.collider.gameObject.layer != LayerMask.NameToLayer("Ground"))
+                if (hit.collider.gameObject.layer != LayerMask.NameToLayer("Ground") && hit.collider.gameObject.layer != LayerMask.NameToLayer("Spell"))
                 {
                     effectSetting.TriggerCollision(new ColliderEventArgs(hit.point), hit.collider);
                 }
