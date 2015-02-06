@@ -153,6 +153,9 @@ public class Player : Entity
                 case SpellType.Area:
                     CastSpell(sp);
                     break;
+                case SpellType.Attached:
+                    CastSpell(sp);
+                    break;
                 default:
                     selectedSpell = spellList[spellIndex];
                     break;

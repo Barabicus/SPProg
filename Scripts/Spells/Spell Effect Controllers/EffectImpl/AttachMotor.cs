@@ -35,11 +35,6 @@ public class AttachMotor : SpellEffect
             if (singleShot)
                 enabled = false;
         }
-
-        if (targetEntity == null)
-        {
-            Debug.Log(name + " : " + transform.parent.name);
-        }
     }
 
 }

@@ -28,12 +28,13 @@ public abstract class Entity : MonoBehaviour
     private Vector3 _lastPosition;
     private float _currentSpeed;
     private EntityLivingState _livingState = EntityLivingState.Alive;
-    private List<Spell> _attachedSpells = new List<Spell>();
+    private Dictionary<string, Spell> _attachedSpells = new Dictionary<string, Spell>();
     private Rigidbody rigidbody;
     private EntityMotionState _entityMotionState;
     private EntityStats _baseStats;
     private List<EntityStats> _statModifiers = new List<EntityStats>();
     private EntityStats _cachedStats;
+    private Timer knockdownTime;
 
     protected NavMeshAgent navMeshAgent;
     protected BeamSpell beamSpell = null;
@@ -111,7 +112,11 @@ public abstract class Entity : MonoBehaviour
                     break;
                 case EntityLivingState.Alive:
                     animator.SetBool("Dead", false);
-                    navMeshAgent.enabled = true;
+                    foreach (Collider c in GetComponents<Collider>())
+                        c.enabled = true;
+                    foreach (Transform t in transform)
+                        foreach (Collider c in t.GetComponents<Collider>())
+                            c.enabled = true;
                     break;
             }
             _livingState = value;
@@ -205,7 +210,7 @@ public abstract class Entity : MonoBehaviour
 
         _baseStats = new EntityStats(speed, maxHP);
         AddStatModifier(_baseStats);
-        rigidbody.constraints = RigidbodyConstraints.FreezeRotationX & RigidbodyConstraints.FreezeRotationZ;
+    //    rigidbody.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
 
         MotionState = EntityMotionState.Pathfinding;
         _lastPosition = transform.position;
@@ -217,6 +222,8 @@ public abstract class Entity : MonoBehaviour
         // Ensure Elemental charge is properly clamped
         CurrentElementalCharge = CurrentElementalCharge;
         _elementalResistance = new ElementalStats(fire, water, kinetic);
+
+        knockdownTime = new Timer(2f);
     }
 
     #endregion
@@ -265,11 +272,19 @@ public abstract class Entity : MonoBehaviour
     /// <summary>
     /// Called while the rigid body is controlling entity motion
     /// </summary>
-    protected virtual void RigidBodyUpdate() { }
+    protected virtual void RigidBodyUpdate()
+    {
+        if (knockdownTime.CanTick)
+            MotionState = EntityMotionState.Pathfinding;
+    }
     /// <summary>
     /// Called while the navmesh is controlling entity motion
     /// </summary>
-    protected virtual void NavMeshUpdate() { }
+    protected virtual void NavMeshUpdate()
+    {
+        if (navMeshAgent.pathStatus == NavMeshPathStatus.PathInvalid)
+            LivingState = EntityLivingState.Dead;
+    }
     /// <summary>
     /// Called while the entity motion is not being controlled by anything
     /// </summary>
@@ -308,7 +323,14 @@ public abstract class Entity : MonoBehaviour
 
     private void UpdateStatComponents()
     {
-        navMeshAgent.speed = _cachedStats.speed;
+        navMeshAgent.speed = Mathf.Max(_cachedStats.speed, 1f);
+    }
+
+    public void Knockdown(float force, Vector3 explodePosition, float radius)
+    {
+        knockdownTime.Reset();
+        MotionState = EntityMotionState.Rigidbody;
+        rigidbody.AddExplosionForce(force, explodePosition, radius);
     }
 
     #endregion
@@ -357,14 +379,14 @@ public abstract class Entity : MonoBehaviour
         return CastSpell(spellID, out ta);
     }
 
-    public bool CastSpell(Spell spell, out Spell castSpell)
-    {
-        return CastSpell(spell.SpellID, out castSpell);
-    }
-
     public bool CastSpell(string spell, out Spell castSpell)
     {
-        if (!CanCastSpell(spell) || IsBeamActive)
+        return CastSpell(SpellList.Instance.GetSpell(spell), out castSpell);
+    }
+
+    public bool CastSpell(Spell spell, out Spell castSpell)
+    {
+        if (!CanCastSpell(spell) || IsBeamActive || (spell.SpellType == SpellType.Attached && !CanAttachSpell(spell)))
         {
             castSpell = null;
             return false;
@@ -414,11 +436,29 @@ public abstract class Entity : MonoBehaviour
         return true;
     }
 
+    public bool CanAttachSpell(Spell spell)
+    {
+        return CanAttachSpell(spell.SpellID);
+    }
+
+    public bool CanAttachSpell(string spellID)
+    {
+        return !_attachedSpells.ContainsKey(spellID);
+    }
+
     public void AttachSpell(Spell spell)
     {
-        _attachedSpells.Add(spell);
+        if (!CanAttachSpell(spell))
+            Debug.LogError("Spell already contained and should not be attached!");
+        _attachedSpells.Add(spell.SpellID, spell);
         spell.transform.parent = transform;
         spell.transform.position = transform.position;
+        spell.OnSpellDestroy += RemoveAttachedSpell;
+    }
+
+    private void RemoveAttachedSpell(object sender, SpellEventargs e)
+    {
+        _attachedSpells.Remove(e.spell.SpellID);
     }
 
     #endregion

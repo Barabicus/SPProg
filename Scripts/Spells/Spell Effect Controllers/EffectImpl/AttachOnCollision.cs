@@ -18,9 +18,12 @@ public class AttachOnCollision : SpellEffect
                     Debug.LogError("Trying to attach spell: " + atch.SpellID + " which is of type: " + atch.SpellType);
                     continue;
                 }
-                Spell sp = SpellList.Instance.GetNewSpell(atch);
-                sp.CastSpell(effectSetting.spell.CastingEntity, obj.transform);
-                ent.AttachSpell(sp);
+                if (ent.CanAttachSpell(atch))
+                {
+                    Spell sp = SpellList.Instance.GetNewSpell(atch);
+                    sp.CastSpell(effectSetting.spell.CastingEntity, obj.transform);
+                    ent.AttachSpell(sp);
+                }
             }
         }
 

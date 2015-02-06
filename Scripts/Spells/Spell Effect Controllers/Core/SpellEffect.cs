@@ -13,6 +13,11 @@ public abstract class SpellEffect : MonoBehaviour
     public EffectSetting effectSetting;
     public bool onlyUpdateOnSpellEnabled = true;
 
+    protected bool OnlyUpdateOnSpellEnabled
+    {
+        get { return onlyUpdateOnSpellEnabled && !effectSetting.spell.enabled; }
+    }
+
     protected virtual void Awake()
     {
 
@@ -39,13 +44,21 @@ public abstract class SpellEffect : MonoBehaviour
     {
     }
 
-    private void Update()
+    /// <summary>
+    /// This should control update flow and not update logic
+    /// </summary>
+    protected virtual void Update()
     {
-        if (onlyUpdateOnSpellEnabled && !effectSetting.spell.enabled)
+        // If only update on spell enabled is checked, check to see if the spell is enabled
+        // if not return
+        if (OnlyUpdateOnSpellEnabled)
             return;
         UpdateSpell();
     }
 
+    /// <summary>
+    /// This should control spell update logic
+    /// </summary>
     protected virtual void UpdateSpell() { }
 
 }

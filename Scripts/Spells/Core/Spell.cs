@@ -37,12 +37,19 @@ public class Spell : MonoBehaviour
         set;
     }
 
+    /// <summary>
+    /// The start position of the entity
+    /// </summary>
     public Vector3 SpellStartPosition
     {
         get;
         set;
     }
 
+    /// <summary>
+    /// The position where the spell was started. Note this is not usually the entity
+    /// more so the casting hand for example.
+    /// </summary>
     public Transform SpellStartTransform
     {
         get;

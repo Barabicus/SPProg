@@ -5,20 +5,26 @@ using System.Collections;
 public class MissileMotor : SpellEffect
 {
     public float speed = 2f;
-    public float randomXPos = 0;
-    public float randomYPos = 0;
-    public float randomZPos = 0;
-    Vector3 direction;
+    public AnimationCurve xCurve;
+    public AnimationCurve yCurve;
+    public AnimationCurve zCurve;
 
+
+    private float _currentAnimTime = 0f;
+    private Vector3 direction;
     private bool shouldMove = true;
+
+    private Vector3 Direction
+    {
+        get { return direction + transform.TransformDirection(new Vector3(xCurve.Evaluate(_currentAnimTime), yCurve.Evaluate(_currentAnimTime), zCurve.Evaluate(_currentAnimTime))); }
+    }
 
     protected override void Start()
     {
         base.Start();
-        direction = ((effectSetting.spell.SpellTargetPosition.Value + (Vector3.Scale(transform.forward,new Vector3(Random.Range(-randomXPos, randomXPos), Random.Range(-randomYPos, randomYPos), Random.Range(-randomZPos, randomZPos))))) - effectSetting.transform.position).normalized;
+        direction = ((effectSetting.spell.SpellTargetPosition.Value + transform.forward) - effectSetting.transform.position).normalized;
         direction.y = 0;
         GetComponent<Rigidbody>().isKinematic = true;
-        GetComponent<SphereCollider>().isTrigger = true;
         transform.parent.forward = direction;
     }
 
@@ -36,7 +42,13 @@ public class MissileMotor : SpellEffect
     {
         base.UpdateSpell();
         if (shouldMove)
-            effectSetting.transform.position += direction * speed * Time.deltaTime;
+            effectSetting.transform.position += Direction * speed * Time.deltaTime;
+        UpdateAnim();
+    }
+
+    private void UpdateAnim()
+    {
+        _currentAnimTime += Time.deltaTime;
     }
 
     protected override void effectSetting_OnSpellDestroy(object sender, SpellEventargs e)

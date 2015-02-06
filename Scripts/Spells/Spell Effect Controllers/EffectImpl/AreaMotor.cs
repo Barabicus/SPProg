@@ -1,10 +1,10 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class AreaMotor : SpellEffect
+public class AreaMotor : TimedUpdateableEffect
 {
-    public bool singleFire = true;
-    public float checkDelay = 1f;
+   // public bool singleFire = true;
+  //  public float checkDelay = 1f;
     public float radius = 5f;
 
     private float _lastCheckTime;
@@ -17,21 +17,12 @@ public class AreaMotor : SpellEffect
     protected override void UpdateSpell()
     {
         base.UpdateSpell();
-        if (singleFire)
-        {
-            CheckCast();
-            enabled = false;
-        }
-        if (singleFire == false && Time.time - _lastCheckTime >= checkDelay)
-        {
-            _lastCheckTime = Time.time;
-            CheckCast();
-        }
+        CheckCast();
     }
 
     private void CheckCast()
     {
-        Collider[] colls = Physics.OverlapSphere(transform.parent.position, radius, 1 << 9);
+        Collider[] colls = Physics.OverlapSphere(effectSetting.transform.position, radius, 1 << 9);
         foreach (Collider c in colls)
         {
             if (c.gameObject != effectSetting.spell.CastingEntity.gameObject)
@@ -39,7 +30,7 @@ public class AreaMotor : SpellEffect
         }
     }
 
-    public void OnDrawGizmosSelected()
+    public void OnDrawGizmos()
     {
         Gizmos.color = Color.blue;
         Gizmos.DrawWireSphere(transform.parent.position, radius);

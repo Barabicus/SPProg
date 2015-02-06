@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.Events;
 
 public class SpawnEntityAreaEvent : GameEvent
 {
@@ -32,7 +33,5 @@ public class SpawnEntityAreaEvent : GameEvent
         Gizmos.color = Color.blue;
         Gizmos.DrawWireCube(transform.position, new Vector3(radius, radius, radius));
     }
-
-
 
 }
