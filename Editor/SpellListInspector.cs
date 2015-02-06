@@ -18,7 +18,6 @@ public class SpellListInspector : Editor
     {
         serializedObject.Update();
 
-        List<int> deleteIndex = new List<int>();
         for (int i = 0; i < spellList.arraySize; i++)
         {
             EditorGUILayout.BeginHorizontal("Box");

@@ -4,7 +4,7 @@ using System.Collections;
 public abstract class GameEvent : MonoBehaviour
 {
     public GameEventTrigger[] triggers;
-    public bool ownerIsTrigger = true;
+    public bool parentIsTrigger = true;
 
     public virtual void Awake() { }
     public virtual void Start()
@@ -13,7 +13,7 @@ public abstract class GameEvent : MonoBehaviour
         {
             tr.onTrigger += TriggerEvent;
         }
-        if (ownerIsTrigger)
+        if (parentIsTrigger)
         {
             GameEventTrigger ownerTrigger = transform.parent.GetComponent<GameEventTrigger>();
 
@@ -22,7 +22,9 @@ public abstract class GameEvent : MonoBehaviour
         }
     }
     public virtual void TriggerEvent(Collider other) { }
+
     public virtual void Update() { }
+
 
 
 }

@@ -12,6 +12,7 @@ public class Spell : MonoBehaviour
     Rigidbody rigidbody;
 
     public string spellID;
+    public string spellName = "NOTSET";
     public float spellLiveTime;
     public float spellCastDelay;
     public float fireCost = 0f;
@@ -19,6 +20,7 @@ public class Spell : MonoBehaviour
     public float kineticCost = 0f;
     public SpellType spellType;
     public ElementalStats elementalCost;
+    public SpellElementType elementType = SpellElementType.NoElement;
     #endregion
 
     #region Properties
@@ -182,6 +184,16 @@ public enum SpellType
     Physical,
     Attached,
     Area
+}
+
+public enum SpellElementType
+{
+    NoElement,
+    Physical,
+    Fire,
+    Water,
+    Air,
+    Earth,
 }
 
 public class SpellEventargs : EventArgs
