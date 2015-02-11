@@ -10,17 +10,7 @@ public class BeamMotor : SpellEffect
 
     private float distance = 1;
 
-    private Vector3 entityOffset;
-
-    private Vector3 EntityOffset
-    {
-        get
-        {
-            return effectSetting.spell.CastingEntity.transform.position - entityOffset;
-        }
-    }
-
-    private Vector3 Direction
+    public Vector3 BeamDirection
     {
         get
         {
@@ -41,7 +31,6 @@ public class BeamMotor : SpellEffect
     protected override void Start()
     {
         base.Start();
-        entityOffset = effectSetting.spell.CastingEntity.transform.position - effectSetting.spell.SpellStartPosition;       
     }
 
     protected override void UpdateSpell()

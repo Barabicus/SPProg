@@ -103,8 +103,8 @@ public class Player : Entity
             RaycastHit hit;
             if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hit, 1000f, 1 << LayerMask.NameToLayer("Ground")))
             {
-                navMeshAgent.SetDestination(hit.point);
-                // LookAtTarget(hit.point);
+                if (Vector3.Distance(transform.position, hit.point) > 1f)
+                    navMeshAgent.SetDestination(hit.point);
             }
         }
     }

@@ -12,9 +12,7 @@ public class BeamChaser : SpellEffect {
         base.Start();
         beamMotor = GetComponent<BeamMotor>();
         if (chaser == null)
-            Debug.LogError("Chase is not set for: " + transform.parent.name);
-        //chaser = new GameObject("Chaser");
-     //   chaser.transform.parent = transform;
+            Debug.LogError("Chaser is not set for: " + transform.parent.name);
     }      
 
     protected override void UpdateSpell()

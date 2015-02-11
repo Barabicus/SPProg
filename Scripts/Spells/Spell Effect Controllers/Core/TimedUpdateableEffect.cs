@@ -18,7 +18,7 @@ public abstract class TimedUpdateableEffect : SpellEffect
         if (OnlyUpdateOnSpellEnabled)
             return;
 
-        if (timer.CanTick)
+        if (timer.CanTickAndReset())
         {
             if (singleShot)
             {

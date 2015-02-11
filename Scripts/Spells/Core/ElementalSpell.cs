@@ -24,7 +24,7 @@ public class ElementalSpell : Spell
         // Apply the spells elemental properties
         foreach (Element e in System.Enum.GetValues(typeof(Element)))
         {
-            entity.CurrentHP += ElementalPower.GetElementalStat(e) * -entity.ElementalModifier.GetElementalStat(e);
+            entity.CurrentHP += ElementalPower[e] * -entity.ElementalModifier[e];
         }
     }
 

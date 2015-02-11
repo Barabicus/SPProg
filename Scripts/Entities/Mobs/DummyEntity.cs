@@ -3,7 +3,7 @@ using System.Collections;
 
 public class DummyEntity : Entity
 {
-
+    
     protected override void Start()
     {
         base.Start();

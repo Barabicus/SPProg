@@ -19,6 +19,7 @@ public abstract class Entity : MonoBehaviour
     public float fire = 1, water = 1, kinetic = 1;
     public Transform castPoint;
     public EntityFlags entityFlags;
+    public ElementalStats rechargeRate = new ElementalStats();
 
 
     private ElementalStats _elementalResistance;
@@ -207,7 +208,6 @@ public abstract class Entity : MonoBehaviour
 
     protected virtual void Start()
     {
-
         _baseStats = new EntityStats(speed, maxHP);
         AddStatModifier(_baseStats);
     //    rigidbody.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
@@ -262,7 +262,7 @@ public abstract class Entity : MonoBehaviour
     /// </summary>
     protected virtual void LivingUpdate()
     {
-        CurrentElementalCharge += new ElementalStats(5 * Time.deltaTime, 5 * Time.deltaTime, 1 * Time.deltaTime);
+        CurrentElementalCharge += rechargeRate * Time.deltaTime;
     }
     /// <summary>
     /// Called while the entity is Dead
@@ -274,7 +274,7 @@ public abstract class Entity : MonoBehaviour
     /// </summary>
     protected virtual void RigidBodyUpdate()
     {
-        if (knockdownTime.CanTick)
+        if (knockdownTime.CanTickAndReset())
             MotionState = EntityMotionState.Pathfinding;
     }
     /// <summary>
