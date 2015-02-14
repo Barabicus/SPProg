@@ -13,6 +13,24 @@ public abstract class SpellEffect : MonoBehaviour
     public EffectSetting effectSetting;
     public bool onlyUpdateOnSpellEnabled = true;
 
+    private float _currentLivingTime;
+
+    public float CurrentLivingTime
+    {
+        get { return _currentLivingTime; }
+    }
+
+    /// <summary>
+    /// A percent from 0-1 on how long this spell has been alive compared to its live time.
+    /// </summary>
+    public float CurrentLivingTimePercent
+    {
+        get
+        {
+            return CurrentLivingTime / effectSetting.spell.SpellLiveTime;
+        }
+    }
+
     protected bool OnlyUpdateOnSpellEnabled
     {
         get { return onlyUpdateOnSpellEnabled && !effectSetting.spell.enabled; }
@@ -54,6 +72,8 @@ public abstract class SpellEffect : MonoBehaviour
         if (OnlyUpdateOnSpellEnabled)
             return;
         UpdateSpell();
+
+        _currentLivingTime += Time.deltaTime;
     }
 
     /// <summary>

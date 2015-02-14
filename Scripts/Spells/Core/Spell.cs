@@ -15,9 +15,6 @@ public class Spell : MonoBehaviour
     public string spellName = "NOTSET";
     public float spellLiveTime;
     public float spellCastDelay;
-    public float fireCost = 0f;
-    public float waterCost = 0f;
-    public float kineticCost = 0f;
     public SpellType spellType;
     public ElementalStats elementalCost;
     public SpellElementType elementType = SpellElementType.NoElement;
@@ -60,8 +57,7 @@ public class Spell : MonoBehaviour
 
     public ElementalStats ElementalCost
     {
-        get { return new ElementalStats(fireCost, waterCost, kineticCost); }
-        private set { elementalCost = value; }
+        get { return elementalCost; }
     }
 
     public virtual float SpellLiveTime

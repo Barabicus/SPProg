@@ -16,15 +16,13 @@ public abstract class Entity : MonoBehaviour
     [HideInInspector]
     public float spellCastDelay = 0.1f;
     public string EntityName = "NOTSET";
-    public float fire = 1, water = 1, kinetic = 1;
     public Transform castPoint;
     public EntityFlags entityFlags;
+    public ElementalStats elementalResistance = new ElementalStats();
+    public ElementalStats maxElementalCharge = new ElementalStats();
     public ElementalStats rechargeRate = new ElementalStats();
 
-
-    private ElementalStats _elementalResistance;
     private ElementalStats _currentElementalCharge;
-    private ElementalStats _maxElementalCharge;
     private Animator animator;
     private Vector3 _lastPosition;
     private float _currentSpeed;
@@ -36,6 +34,7 @@ public abstract class Entity : MonoBehaviour
     private List<EntityStats> _statModifiers = new List<EntityStats>();
     private EntityStats _cachedStats;
     private Timer knockdownTime;
+    private Timer spellCastTimer;
 
     protected NavMeshAgent navMeshAgent;
     protected BeamSpell beamSpell = null;
@@ -146,7 +145,7 @@ public abstract class Entity : MonoBehaviour
         }
         set
         {
-            _currentElementalCharge = new ElementalStats(Mathf.Min(value[Element.Fire], _maxElementalCharge[Element.Fire]), Mathf.Min(value[Element.Water], _maxElementalCharge[Element.Water]), Mathf.Min(value[Element.Kinetic], _maxElementalCharge[Element.Kinetic]));
+            _currentElementalCharge = new ElementalStats(Mathf.Min(value[Element.Fire], maxElementalCharge[Element.Fire]), Mathf.Min(value[Element.Water], maxElementalCharge[Element.Water]), Mathf.Min(value[Element.Kinetic], maxElementalCharge[Element.Kinetic]));
         }
     }
 
@@ -154,7 +153,7 @@ public abstract class Entity : MonoBehaviour
     {
         get
         {
-            return _maxElementalCharge;
+            return maxElementalCharge;
         }
     }
 
@@ -168,7 +167,7 @@ public abstract class Entity : MonoBehaviour
 
     public ElementalStats ElementalModifier
     {
-        get { return _elementalResistance; }
+        get { return elementalResistance; }
     }
 
     public EntityMotionState MotionState
@@ -210,18 +209,17 @@ public abstract class Entity : MonoBehaviour
     {
         _baseStats = new EntityStats(speed, maxHP);
         AddStatModifier(_baseStats);
-    //    rigidbody.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
+        //    rigidbody.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
 
         MotionState = EntityMotionState.Pathfinding;
         _lastPosition = transform.position;
-        _currentElementalCharge = new ElementalStats(50, 50, 50);
-        _maxElementalCharge = new ElementalStats(50, 50, 50);
+        _currentElementalCharge = MaxElementalCharge;
+        //  maxElementalCharge = new ElementalStats(50, 50, 50);
 
         // Ensure HP is properly clamped
         currentHP = Mathf.Clamp(currentHP, 0f, maxHP); ;
         // Ensure Elemental charge is properly clamped
         CurrentElementalCharge = CurrentElementalCharge;
-        _elementalResistance = new ElementalStats(fire, water, kinetic);
 
         knockdownTime = new Timer(2f);
     }
@@ -413,6 +411,7 @@ public abstract class Entity : MonoBehaviour
         // Take spell cost
         SubtractSpellCost(sp);
         castSpell = sp;
+        spellCastTimer = new Timer(spell.SpellCastDelay);
         return true;
     }
 
@@ -428,6 +427,8 @@ public abstract class Entity : MonoBehaviour
 
     public bool CanCastSpell(Spell spell)
     {
+        if (!spellCastTimer.CanTick)
+            return false;
         foreach (Element e in Enum.GetValues(typeof(Element)))
         {
             if (CurrentElementalCharge[e] < spell.ElementalCost[e])
@@ -459,6 +460,16 @@ public abstract class Entity : MonoBehaviour
     private void RemoveAttachedSpell(object sender, SpellEventargs e)
     {
         _attachedSpells.Remove(e.spell.SpellID);
+    }
+
+    #endregion
+
+    #region Helper Methods
+
+    public void EntityLookAt(Vector3 lookPosition)
+    {
+        lookPosition = new Vector3(lookPosition.x, transform.position.y, lookPosition.z);
+        transform.LookAt(lookPosition);
     }
 
     #endregion

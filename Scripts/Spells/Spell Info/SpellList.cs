@@ -42,6 +42,11 @@ public class SpellList : MonoBehaviour
         return _spellDict[spell];
     }
 
+    public Spell GetSpell(Spell spell)
+    {
+        return _spellDict[spell.SpellID];
+    }
+
 }
 
 public enum SpellID{

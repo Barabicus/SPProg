@@ -5,19 +5,17 @@ public class Player : Entity
 {
 
     #region Fields
-    public string selectedSpell;
+    public Spell selectedSpell;
     public float spellLookSpeed = 5f;
     public float reselectDelay = 0.5f;
-    public string[] spellList;
+    public Spell[] spellList;
 
-    private float _lastSpellCastTime;
     private float _lastSelectTime;
     #endregion
 
     protected override void Start()
     {
         base.Start();
-        _lastSpellCastTime = Time.time;
         _lastSelectTime = Time.time;
         selectedSpell = spellList[0];
     }
@@ -58,7 +56,7 @@ public class Player : Entity
 
     private void PlayerCastSpell()
     {
-        if (Time.time - _lastSpellCastTime >= spellCastDelay && Input.GetMouseButton(1))
+        if (Input.GetMouseButton(1) && selectedSpell != null)
         {
             // Cast a ray to see if we can hit any entities or ground
             RaycastHit hit;
@@ -77,8 +75,6 @@ public class Player : Entity
                         spell.SpellTarget = selectedTarget;
                     }
                     spell.SpellTargetPosition = hit.point;
-
-                    _lastSpellCastTime = Time.time;
                 }
 
             }
