@@ -145,7 +145,7 @@ public abstract class Entity : MonoBehaviour
         }
         set
         {
-            _currentElementalCharge = new ElementalStats(Mathf.Min(value[Element.Fire], maxElementalCharge[Element.Fire]), Mathf.Min(value[Element.Water], maxElementalCharge[Element.Water]), Mathf.Min(value[Element.Kinetic], maxElementalCharge[Element.Kinetic]));
+            _currentElementalCharge = new ElementalStats(Mathf.Min(value[Element.Fire], maxElementalCharge[Element.Fire]), Mathf.Min(value[Element.Water], maxElementalCharge[Element.Water]), Mathf.Min(value[Element.Air], maxElementalCharge[Element.Air]), Mathf.Min(value[Element.Kinetic], maxElementalCharge[Element.Kinetic]));
         }
     }
 
@@ -337,11 +337,13 @@ public abstract class Entity : MonoBehaviour
 
     protected virtual void Die()
     {
-        //  Destroy(gameObject);
         LivingState = EntityLivingState.Dead;
 
     }
 
+    /// <summary>
+    /// Called when this entity has been killed
+    /// </summary>
     protected virtual void EntityKilled()
     {
 

@@ -36,21 +36,12 @@ public class Player : Entity
 
     private void LookAtMouse()
     {
-        RaycastHit hit;
-        if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hit, 1000f, 1 << LayerMask.NameToLayer("Ground")))
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        Plane hPlane = new Plane(Vector3.up, transform.position);
+        float distance = 0;
+        if (hPlane.Raycast(ray, out distance))
         {
-            LookAtTarget(hit.point);
-        }
-    }
-
-    private void EnsurePlayerVisibility()
-    {
-        RaycastHit hit;
-        if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hit, 1000f, 1 << LayerMask.NameToLayer("Entity") | 1 << LayerMask.NameToLayer("Environment")))
-        {
-            if (hit.collider.gameObject.tag.Equals("Player"))
-                return;
-            hit.collider.gameObject.SetActive(false);
+            LookAtTarget(ray.GetPoint(distance));
         }
     }
 
@@ -58,9 +49,13 @@ public class Player : Entity
     {
         if (Input.GetMouseButton(1) && selectedSpell != null)
         {
-            // Cast a ray to see if we can hit any entities or ground
-            RaycastHit hit;
-            if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hit, 1000f, 1 << LayerMask.NameToLayer("Ground") | 1 << LayerMask.NameToLayer("Entity")))
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            // create a plane at 0,0,0 whose normal points to +Y:
+            Plane hPlane = new Plane(Vector3.up, transform.position);
+            // Plane.Raycast stores the distance from ray.origin to the hit point in this variable:
+            float distance = 0;
+            // if the ray hits the plane...
+            if (hPlane.Raycast(ray, out distance))
             {
                 // Create the spell
                 Spell spell;
@@ -74,11 +69,9 @@ public class Player : Entity
                         //  spell.SpellTargetPosition = selectedTarget.position;
                         spell.SpellTarget = selectedTarget;
                     }
-                    spell.SpellTargetPosition = hit.point;
+                    spell.SpellTargetPosition = ray.GetPoint(distance);
                 }
-
             }
-
         }
     }
 
@@ -161,6 +154,6 @@ public class Player : Entity
 
     protected override bool KeepBeamAlive()
     {
-        return Input.GetMouseButton(1);
+        return LivingState == EntityLivingState.Alive && Input.GetMouseButton(1);
     }
 }

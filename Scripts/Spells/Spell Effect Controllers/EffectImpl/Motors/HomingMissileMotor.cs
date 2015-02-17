@@ -11,7 +11,7 @@ public class HomingMissileMotor : MissileMotor
     private Transform _homingTarget;
     private Timer _searchTimer;
 
-    protected override Vector3 Direction
+    public override Vector3 Direction
     {
         get
         {
@@ -39,7 +39,6 @@ public class HomingMissileMotor : MissileMotor
                 {
                     _homingTarget = c.gameObject.transform;
                     speed = homingSpeed;
-                    randomRadius = homingRandomRadius;
                 }
             }
         }

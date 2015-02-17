@@ -5,11 +5,7 @@ using System.Collections;
 public class MissileMotor : SpellEffect
 {
     public float speed = 2f;
-    public float randomRadius = 0f;
-    public float randomSpeed = 1f;
-    public bool randomXMove = false;
-    public bool randomYMove = false;
-    public bool randomZMove = false;
+
     [Tooltip("The speed curve for this spell effect. Y axis is modifer X axis is living time percent from 0 - 1")]
     public AnimationCurve speedCurve = AnimationCurve.Linear(0f, 1f, 1f, 1f);
     [Tooltip("The Direction offset in spell living time. Note this is spell living real time and not a percent")]
@@ -19,6 +15,22 @@ public class MissileMotor : SpellEffect
     [Tooltip("The Direction offset in spell living time. Note this is spell living real time and not a percent")]
     public AnimationCurve directionZCurve = AnimationCurve.Linear(0f, 0f, 1f, 0f);
 
+    public bool randomXMove = false;
+    public bool randomYMove = false;
+    public bool randomZMove = false;
+    public float randomXRadius = 1f;
+    public float randomYRadius = 1f;
+    public float randomZRadius = 1f;
+
+    public AnimationCurve randomXRadiusCurve = AnimationCurve.Linear(0f, 1f, 1f, 1f);
+    public AnimationCurve randomYRadiusCurve = AnimationCurve.Linear(0f, 1f, 1f, 1f);
+    public AnimationCurve randomZRadiusCurve = AnimationCurve.Linear(0f, 1f, 1f, 1f);
+
+    public float minRange = 1f;
+    public float randomRange = 1f;
+
+
+
 
     private Vector3 direction;
     private bool shouldMove = true;
@@ -26,15 +38,28 @@ public class MissileMotor : SpellEffect
     private float _lastTime;
     private float _timeStartOffset;
 
-    private float xRandDir, yRandDir, zRandDir;
+    private float xRandDir = 0f, yRandDir = 0f, zRandDir = 0f;
     private float xRandSpeed, yRandSpeed, zRandSpeed;
 
 
-    protected virtual Vector3 Direction
+    public virtual Vector3 Direction
     {
         get
         {
-            return direction + DirectionRandomOffset;
+            return (direction);
+        }
+    }
+
+    public Vector3 RandomRadius
+    {
+        get { return new Vector3(randomXRadius * randomXRadiusCurve.Evaluate(CurrentLivingTimePercent), randomYRadius * randomYRadiusCurve.Evaluate(CurrentLivingTimePercent), randomZRadius * randomZRadiusCurve.Evaluate(CurrentLivingTimePercent)); }
+    }
+
+    protected virtual float Speed
+    {
+        get
+        {
+            return (speed * speedCurve.Evaluate(CurrentLivingTimePercent)) * Time.deltaTime;
         }
     }
 
@@ -42,7 +67,7 @@ public class MissileMotor : SpellEffect
     {
         get
         {
-            return transform.TransformDirection(new Vector3(xRandDir, yRandDir, zRandDir));
+            return transform.TransformDirection(new Vector3(xRandDir, yRandDir, zRandDir)) * Time.deltaTime;
         }
     }
 
@@ -56,7 +81,7 @@ public class MissileMotor : SpellEffect
 
     protected float CurrentTimeAndOffset
     {
-        get { return CurrentTime + _timeStartOffset; }
+        get { return (CurrentTime) + _timeStartOffset; }
     }
 
     protected float CurrentTime
@@ -68,12 +93,13 @@ public class MissileMotor : SpellEffect
     {
         base.Start();
         _lastTime = Time.time;
-        direction = ((effectSetting.spell.SpellTargetPosition.Value + transform.forward) - effectSetting.transform.position);
+        direction = ((effectSetting.spell.SpellTargetPosition.Value) - effectSetting.spell.SpellStartPosition);
         direction.y = 0;
         direction.Normalize();
         GetComponent<Rigidbody>().isKinematic = true;
-        transform.parent.forward = direction;
         InitRandomVariables();
+        transform.parent.forward = Direction;
+
     }
 
     public void OnTriggerEnter(Collider other)
@@ -89,37 +115,51 @@ public class MissileMotor : SpellEffect
         base.UpdateSpell();
         UpdateRandomValues();
         effectSetting.transform.forward = Direction;
-        effectSetting.transform.position += DirectionOffset;
         if (shouldMove)
-            effectSetting.transform.position += Direction * (speed * speedCurve.Evaluate(CurrentLivingTimePercent)) * Time.deltaTime;
+        {
+            transform.parent.forward = Direction;
+            effectSetting.transform.position += DirectionOffset;
+            effectSetting.transform.position += (Direction * Speed) + Vector3.Scale(DirectionRandomOffset, RandomRadius);
+        }
     }
 
     private void InitRandomVariables()
     {
-        _timeStartOffset = Random.Range(0, 100);
+         _timeStartOffset = Random.Range(0, 1000);
+
         UpdateRandomSpeed();
+        UpdateRandomValues();
     }
 
     private void UpdateRandomSpeed()
     {
         if (randomXMove)
-            xRandSpeed = Random.Range(25, 50) * randomSpeed;
+            xRandSpeed = (Random.Range(minRange * 1000, 1000 * randomRange) + 1) / 1000f;
         if (randomYMove)
-            yRandSpeed = Random.Range(25, 50) * randomSpeed;
+            yRandSpeed = (Random.Range(minRange * 1000, 1000 * randomRange) + 1) / 1000f;
         if (randomZMove)
-            zRandSpeed = Random.Range(25, 50) * randomSpeed;
+            zRandSpeed = (Random.Range(minRange * 1000, 1000 * randomRange) + 1) / 1000f;
     }
 
     private void UpdateRandomValues()
     {
-        xRandDir = (CurrentTimeAndOffset * xRandSpeed) * Mathf.Deg2Rad;
-        xRandDir = Mathf.Sin(xRandDir) * randomRadius;
+        if (randomXMove)
+        {
+            xRandDir = (CurrentTimeAndOffset * xRandSpeed) * Mathf.Deg2Rad;
+            xRandDir = Mathf.Sin(xRandDir);
+        }
 
-        yRandDir = (CurrentTimeAndOffset * yRandSpeed) * Mathf.Deg2Rad;
-        yRandDir = Mathf.Sin(yRandDir) * randomRadius;
+        if (randomYMove)
+        {
+            yRandDir = (CurrentTimeAndOffset * yRandSpeed) * Mathf.Deg2Rad;
+            yRandDir = Mathf.Sin(yRandDir);
+        }
 
-        zRandDir = (CurrentTimeAndOffset * zRandSpeed) * Mathf.Deg2Rad;
-        zRandDir = Mathf.Sin(zRandDir) * randomRadius;
+        if (randomZMove)
+        {
+            zRandDir = (CurrentTimeAndOffset * zRandSpeed) * Mathf.Deg2Rad;
+            zRandDir = Mathf.Sin(zRandDir);
+        }
     }
 
     protected override void effectSetting_OnSpellDestroy(object sender, SpellEventargs e)

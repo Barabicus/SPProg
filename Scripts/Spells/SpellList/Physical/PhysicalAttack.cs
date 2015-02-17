@@ -16,7 +16,7 @@ public class PhysicalAttack : ElementalSpell
 
     public override ElementalStats ElementalPower
     {
-        get { return new ElementalStats(0, 0, 1f); }
+        get { return new ElementalStats(0, 0, 0, 1f); }
     }
 
     public override float SpellCastDelay

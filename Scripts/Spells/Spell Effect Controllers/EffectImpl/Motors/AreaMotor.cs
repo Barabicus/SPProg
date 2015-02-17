@@ -1,13 +1,9 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class AreaMotor : TimedUpdateableEffect
+public class AreaMotor : TimedUpdateableSpellMotor
 {
-   // public bool singleFire = true;
-  //  public float checkDelay = 1f;
     public float radius = 5f;
-
-    private float _lastCheckTime;
 
     protected override void Start()
     {
@@ -26,7 +22,12 @@ public class AreaMotor : TimedUpdateableEffect
         foreach (Collider c in colls)
         {
             if (c.gameObject != effectSetting.spell.CastingEntity.gameObject)
-                effectSetting.TriggerCollision(new ColliderEventArgs(), c);
+            {
+                Entity e = c.gameObject.GetComponent<Entity>();
+
+             //   if ((!collideWithSameFlag && (e.entityFlags & effectSetting.spell.CastingEntity.entityFlags) != 0) || collideWithSameFlag)
+                    effectSetting.TriggerCollision(new ColliderEventArgs(), c);
+            }
         }
     }
 

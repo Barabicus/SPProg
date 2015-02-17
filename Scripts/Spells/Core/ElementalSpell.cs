@@ -4,14 +4,14 @@ using System.Collections;
 public class ElementalSpell : Spell
 {
 
-    public float fire, water, kinetic;
+    public float fire, water, air, kinetic;
 
     /// <summary>
     /// The Elemental properties of this spell
     /// </summary>
     public virtual ElementalStats ElementalPower
     {
-        get { return new ElementalStats(fire, water, kinetic); }
+        get { return new ElementalStats(fire, water, air, kinetic); }
     }
 
     public override void ApplySpell(Entity entity)
