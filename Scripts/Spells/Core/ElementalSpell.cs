@@ -4,14 +4,14 @@ using System.Collections;
 public class ElementalSpell : Spell
 {
 
-    public float fire, water, air, kinetic;
+    public ElementalStats elementalPower = ElementalStats.Zero;
 
     /// <summary>
     /// The Elemental properties of this spell
     /// </summary>
     public virtual ElementalStats ElementalPower
     {
-        get { return new ElementalStats(fire, water, air, kinetic); }
+        get { return elementalPower; }
     }
 
     public override void ApplySpell(Entity entity)
@@ -24,7 +24,7 @@ public class ElementalSpell : Spell
         // Apply the spells elemental properties
         foreach (Element e in System.Enum.GetValues(typeof(Element)))
         {
-            entity.CurrentHP += ElementalPower[e] * -entity.ElementalModifier[e];
+            entity.AdjustHealthByAmount(ElementalPower[e] * -entity.ElementalModifier[e]);
         }
     }
 

@@ -18,8 +18,6 @@ public class Spell : MonoBehaviour
     public SpellType spellType;
     public ElementalStats elementalCost;
     public SpellElementType elementType = SpellElementType.NoElement;
-    [Tooltip("Should the spell be applied to  entities of the same flag type")]
-    public bool applyWithSameFlag = false;
     #endregion
 
     #region Properties

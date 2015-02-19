@@ -4,32 +4,32 @@ using System.Collections;
 public struct EntityStats
 {
     public float speed;
-    public float maxHP;
+    public float health;
 
-    public EntityStats(float speed, float maxHP)
+    public EntityStats(float speed, float health)
     {
         this.speed = speed;
-        this.maxHP = maxHP;
+        this.health = health;
     }
 
     public static EntityStats operator +(EntityStats e1, EntityStats e2)
     {
-        return new EntityStats(e1.speed + e2.speed, e1.maxHP + e2.maxHP);
+        return new EntityStats(e1.speed + e2.speed, e1.health + e2.health);
     }
 
     public static EntityStats operator -(EntityStats e1, EntityStats e2)
     {
-        return new EntityStats(e1.speed - e2.speed, e1.maxHP - e2.maxHP);
+        return new EntityStats(e1.speed - e2.speed, e1.health - e2.health);
     }
 
     public EntityStats Difference(EntityStats other)
     {
-        return new EntityStats(speed + (other.speed * -1), maxHP + (other.maxHP * -1));
+        return new EntityStats(speed + (other.speed * -1), health + (other.health * -1));
     }
 
     public override string ToString()
     {
-        return "(" + speed + " : " + maxHP +")";
+        return "(" + speed + " : " + health +")";
     }
 
 }

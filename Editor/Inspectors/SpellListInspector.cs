@@ -17,10 +17,11 @@ public class SpellListInspector : Editor
         spellList = serializedObject.FindProperty("spells");
 
         list = new ReorderableList(serializedObject, spellList, true, true, true, true);
+        list.displayAdd = false;
 
         list.drawHeaderCallback = (Rect rect) =>
         {
-            EditorGUI.LabelField(rect, "Event Targets");
+            EditorGUI.LabelField(rect, "Spells");
         };
 
         list.drawElementCallback = ListDrawCallBack;
@@ -40,36 +41,26 @@ public class SpellListInspector : Editor
     {
         serializedObject.Update();
 
-        //for (int i = 0; i < spellList.arraySize; i++)
-        //{
-        //    EditorGUILayout.BeginHorizontal("Box");
-        //    Spell spell = spellList.GetArrayElementAtIndex(i).objectReferenceValue as Spell;
-        //    if (spell == null)
-        //    {
-        //        spellList.DeleteArrayElementAtIndex(i);
-        //        spellList.DeleteArrayElementAtIndex(i);
-        //    }else
-        //    EditorGUILayout.PropertyField(spellList.GetArrayElementAtIndex(i), new GUIContent(spell.spellID));
-        //    if (GUILayout.Button(new GUIContent("[-]")))
-        //    {
-        //        spellList.DeleteArrayElementAtIndex(i);
-        //        spellList.DeleteArrayElementAtIndex(i);
-        //    }
-        //    EditorGUILayout.EndHorizontal();
-        //}
-
-        //EditorGUILayout.BeginHorizontal("Box");
-        //insertObj = EditorGUILayout.ObjectField(insertObj, typeof(Spell), false);
-        //if (GUILayout.Button(new GUIContent("Insert")))
-        //{
-        //    int index = spellList.arraySize;
-        //    spellList.InsertArrayElementAtIndex(index);
-        //    SerializedProperty spellProp = spellList.GetArrayElementAtIndex(index);
-        //    spellProp.objectReferenceValue = insertObj;
-        //}
-        //EditorGUILayout.EndHorizontal();
-
         list.DoLayoutList();
+        insertObj = EditorGUILayout.ObjectField(insertObj, typeof(Spell));
+
+        if (GUILayout.Button(new GUIContent("Insert Spell")) && insertObj != null)
+        {
+            for (int i = 0; i < spellList.arraySize; i++)
+            {
+                if (insertObj == spellList.GetArrayElementAtIndex(i).objectReferenceValue)
+                {
+                    Debug.Log("Spell Already Exists");
+                    insertObj = null;
+                    return;
+                }
+            }
+
+                spellList.InsertArrayElementAtIndex(spellList.arraySize);
+            SerializedProperty insert = spellList.GetArrayElementAtIndex(spellList.arraySize - 1);
+            insert.objectReferenceValue = insertObj;
+            insertObj = null;
+        }
 
         serializedObject.ApplyModifiedProperties();
 

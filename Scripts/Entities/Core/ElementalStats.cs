@@ -13,6 +13,7 @@ public struct ElementalStats
     public float fire;
     public float water;
     public float air;
+    public float earth;
     public float kinetic;
 
     public float this[Element e]
@@ -33,12 +34,13 @@ public struct ElementalStats
         }
     }
 
-    public ElementalStats(float fire, float water, float air, float kinetic)
+    public ElementalStats(float fire, float water, float air, float earth, float kinetic)
     {
         this.fire = fire;
         this.water = water;
         this.kinetic = kinetic;
         this.air = air;
+        this.earth = earth;
         elementalStats = null;
     }
 
@@ -49,6 +51,7 @@ public struct ElementalStats
         elementalStats.Add(Element.Water, water);
         elementalStats.Add(Element.Kinetic, kinetic);
         elementalStats.Add(Element.Air, air);
+        elementalStats.Add(Element.Earth, earth);
     }
 
     private float GetElementalStat(Element element)
@@ -60,28 +63,28 @@ public struct ElementalStats
     {
         get
         {
-            return new ElementalStats(0, 0, 0, 0);
+            return new ElementalStats(0, 0, 0, 0, 0);
         }
     }
 
     public static ElementalStats operator +(ElementalStats e1, ElementalStats e2)
     {
-        return new ElementalStats(e1[Element.Fire] + e2[Element.Fire], e1[Element.Water] + e2[Element.Water], e1[Element.Air] + e2[Element.Air], e1[Element.Kinetic] + e2[Element.Kinetic]);
+        return new ElementalStats(e1[Element.Fire] + e2[Element.Fire], e1[Element.Water] + e2[Element.Water], e1[Element.Air] + e2[Element.Air], e1[Element.Earth] + e2[Element.Earth], e1[Element.Kinetic] + e2[Element.Kinetic]);
     }
 
     public static ElementalStats operator -(ElementalStats e1, ElementalStats e2)
     {
-        return new ElementalStats(e1[Element.Fire] - e2[Element.Fire], e1[Element.Water] - e2[Element.Water], e1[Element.Air] - e2[Element.Air], e1[Element.Kinetic] - e2[Element.Kinetic]);
+        return new ElementalStats(e1[Element.Fire] - e2[Element.Fire], e1[Element.Water] - e2[Element.Water], e1[Element.Air] - e2[Element.Air], e1[Element.Earth] - e2[Element.Earth], e1[Element.Kinetic] - e2[Element.Kinetic]);
     }
 
     public static ElementalStats operator *(ElementalStats e1, float f)
     {
-        return new ElementalStats(e1[Element.Fire] * f, e1[Element.Water] * f, e1[Element.Air] * f, e1[Element.Kinetic] * f);
+        return new ElementalStats(e1[Element.Fire] * f, e1[Element.Water] * f, e1[Element.Air] * f, e1[Element.Earth] * f, e1[Element.Kinetic] * f);
     }
 
     public override string ToString()
     {
-        return "(" + this[Element.Fire] + " : " + this[Element.Water] + " : " + this[Element.Air] + " : "+ this[Element.Kinetic] + ")";
+        return "(" + this[Element.Fire] + " : " + this[Element.Water] + " : " + this[Element.Air] + " : " + this[Element.Earth] + " : " + this[Element.Kinetic] + ")";
     }
 }
 
@@ -90,5 +93,6 @@ public enum Element
     Fire,
     Water,
     Kinetic,
-    Air
+    Air,
+    Earth
 }

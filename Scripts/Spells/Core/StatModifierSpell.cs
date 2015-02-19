@@ -5,7 +5,7 @@ public class StatModifierSpell : Spell
 {
 
     public float speedMod = 0f;
-    public float maxHPMod = 0f;
+    public float hpMod = 0f;
 
     private EntityStats _incrementStat;
     private EntityStats _addedStat;
@@ -14,7 +14,7 @@ public class StatModifierSpell : Spell
     public override void Start()
     {
         base.Start();
-        _incrementStat = new EntityStats(speedMod, maxHPMod);
+        _incrementStat = new EntityStats(speedMod, hpMod);
     }
 
     public override void ApplySpell(Entity entity)

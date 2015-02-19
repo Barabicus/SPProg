@@ -7,7 +7,7 @@ using System.Collections;
 public class AttachMotor : SpellEffect
 {
     public bool singleShot = false;
-    public float updateTime = 2f;
+    public float updateTime = 1f;
     private float lastUpdateTime;
 
     private Entity targetEntity;

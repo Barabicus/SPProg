@@ -18,9 +18,9 @@ public abstract class Entity : MonoBehaviour
     public string EntityName = "NOTSET";
     public Transform castPoint;
     public EntityFlags entityFlags;
-    public ElementalStats elementalResistance = new ElementalStats();
-    public ElementalStats maxElementalCharge = new ElementalStats();
-    public ElementalStats rechargeRate = new ElementalStats();
+    public ElementalStats elementalResistance = new ElementalStats(1,1,1,1,1);
+    public ElementalStats maxElementalCharge = new ElementalStats(1, 1, 1, 1, 1);
+    public ElementalStats rechargeRate = new ElementalStats(1, 1, 1, 1, 1);
 
     private ElementalStats _currentElementalCharge;
     private Animator animator;
@@ -87,7 +87,7 @@ public abstract class Entity : MonoBehaviour
     {
         get
         {
-            return _cachedStats.maxHP;
+            return _cachedStats.health;
         }
     }
 
@@ -145,7 +145,7 @@ public abstract class Entity : MonoBehaviour
         }
         set
         {
-            _currentElementalCharge = new ElementalStats(Mathf.Min(value[Element.Fire], maxElementalCharge[Element.Fire]), Mathf.Min(value[Element.Water], maxElementalCharge[Element.Water]), Mathf.Min(value[Element.Air], maxElementalCharge[Element.Air]), Mathf.Min(value[Element.Kinetic], maxElementalCharge[Element.Kinetic]));
+            _currentElementalCharge = new ElementalStats(Mathf.Min(value[Element.Fire], maxElementalCharge[Element.Fire]), Mathf.Min(value[Element.Water], maxElementalCharge[Element.Water]), Mathf.Min(value[Element.Air], maxElementalCharge[Element.Air]), Mathf.Min(value[Element.Earth], maxElementalCharge[Element.Earth]), Mathf.Min(value[Element.Kinetic], maxElementalCharge[Element.Kinetic]));
         }
     }
 
@@ -291,6 +291,17 @@ public abstract class Entity : MonoBehaviour
     #endregion
 
     #region State And Value Changes
+
+    /// <summary>
+    /// Adjusts the health of the entity ensuring that the amount passed in is a whole number
+    /// </summary>
+    /// <param name="amount"></param>
+    public void AdjustHealthByAmount(float amount)
+    {
+        amount = Mathf.Floor(amount);
+        CurrentHP += amount;
+    }
+
     private void UpdateAnimation()
     {
         animator.SetFloat("Speed", _currentSpeed);
@@ -309,6 +320,7 @@ public abstract class Entity : MonoBehaviour
     {
         _statModifiers.Add(stat);
         _cachedStats += stat;
+        AdjustHealthByAmount(stat.health);
         UpdateStatComponents();
     }
 
