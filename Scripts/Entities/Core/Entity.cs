@@ -34,11 +34,16 @@ public abstract class Entity : MonoBehaviour
     private List<EntityStats> _statModifiers = new List<EntityStats>();
     private EntityStats _cachedStats;
     private Timer knockdownTime;
-    private Timer spellCastTimer;
 
     protected NavMeshAgent navMeshAgent;
     protected BeamSpell beamSpell = null;
     protected Transform selectedTarget;
+    /// <summary>
+    /// The timer that controls whether or not enough time has passed to be able to recast a spell again. This takes in spellcastdelay and will
+    /// allow a spellrecast once that time has passed.
+    /// </summary>
+    protected Timer spellCastTimer;
+
 
 
     #endregion
@@ -87,7 +92,7 @@ public abstract class Entity : MonoBehaviour
     {
         get
         {
-            return _cachedStats.health;
+            return maxHP;
         }
     }
 

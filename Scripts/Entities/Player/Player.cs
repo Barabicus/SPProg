@@ -137,6 +137,7 @@ public class Player : Entity
         if (spellIndex >= 0 && spellIndex < spellList.Length)
         {
             Spell sp = SpellList.Instance.GetSpell(spellList[spellIndex]);
+
             switch (sp.SpellType)
             {
                 case SpellType.Area:
@@ -146,7 +147,10 @@ public class Player : Entity
                     CastSpell(sp);
                     break;
                 default:
+                    if (selectedSpell == sp)
+                        return;
                     selectedSpell = spellList[spellIndex];
+                    spellCastTimer = new Timer(0);
                     break;
             }
         }

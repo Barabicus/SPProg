@@ -5,6 +5,8 @@ using System.Collections;
 public class MissileMotor : SpellEffect
 {
     public float speed = 2f;
+    public bool keepDistanceToGround = false;
+    public float minGroundDistance = 1f;
 
     [Tooltip("The speed curve for this spell effect. Y axis is modifer X axis is living time percent from 0 - 1")]
     public AnimationCurve speedCurve = AnimationCurve.Linear(0f, 1f, 1f, 1f);
@@ -120,12 +122,22 @@ public class MissileMotor : SpellEffect
             transform.parent.forward = Direction;
             effectSetting.transform.position += DirectionOffset;
             effectSetting.transform.position += (Direction * Speed) + Vector3.Scale(DirectionRandomOffset, RandomRadius);
+
+            if (keepDistanceToGround)
+            {
+                RaycastHit hit;
+                if (Physics.Raycast(effectSetting.transform.position, -Vector3.up, out hit, 500f, 1 << LayerMask.NameToLayer("Ground")))
+                {
+                    effectSetting.transform.position = new Vector3(effectSetting.transform.position.x, hit.point.y + minGroundDistance, effectSetting.transform.position.z);
+                }
+            }
         }
+
     }
 
     private void InitRandomVariables()
     {
-         _timeStartOffset = Random.Range(0, 1000);
+        _timeStartOffset = Random.Range(0, 1000);
 
         UpdateRandomSpeed();
         UpdateRandomValues();
