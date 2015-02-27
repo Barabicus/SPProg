@@ -19,27 +19,44 @@ public class EssentialsWindow : EditorWindow
 
     public void OnEnable()
     {
+        Find();
+    }
 
+    void Find()
+    {
         EssentialObjects[] e = Resources.FindObjectsOfTypeAll<EssentialObjects>();
 
         if (e.Length > 0)
             ess = e[0];
         else
         {
-            Debug.LogError("Error Essential Objects could not be found!");
+            Debug.Log("Essential Objects could not be found!");
+            return;
         }
 
-        player = ess.player;
-        gameplayGUI = ess.gameplayGUI;
-        rtsCamera = ess.camera;
-        spellList = ess.spellList;
     }
 
     void OnGUI()
     {
+        GUILayout.BeginHorizontal();
         ess = EditorGUILayout.ObjectField(ess, typeof(EssentialObjects)) as EssentialObjects;
-        if (GUILayout.Button(new GUIContent("Create Assets")) && player != null)
+        if (GUILayout.Button(new GUIContent("Find")))
         {
+            Find();
+        }
+        GUILayout.EndHorizontal();
+
+        GUILayout.BeginVertical();
+
+        if (ess == null)
+            GUI.backgroundColor = Color.red;
+        else
+            GUI.backgroundColor = Color.green;
+        if (GUILayout.Button(new GUIContent("Create Assets")) && ess != null)
+        {
+            if (!LoadObjects())
+                return;
+
             gameplayGUI = PrefabUtility.InstantiatePrefab(gameplayGUI) as GameplayGUI;
             rtsCamera = PrefabUtility.InstantiatePrefab(rtsCamera) as RTSCamera;
             player = PrefabUtility.InstantiatePrefab(player) as Player;
@@ -47,7 +64,45 @@ public class EssentialsWindow : EditorWindow
 
             gameplayGUI.player = player;
             rtsCamera.followTarget = player.transform;
+            Debug.Log("Created");
         }
+
+        GUILayout.EndVertical();
+    }
+
+    private bool LoadObjects()
+    {
+        bool loaded = true;
+        player = ess.player;
+        gameplayGUI = ess.gameplayGUI;
+        rtsCamera = ess.camera;
+        spellList = ess.spellList;
+
+        if (player == null)
+        {
+            Debug.Log("Player was null");
+            loaded = false;
+        }
+
+        if (gameplayGUI == null)
+        {
+            Debug.Log("GameplayGUI was null");
+            loaded = false;
+        }
+
+        if (rtsCamera == null)
+        {
+            Debug.Log("RtsCamera was null");
+            loaded = false;
+        }
+
+        if (spellList == null)
+        {
+            Debug.Log("SpellList was null");
+            loaded = false;
+        }
+
+        return loaded;
     }
 
 }

@@ -1,5 +1,7 @@
 fileFormatVersion: 2
 guid: 493c08888fffe954d912e3ccf534e3da
+timeCreated: 1424660595
+licenseType: Pro
 TextureImporter:
   fileIDToRecycleName:
     8900000: generatedCubemap
@@ -51,3 +53,4 @@ TextureImporter:
   spritePackingTag: 
   userData: 
   assetBundleName: 
+  assetBundleVariant: 

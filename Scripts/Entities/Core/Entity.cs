@@ -18,7 +18,7 @@ public abstract class Entity : MonoBehaviour
     public string EntityName = "NOTSET";
     public Transform castPoint;
     public EntityFlags entityFlags;
-    public ElementalStats elementalResistance = new ElementalStats(1,1,1,1,1);
+    public ElementalStats elementalResistance = new ElementalStats(1, 1, 1, 1, 1);
     public ElementalStats maxElementalCharge = new ElementalStats(1, 1, 1, 1, 1);
     public ElementalStats rechargeRate = new ElementalStats(1, 1, 1, 1, 1);
 
@@ -43,6 +43,7 @@ public abstract class Entity : MonoBehaviour
     /// allow a spellrecast once that time has passed.
     /// </summary>
     protected Timer spellCastTimer;
+    protected Spell lastCastSpell;
 
 
 
@@ -73,6 +74,11 @@ public abstract class Entity : MonoBehaviour
     #endregion
 
     #region Properties
+
+    public bool IsCasting
+    {
+        get { return !spellCastTimer.CanTick; }
+    }
 
     public EntityStats BaseStats
     {
@@ -265,7 +271,8 @@ public abstract class Entity : MonoBehaviour
     /// </summary>
     protected virtual void LivingUpdate()
     {
-        CurrentElementalCharge += rechargeRate * Time.deltaTime;
+        if (!IsCasting)
+            CurrentElementalCharge += rechargeRate * Time.deltaTime;
     }
     /// <summary>
     /// Called while the entity is Dead
@@ -431,6 +438,7 @@ public abstract class Entity : MonoBehaviour
         SubtractSpellCost(sp);
         castSpell = sp;
         spellCastTimer = new Timer(spell.SpellCastDelay);
+        lastCastSpell = castSpell;
         return true;
     }
 
