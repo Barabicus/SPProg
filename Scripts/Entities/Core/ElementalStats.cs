@@ -5,11 +5,6 @@ using System.Collections.Generic;
 [System.Serializable]
 public struct ElementalStats
 {
-
-    private Dictionary<Element, float> elementalStats;
-
-    // Editor fields, these fields can be assigned in the editor and will be applied
-    // if the default constructor is used
     public float fire;
     public float water;
     public float air;
@@ -20,17 +15,11 @@ public struct ElementalStats
     {
         get
         {
-            // Ensure the elemental stats are created if the default constructor is used
-            if (elementalStats == null)
-                BuildStats(fire, water, air, kinetic);
             return GetElementalStat(e);
         }
         set
         {
-            // Ensure the elemental stats are created if the default constructor is used
-            if (elementalStats == null)
-                BuildStats(fire, water, air, kinetic);
-            elementalStats[e] = value;
+            SetElementalStat(e, value);
         }
     }
 
@@ -41,22 +30,47 @@ public struct ElementalStats
         this.kinetic = kinetic;
         this.air = air;
         this.earth = earth;
-        elementalStats = null;
-    }
-
-    private void BuildStats(float fire, float water, float air, float kinetic)
-    {
-        elementalStats = new Dictionary<Element, float>();
-        elementalStats.Add(Element.Fire, fire);
-        elementalStats.Add(Element.Water, water);
-        elementalStats.Add(Element.Kinetic, kinetic);
-        elementalStats.Add(Element.Air, air);
-        elementalStats.Add(Element.Earth, earth);
     }
 
     private float GetElementalStat(Element element)
     {
-        return elementalStats[element];
+        switch (element)
+        {
+            case Element.Fire:
+                return fire;
+            case Element.Water:
+                return water;
+            case Element.Air:
+                return air;
+            case Element.Earth:
+                return earth;
+            case Element.Kinetic:
+                return kinetic;
+            default:
+                return 0;
+        }
+    }
+
+    private void SetElementalStat(Element element, float value)
+    {
+        switch (element)
+        {
+            case Element.Fire:
+                this.fire = value;
+                break;
+            case Element.Water:
+                this.water = value;
+                break;
+            case Element.Air:
+                this.air = value;
+                break;
+            case Element.Earth:
+                this.earth = value;
+                break;
+            case Element.Kinetic:
+                this.kinetic = value;
+                break;
+        }
     }
 
     public static ElementalStats Zero
@@ -64,6 +78,14 @@ public struct ElementalStats
         get
         {
             return new ElementalStats(0, 0, 0, 0, 0);
+        }
+    }
+
+    public static ElementalStats One
+    {
+        get
+        {
+            return new ElementalStats(1, 1, 1, 1, 1);
         }
     }
 
@@ -75,6 +97,15 @@ public struct ElementalStats
     public static ElementalStats operator -(ElementalStats e1, ElementalStats e2)
     {
         return new ElementalStats(e1[Element.Fire] - e2[Element.Fire], e1[Element.Water] - e2[Element.Water], e1[Element.Air] - e2[Element.Air], e1[Element.Earth] - e2[Element.Earth], e1[Element.Kinetic] - e2[Element.Kinetic]);
+    }
+    public static ElementalStats operator *(ElementalStats e1, ElementalStats e2)
+    {
+        return new ElementalStats(e1[Element.Fire] * e2[Element.Fire], e1[Element.Water] * e2[Element.Water], e1[Element.Air] * e2[Element.Air], e1[Element.Earth] * e2[Element.Earth], e1[Element.Kinetic] * e2[Element.Kinetic]);
+    }
+
+    public static ElementalStats operator /(ElementalStats e1, ElementalStats e2)
+    {
+        return new ElementalStats(e1[Element.Fire] / e2[Element.Fire], e1[Element.Water] / e2[Element.Water], e1[Element.Air] / e2[Element.Air], e1[Element.Earth] / e2[Element.Earth], e1[Element.Kinetic] / e2[Element.Kinetic]);
     }
 
     public static ElementalStats operator *(ElementalStats e1, float f)

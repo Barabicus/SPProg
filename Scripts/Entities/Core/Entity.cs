@@ -18,11 +18,15 @@ public abstract class Entity : MonoBehaviour
     public string EntityName = "NOTSET";
     public Transform castPoint;
     public EntityFlags entityFlags;
-    public ElementalStats elementalResistance = new ElementalStats(1, 1, 1, 1, 1);
-    public ElementalStats maxElementalCharge = new ElementalStats(1, 1, 1, 1, 1);
-    public ElementalStats rechargeRate = new ElementalStats(1, 1, 1, 1, 1);
+    public ElementalStats elementalResistance = ElementalStats.One;
+    public ElementalStats maxElementalCharge = ElementalStats.One;
+    public ElementalStats rechargeRate = ElementalStats.One;
 
     private ElementalStats _currentElementalCharge;
+    /// <summary>
+    /// Recharge lock on each element based on time i.e fire = 1 is a lock of 1 second on fire recharge
+    /// </summary>
+    private ElementalStats _rechargeLock = ElementalStats.One;
     private Animator animator;
     private Vector3 _lastPosition;
     private float _currentSpeed;
@@ -43,9 +47,15 @@ public abstract class Entity : MonoBehaviour
     /// allow a spellrecast once that time has passed.
     /// </summary>
     protected Timer spellCastTimer;
-    protected Spell lastCastSpell;
 
 
+    #region Animation Hashes
+    private static int animSpeed = Animator.StringToHash("speed");
+    private static int animDead = Animator.StringToHash("dead");
+    private static int animCast01 = Animator.StringToHash("cast01");
+    private static int animAttack02 = Animator.StringToHash("attack02");
+
+    #endregion
 
     #endregion
 
@@ -75,6 +85,12 @@ public abstract class Entity : MonoBehaviour
 
     #region Properties
 
+    public float CurrentSpeed
+    {
+        get { return _currentSpeed; }
+        set { _currentSpeed = value; }
+    }
+
     public bool IsCasting
     {
         get { return !spellCastTimer.CanTick; }
@@ -102,6 +118,14 @@ public abstract class Entity : MonoBehaviour
         }
     }
 
+    public ElementalStats RechargeRate
+    {
+        get
+        {
+            return rechargeRate * _rechargeLock;
+        }
+    }
+
     public EntityLivingState LivingState
     {
         get { return _livingState; }
@@ -110,7 +134,7 @@ public abstract class Entity : MonoBehaviour
             switch (value)
             {
                 case EntityLivingState.Dead:
-                    animator.SetBool("Dead", true);
+                    animator.SetBool(animDead, true);
                     foreach (Collider c in GetComponents<Collider>())
                         c.enabled = false;
                     foreach (Transform t in transform)
@@ -122,7 +146,7 @@ public abstract class Entity : MonoBehaviour
                     EntityKilled();
                     break;
                 case EntityLivingState.Alive:
-                    animator.SetBool("Dead", false);
+                    animator.SetBool(animDead, false);
                     foreach (Collider c in GetComponents<Collider>())
                         c.enabled = true;
                     foreach (Transform t in transform)
@@ -271,8 +295,8 @@ public abstract class Entity : MonoBehaviour
     /// </summary>
     protected virtual void LivingUpdate()
     {
-        if (!IsCasting)
-            CurrentElementalCharge += rechargeRate * Time.deltaTime;
+        UpdateRechargeLock();
+        CurrentElementalCharge += RechargeRate * Time.deltaTime;
     }
     /// <summary>
     /// Called while the entity is Dead
@@ -292,8 +316,8 @@ public abstract class Entity : MonoBehaviour
     /// </summary>
     protected virtual void NavMeshUpdate()
     {
-        if (navMeshAgent.pathStatus == NavMeshPathStatus.PathInvalid)
-            LivingState = EntityLivingState.Dead;
+      //  if (navMeshAgent.pathStatus == NavMeshPathStatus.PathInvalid)
+     //       LivingState = EntityLivingState.Dead;
     }
     /// <summary>
     /// Called while the entity motion is not being controlled by anything
@@ -316,16 +340,16 @@ public abstract class Entity : MonoBehaviour
 
     private void UpdateAnimation()
     {
-        animator.SetFloat("Speed", _currentSpeed);
+        animator.SetFloat(animSpeed, CurrentSpeed);
     }
 
     private void UpdateSpeed()
     {
         var moveAmount = transform.position - _lastPosition;
         _lastPosition = transform.position;
-        _currentSpeed = moveAmount.magnitude / Time.deltaTime;
+        CurrentSpeed = moveAmount.magnitude / Time.deltaTime;
         // Normalise speed
-        _currentSpeed /= navMeshAgent.speed;
+        CurrentSpeed /= navMeshAgent.speed;
     }
 
     public void AddStatModifier(EntityStats stat)
@@ -362,7 +386,6 @@ public abstract class Entity : MonoBehaviour
     protected virtual void Die()
     {
         LivingState = EntityLivingState.Dead;
-
     }
 
     /// <summary>
@@ -438,7 +461,8 @@ public abstract class Entity : MonoBehaviour
         SubtractSpellCost(sp);
         castSpell = sp;
         spellCastTimer = new Timer(spell.SpellCastDelay);
-        lastCastSpell = castSpell;
+        SetRechargeLock(castSpell.ElementalCost);
+        PlayAnimation(castSpell.spellAnimation);
         return true;
     }
 
@@ -491,7 +515,40 @@ public abstract class Entity : MonoBehaviour
 
     #endregion
 
+    #region Animation
+
+    public void PlayAnimation(EntityAnimation animClip)
+    {
+        switch (animClip)
+        {
+            case EntityAnimation.Cast01:
+                animator.SetTrigger(animCast01);
+                break;
+            case EntityAnimation.Attack02:
+                animator.SetTrigger(animAttack02);
+                break;
+        }
+    }
+
+    #endregion
+
     #region Helper Methods
+
+    public void UpdateRechargeLock()
+    {
+        foreach (Element e in Enum.GetValues(typeof(Element)))
+        {
+            _rechargeLock[e] = Mathf.MoveTowards(_rechargeLock[e], 1f, Time.deltaTime);
+        }
+    }
+
+    public void SetRechargeLock(ElementalStats stats)
+    {
+        foreach (Element e in Enum.GetValues(typeof(Element)))
+        {
+            _rechargeLock[e] = stats[e] > 0 ? 0 : 1;
+        }
+    }
 
     public void EntityLookAt(Vector3 lookPosition)
     {
@@ -521,4 +578,11 @@ public enum EntityFlags
     Two,
     Three,
     Four
+}
+
+public enum EntityAnimation
+{
+    Nothing,
+    Cast01,
+    Attack02
 }

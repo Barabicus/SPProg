@@ -9,6 +9,7 @@ public class BeamMotor : SpellEffect
     public bool triggerStopMovement = true;
 
     private float distance = 1;
+    private LayerMask ignoreLayers;
 
     public Vector3 BeamDirection
     {
@@ -31,6 +32,7 @@ public class BeamMotor : SpellEffect
     protected override void Start()
     {
         base.Start();
+        ignoreLayers = ~((1 << LayerMask.NameToLayer("Spell")) | (1 << LayerMask.NameToLayer("Ignore Raycast")));
     }
 
     protected override void UpdateSpell()
@@ -40,8 +42,9 @@ public class BeamMotor : SpellEffect
             transform.parent.position = effectSetting.spell.SpellStartTransform.position;
             Debug.DrawRay(transform.position, transform.forward * distance, Color.red);
             RaycastHit hit;
-            if (Physics.Raycast(new Ray(transform.position, transform.forward), out hit, distance, ~(1 << LayerMask.NameToLayer("Spell"))))
+            if (Physics.Raycast(new Ray(transform.position, transform.forward), out hit, distance, ignoreLayers))
             {
+
                 if (hit.collider.gameObject == effectSetting.spell.CastingEntity.gameObject)
                     return;
                 distance = hit.distance;

@@ -26,6 +26,11 @@ public class EffectSetting : MonoBehaviour
         Invoke("DestroyGameObject", destroyTimeDelay);
     }
 
+    /// <summary>
+    /// Calling this will trigger a collision in all of the spells effects
+    /// </summary>
+    /// <param name="args"></param>
+    /// <param name="other"></param>
     public void TriggerCollision(ColliderEventArgs args, Collider other)
     {
         spell.CollisionEvent(other);

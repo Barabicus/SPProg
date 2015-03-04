@@ -31,7 +31,8 @@ public class SpellCasterEntity : Entity
             {
                 Cast();
                 isCasting = true;
-                navMeshAgent.SetDestination(transform.position);
+                if (navMeshAgent.isOnNavMesh)
+                    navMeshAgent.SetDestination(transform.position);
             }
             else
             {

@@ -16,6 +16,7 @@ public class Spell : MonoBehaviour
     public float spellLiveTime;
     public float spellCastDelay;
     public SpellType spellType;
+    public EntityAnimation spellAnimation = EntityAnimation.Nothing;
     public ElementalStats elementalCost;
     public SpellElementType elementType = SpellElementType.NoElement;
     #endregion
