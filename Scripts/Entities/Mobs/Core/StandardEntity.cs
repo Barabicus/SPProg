@@ -1,12 +1,16 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
-public abstract class StandardEntity : Entity
+public class StandardEntity : Entity
 {
-
-    public Vector3[] patrolPoints;
-    public PathLocationMethod pathLocationMethod;
+    
+    [HideInInspector]
+    public List<Vector3> patrolPoints = new List<Vector3>();
+    public PathLocationMethod pathLocationMethod = PathLocationMethod.None;
+    public bool startAtRandomPathIndex = false;
     public float chaseDistance = 50f;
+    public float chooseNextPatrolPointDistance = 2f;
 
     private int _currentPatrolIndex = 0;
     [SerializeField]
@@ -15,6 +19,7 @@ public abstract class StandardEntity : Entity
 
     public enum PathLocationMethod
     {
+        None,
         Patrol,
         Chase
     }
@@ -55,6 +60,8 @@ public abstract class StandardEntity : Entity
     protected override void Start()
     {
         base.Start();
+        if(startAtRandomPathIndex)
+            _currentPatrolIndex = Random.Range(0, patrolPoints.Count);
     }
 
 
@@ -86,7 +93,7 @@ public abstract class StandardEntity : Entity
         {
             Debug.LogWarning("Patrol points are null for: " + gameObject.name);
         }
-        if (Vector3.Distance(patrolPoints[_currentPatrolIndex], transform.position) <= navMeshAgent.stoppingDistance)
+        if (Vector3.Distance(patrolPoints[_currentPatrolIndex], transform.position) <= chooseNextPatrolPointDistance)
         {
             AdvancePatrolIndex();
         }
@@ -96,7 +103,7 @@ public abstract class StandardEntity : Entity
     private void AdvancePatrolIndex()
     {
         _currentPatrolIndex++;
-        if (_currentPatrolIndex >= patrolPoints.Length)
+        if (_currentPatrolIndex >= patrolPoints.Count)
             _currentPatrolIndex = 0;
     }
 
@@ -108,5 +115,5 @@ public abstract class StandardEntity : Entity
         }
     }
 
-    protected override abstract bool KeepBeamAlive();
+    protected override bool KeepBeamAlive() { return false; }
 }

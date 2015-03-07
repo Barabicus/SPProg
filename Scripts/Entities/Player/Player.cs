@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class Player : Entity
+public class Player : HumanoidEntity
 {
 
     #region Fields
@@ -9,6 +9,7 @@ public class Player : Entity
     public float spellLookSpeed = 5f;
     public float reselectDelay = 0.5f;
     public Spell[] spellList;
+    public Transform respawnPoint;
 
     private float _lastSelectTime;
     #endregion
@@ -159,5 +160,15 @@ public class Player : Entity
     protected override bool KeepBeamAlive()
     {
         return LivingState == EntityLivingState.Alive && Input.GetMouseButton(1);
+    }
+
+    protected override void Die()
+    {
+        base.Die();
+        LivingState = EntityLivingState.Alive;
+        MotionState = EntityMotionState.Pathfinding;
+        CurrentHP = MaxHP;
+        transform.position = respawnPoint.position;
+        navMeshAgent.SetDestination(respawnPoint.position);
     }
 }

@@ -24,8 +24,11 @@ public class MissileMotor : SpellEffect
     public float randomYRadius = 1f;
     public float randomZRadius = 1f;
 
+    [Tooltip("The Random x radius multiplier curve based over spell life time")]
     public AnimationCurve randomXRadiusCurve = AnimationCurve.Linear(0f, 1f, 1f, 1f);
+    [Tooltip("The Random y radius multiplier curve based over spell life time")]
     public AnimationCurve randomYRadiusCurve = AnimationCurve.Linear(0f, 1f, 1f, 1f);
+    [Tooltip("The Random z radius multiplier curve based over spell life time")]
     public AnimationCurve randomZRadiusCurve = AnimationCurve.Linear(0f, 1f, 1f, 1f);
 
     public float minRange = 1f;
@@ -54,7 +57,10 @@ public class MissileMotor : SpellEffect
 
     public Vector3 RandomRadius
     {
-        get { return new Vector3(randomXRadius * randomXRadiusCurve.Evaluate(CurrentLivingTimePercent), randomYRadius * randomYRadiusCurve.Evaluate(CurrentLivingTimePercent), randomZRadius * randomZRadiusCurve.Evaluate(CurrentLivingTimePercent)); }
+        get
+        {
+            return transform.TransformDirection(new Vector3(randomXRadius * randomXRadiusCurve.Evaluate(CurrentLivingTimePercent), randomYRadius * randomYRadiusCurve.Evaluate(CurrentLivingTimePercent), randomZRadius * randomZRadiusCurve.Evaluate(CurrentLivingTimePercent)));
+        }
     }
 
     protected virtual float Speed
@@ -128,7 +134,8 @@ public class MissileMotor : SpellEffect
                 RaycastHit hit;
                 if (Physics.Raycast(effectSetting.transform.position, -Vector3.up, out hit, 500f, 1 << LayerMask.NameToLayer("Ground")))
                 {
-                    effectSetting.transform.position = new Vector3(effectSetting.transform.position.x, hit.point.y + minGroundDistance, effectSetting.transform.position.z);
+                    if (Mathf.Abs(hit.point.y - transform.position.y) < minGroundDistance)
+                        effectSetting.transform.position = new Vector3(effectSetting.transform.position.x, hit.point.y + minGroundDistance, effectSetting.transform.position.z);
                 }
             }
         }

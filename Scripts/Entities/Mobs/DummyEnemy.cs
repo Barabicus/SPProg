@@ -2,15 +2,12 @@
 using System.Collections;
 using UnityEngine.Audio;
 
-public class DummyEnemy : StandardEntity
+public class DummyEnemy : HumanoidEntity
 {
     private Player player;
-    public float detectDistance;
     public float attackDistance;
     public Spell attackSpell;
     public float attackSpeed = 1f;
-    public float speedIncTime = 3f;
-    public AudioMixerGroup mixer;
 
     private Transform _moveTarget;
     private float _lastAttackTime;
@@ -29,11 +26,6 @@ public class DummyEnemy : StandardEntity
     protected override void LivingUpdate()
     {
         base.LivingUpdate();
-        if (Time.time - _lastSpeedInc >= speedIncTime)
-        {
-            AddStatModifier(new EntityStats(1f, 0));
-            _lastSpeedInc = Time.time;
-        }
         Attack();
     }
 

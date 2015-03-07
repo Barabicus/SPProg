@@ -7,6 +7,7 @@ using System.Collections.Generic;
 [RequireComponent(typeof(Animator))]
 [RequireComponent(typeof(EntityHitText))]
 [RequireComponent(typeof(Rigidbody))]
+[RequireComponent(typeof(AudioSource))]
 public abstract class Entity : MonoBehaviour
 {
     #region Fields
@@ -17,17 +18,18 @@ public abstract class Entity : MonoBehaviour
     public float spellCastDelay = 0.1f;
     public string EntityName = "NOTSET";
     public Transform castPoint;
+    public ParticleSystem hitParticles;
     public EntityFlags entityFlags;
     public ElementalStats elementalResistance = ElementalStats.One;
     public ElementalStats maxElementalCharge = ElementalStats.One;
     public ElementalStats rechargeRate = ElementalStats.One;
+    public AudioClip deathAudio;
 
     private ElementalStats _currentElementalCharge;
     /// <summary>
     /// Recharge lock on each element based on time i.e fire = 1 is a lock of 1 second on fire recharge
     /// </summary>
     private ElementalStats _rechargeLock = ElementalStats.One;
-    private Animator animator;
     private Vector3 _lastPosition;
     private float _currentSpeed;
     private EntityLivingState _livingState = EntityLivingState.Alive;
@@ -38,10 +40,13 @@ public abstract class Entity : MonoBehaviour
     private List<EntityStats> _statModifiers = new List<EntityStats>();
     private EntityStats _cachedStats;
     private Timer knockdownTime;
+    private AudioSource audio;
 
     protected NavMeshAgent navMeshAgent;
     protected BeamSpell beamSpell = null;
     protected Transform selectedTarget;
+    protected Animator animator;
+
     /// <summary>
     /// The timer that controls whether or not enough time has passed to be able to recast a spell again. This takes in spellcastdelay and will
     /// allow a spellrecast once that time has passed.
@@ -52,9 +57,6 @@ public abstract class Entity : MonoBehaviour
     #region Animation Hashes
     private static int animSpeed = Animator.StringToHash("speed");
     private static int animDead = Animator.StringToHash("dead");
-    private static int animCast01 = Animator.StringToHash("cast01");
-    private static int animAttack02 = Animator.StringToHash("attack02");
-
     #endregion
 
     #endregion
@@ -63,6 +65,10 @@ public abstract class Entity : MonoBehaviour
 
     public event EventHandler<EntityEventArgs> entityKilled;
     public event Action<float> entityHealthChanged;
+    /// <summary>
+    /// An Event with the spell that was just cast. Note this is an instance to the actual spell that was cast and exists in game.
+    /// </summary>
+    public event Action<Spell> spellCast;
 
     #endregion
 
@@ -89,11 +95,6 @@ public abstract class Entity : MonoBehaviour
     {
         get { return _currentSpeed; }
         set { _currentSpeed = value; }
-    }
-
-    public bool IsCasting
-    {
-        get { return !spellCastTimer.CanTick; }
     }
 
     public EntityStats BaseStats
@@ -238,10 +239,12 @@ public abstract class Entity : MonoBehaviour
         navMeshAgent = GetComponent<NavMeshAgent>();
         animator = GetComponent<Animator>();
         rigidbody = GetComponent<Rigidbody>();
+        audio = GetComponent<AudioSource>();
     }
 
     protected virtual void Start()
     {
+        entityHealthChanged += HealthChanged;
         _baseStats = new EntityStats(speed, maxHP);
         AddStatModifier(_baseStats);
         //    rigidbody.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
@@ -316,8 +319,8 @@ public abstract class Entity : MonoBehaviour
     /// </summary>
     protected virtual void NavMeshUpdate()
     {
-      //  if (navMeshAgent.pathStatus == NavMeshPathStatus.PathInvalid)
-     //       LivingState = EntityLivingState.Dead;
+        //  if (navMeshAgent.pathStatus == NavMeshPathStatus.PathInvalid)
+        //       LivingState = EntityLivingState.Dead;
     }
     /// <summary>
     /// Called while the entity motion is not being controlled by anything
@@ -349,7 +352,7 @@ public abstract class Entity : MonoBehaviour
         _lastPosition = transform.position;
         CurrentSpeed = moveAmount.magnitude / Time.deltaTime;
         // Normalise speed
-        CurrentSpeed /= navMeshAgent.speed;
+        CurrentSpeed /= speed;
     }
 
     public void AddStatModifier(EntityStats stat)
@@ -383,9 +386,19 @@ public abstract class Entity : MonoBehaviour
 
     #region Entity Events
 
+    protected virtual void HealthChanged(float amount)
+    {
+        if (amount < 0 && hitParticles != null && UnityEngine.Random.Range(0, 5) == 0)
+            hitParticles.Emit(1);
+
+    }
+
     protected virtual void Die()
     {
         LivingState = EntityLivingState.Dead;
+        if (hitParticles != null)
+            hitParticles.Emit(UnityEngine.Random.Range(5, 20));
+        PlaySound(deathAudio);
     }
 
     /// <summary>
@@ -462,10 +475,11 @@ public abstract class Entity : MonoBehaviour
         castSpell = sp;
         spellCastTimer = new Timer(spell.SpellCastDelay);
         SetRechargeLock(castSpell.ElementalCost);
-        PlayAnimation(castSpell.spellAnimation);
+        if (spellCast != null)
+            spellCast(sp);
+            PlaySound(castSpell.castAudio);
         return true;
     }
-
     public void SubtractSpellCost(Spell spell)
     {
         CurrentElementalCharge -= spell.ElementalCost;
@@ -515,22 +529,6 @@ public abstract class Entity : MonoBehaviour
 
     #endregion
 
-    #region Animation
-
-    public void PlayAnimation(EntityAnimation animClip)
-    {
-        switch (animClip)
-        {
-            case EntityAnimation.Cast01:
-                animator.SetTrigger(animCast01);
-                break;
-            case EntityAnimation.Attack02:
-                animator.SetTrigger(animAttack02);
-                break;
-        }
-    }
-
-    #endregion
 
     #region Helper Methods
 
@@ -556,6 +554,12 @@ public abstract class Entity : MonoBehaviour
         transform.LookAt(lookPosition);
     }
 
+    private void PlaySound(AudioClip audioClip)
+    {
+        if (audioClip != null)
+            audio.PlayOneShot(audioClip);
+    }
+
     #endregion
 
 
@@ -578,11 +582,4 @@ public enum EntityFlags
     Two,
     Three,
     Four
-}
-
-public enum EntityAnimation
-{
-    Nothing,
-    Cast01,
-    Attack02
 }
