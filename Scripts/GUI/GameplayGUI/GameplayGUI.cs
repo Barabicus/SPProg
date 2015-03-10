@@ -16,10 +16,13 @@ public class GameplayGUI : MonoBehaviour
     public RectTransform waterCharge;
     public RectTransform airCharge;
     public RectTransform earthCharge;
+
+
     public Text selectedEntityText;
     public Player player;
 
-    public bool isMouseOver;
+    private bool _isMouseOver;
+    private bool _mouseDragLock;
 
     private Entity _selectedEntity;
 
@@ -29,6 +32,37 @@ public class GameplayGUI : MonoBehaviour
         set { _selectedEntity = value; }
     }
 
+    public bool LockPlayerControls
+    {
+        get
+        {
+            return IsMouseOver || MouseDragLock;
+        }
+    }
+
+    public bool IsMouseOver
+    {
+        get
+        {
+            return _isMouseOver;
+        }
+        set
+        {
+            _isMouseOver = value;
+        }
+    }
+
+    public bool MouseDragLock
+    {
+        get
+        {
+            return _mouseDragLock;
+        }
+        set
+        {
+            _mouseDragLock = value;
+        }
+    }
     public void Awake()
     {
         instance = this;
@@ -47,6 +81,12 @@ public class GameplayGUI : MonoBehaviour
         RectTransform rt = Instantiate(hitTextPrefab) as RectTransform;
         rt.parent = transform;
         return rt.GetComponent<Text>();
+    }
+
+    public void ChangeSpell(int index)
+    {
+        if (player != null)
+            player.ChangeSpell(index);
     }
 
     private void SelectSpellInput()
@@ -112,7 +152,7 @@ public class GameplayGUI : MonoBehaviour
 
     public void SetMouseOver(bool value)
     {
-        isMouseOver = value;
+        IsMouseOver = value;
     }
 
 }

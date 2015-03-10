@@ -18,6 +18,7 @@ public class Spell : MonoBehaviour
     public SpellType spellType;
     public HumanoidEntityAnimation spellAnimation = HumanoidEntityAnimation.Nothing;
     public AudioClip castAudio;
+    public Sprite spellIcon;
     public ElementalStats elementalCost;
     public SpellElementType elementType = SpellElementType.NoElement;
     #endregion
@@ -106,7 +107,6 @@ public class Spell : MonoBehaviour
     #region Events
 
     public event EventHandler<SpellEventargs> OnSpellDestroy;
-
     #endregion
 
 

@@ -29,7 +29,7 @@ public class Player : HumanoidEntity
         if (Input.GetMouseButton(1))
             LookAtMouse();
 
-        if (!GameplayGUI.instance.isMouseOver)
+        if (!GameplayGUI.instance.LockPlayerControls)
             MouseControl();
 
         PlayerCastSpell();
@@ -133,27 +133,33 @@ public class Player : HumanoidEntity
         }
     }
 
+    public void ChangeSpell(Spell spell)
+    {
+        //if (spellIndex >= 0 && spellIndex < spellList.Length)
+        //{
+        switch (spell.SpellType)
+        {
+            case SpellType.Area:
+                CastSpell(spell);
+                break;
+            case SpellType.Attached:
+                CastSpell(spell);
+                break;
+            default:
+                if (selectedSpell == spell)
+                    return;
+                selectedSpell = spell;
+                spellCastTimer = new Timer(0);
+                break;
+        }
+
+    }
+
     public void ChangeSpell(int spellIndex)
     {
         if (spellIndex >= 0 && spellIndex < spellList.Length)
         {
-            Spell sp = SpellList.Instance.GetSpell(spellList[spellIndex]);
-
-            switch (sp.SpellType)
-            {
-                case SpellType.Area:
-                    CastSpell(sp);
-                    break;
-                case SpellType.Attached:
-                    CastSpell(sp);
-                    break;
-                default:
-                    if (selectedSpell == sp)
-                        return;
-                    selectedSpell = spellList[spellIndex];
-                    spellCastTimer = new Timer(0);
-                    break;
-            }
+            ChangeSpell(spellList[spellIndex]);
         }
     }
 

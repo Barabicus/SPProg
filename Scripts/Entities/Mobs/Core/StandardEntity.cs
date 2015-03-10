@@ -11,6 +11,7 @@ public class StandardEntity : Entity
     public bool startAtRandomPathIndex = false;
     public float chaseDistance = 50f;
     public float chooseNextPatrolPointDistance = 2f;
+    public bool keepLookAtChaseTarget = true;
 
     private int _currentPatrolIndex = 0;
     [SerializeField]
@@ -111,6 +112,10 @@ public class StandardEntity : Entity
     {
         if (_chaseTarget != null)
         {
+            if (keepLookAtChaseTarget && navMeshAgent.remainingDistance <= navMeshAgent.stoppingDistance)
+            {
+                EntityLookAt(ChaseTarget.position);
+            }
             navMeshAgent.SetDestination(_chaseTarget.position);
         }
     }

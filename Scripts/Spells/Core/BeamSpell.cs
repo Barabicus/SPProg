@@ -4,8 +4,6 @@ using System;
 
 public class BeamSpell : ElementalSpell
 {
-    private float _lastApplyTime;
-
     public float beamApplyDelay;
     public bool chargeOnApply = true;
 
@@ -20,17 +18,14 @@ public class BeamSpell : ElementalSpell
     {
         if (beamDelayTimer.CanTickAndReset() && other.gameObject.layer == LayerMask.NameToLayer("Entity"))
         {
+            if (!CanKeepBeamOpen())
+                return;
+
             if (chargeOnApply)
-            {
-                if (!CanKeepBeamOpen())
-                    return;
                 // Subtract the spell cost when this spell is applied only
                 CastingEntity.SubtractSpellCost(this);
-            }
 
             ApplySpell(other.GetComponent<Entity>());
-            if (chargeOnApply)
-                ChargeBeamCost();
 
         }
     }
@@ -49,17 +44,10 @@ public class BeamSpell : ElementalSpell
         return true;
     }
 
-    private void ChargeBeamCost()
-    {
-        CastingEntity.SubtractSpellCost(this);
-        _lastApplyTime = Time.time;
-    }
-
     public override void Start()
     {
         base.Start();
         beamDelayTimer = new Timer(beamApplyDelay);
-        _lastApplyTime = Time.time;
         if (KeepBeamAlive == null)
             DestroySpell();
     }
@@ -69,8 +57,6 @@ public class BeamSpell : ElementalSpell
         base.Update();
         if (!KeepBeamAlive())
             DestroySpell();
-        if (!chargeOnApply)
-            ChargeBeamCost();
 
         CanKeepBeamOpen();
     }

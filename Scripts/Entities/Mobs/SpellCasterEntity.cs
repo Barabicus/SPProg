@@ -3,8 +3,6 @@ using System.Collections;
 
 public class SpellCasterEntity : HumanoidEntity
 {
-
-    public Player player;
     public Spell selectedSpell;
     public float attackDistance = 30f;
 
@@ -13,16 +11,16 @@ public class SpellCasterEntity : HumanoidEntity
     protected override void Start()
     {
         base.Start();
-        player = GameplayGUI.instance.player;
+        ChaseTarget = GameplayGUI.instance.player.transform;
     }
 
     protected override void LivingUpdate()
     {
         base.LivingUpdate();
 
-        if (Vector3.Distance(player.transform.position, transform.position) <= attackDistance)
+        if (Vector3.Distance(ChaseTarget.position, transform.position) <= attackDistance)
         {
-            Vector3 direction = player.transform.position - castPoint.position;
+            Vector3 direction = ChaseTarget.position - castPoint.position;
             direction.y = transform.position.y;
             direction.Normalize();
 
@@ -45,7 +43,6 @@ public class SpellCasterEntity : HumanoidEntity
 
         if (isCasting)
             Cast();
-
     }
 
     protected override void EntityKilled()
@@ -59,10 +56,9 @@ public class SpellCasterEntity : HumanoidEntity
             Spell spell;
             if (CastSpell(selectedSpell, out spell))
             {
-                spell.SpellTarget = player.transform;
-                spell.SpellTargetPosition = player.transform.position;
+                spell.SpellTarget = ChaseTarget;
+                spell.SpellTargetPosition = ChaseTarget.position;
             }
-        
     }
 
     protected override bool KeepBeamAlive()

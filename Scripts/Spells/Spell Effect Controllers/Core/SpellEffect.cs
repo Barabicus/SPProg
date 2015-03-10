@@ -47,7 +47,12 @@ public abstract class SpellEffect : MonoBehaviour
         effectSetting.OnSpellDestroy += effectSetting_OnSpellDestroy;
         effectSetting.OnSpellCollision += effectSetting_OnSpellCollision;
         effectSetting.OnEffectDestroy += effectSetting_OnEffectDestroy;
+        effectSetting.OnSpellApply += effectSetting_OnSpellApply;
 
+    }
+
+    protected virtual void effectSetting_OnSpellApply(Entity entity)
+    {
     }
 
     protected virtual void effectSetting_OnEffectDestroy()

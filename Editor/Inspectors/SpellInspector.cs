@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class EntityHealthBar : MonoBehaviour {
+public class SpellInspector : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {

@@ -4,21 +4,21 @@ using System.Collections;
 public class HomingMissileMotor : MissileMotor
 {
     public float searchTime = 1f;
-    public float radius = 10f;
+    public float homingRadius = 10f;
     public float homingSpeed = 30f;
-    public float homingRandomRadius = 0f;
 
-    private Transform _homingTarget;
+    [Tooltip("The target to move towards. If the target is null the homing missle will attempt to find one throughout its life based on homingradius and homingpseed")]
+    public Transform homingTarget;
     private Timer _searchTimer;
 
     public override Vector3 Direction
     {
         get
         {
-            if (_homingTarget == null)
+            if (homingTarget == null)
                 return base.Direction;
             else
-                return (_homingTarget.position - effectSetting.transform.position).normalized + DirectionRandomOffset;
+                return (homingTarget.position - effectSetting.transform.position).normalized + DirectionRandomOffset;
         }
     }
 
@@ -31,13 +31,13 @@ public class HomingMissileMotor : MissileMotor
     protected override void UpdateSpell()
     {
         base.UpdateSpell();
-        if (_homingTarget == null && _searchTimer.CanTickAndReset())
+        if (homingTarget == null && _searchTimer.CanTickAndReset())
         {
-            foreach (Collider c in Physics.OverlapSphere(effectSetting.transform.position, radius))
+            foreach (Collider c in Physics.OverlapSphere(effectSetting.transform.position, homingRadius))
             {
                 if (c.gameObject.layer == LayerMask.NameToLayer("Entity") && c.gameObject != effectSetting.spell.CastingEntity.gameObject)
                 {
-                    _homingTarget = c.gameObject.transform;
+                    homingTarget = c.gameObject.transform;
                     speed = homingSpeed;
                 }
             }

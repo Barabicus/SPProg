@@ -41,6 +41,7 @@ public abstract class Entity : MonoBehaviour
     private EntityStats _cachedStats;
     private Timer knockdownTime;
     private AudioSource audio;
+    private Timer _audioPlayTimer;
 
     protected NavMeshAgent navMeshAgent;
     protected BeamSpell beamSpell = null;
@@ -260,6 +261,7 @@ public abstract class Entity : MonoBehaviour
         CurrentElementalCharge = CurrentElementalCharge;
 
         knockdownTime = new Timer(2f);
+        _audioPlayTimer = new Timer(0.25f);
     }
 
     #endregion
@@ -540,10 +542,15 @@ public abstract class Entity : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Set the recharge lock to lock a spell if a passed in stat is greater than 0
+    /// </summary>
+    /// <param name="stats"></param>
     public void SetRechargeLock(ElementalStats stats)
     {
         foreach (Element e in Enum.GetValues(typeof(Element)))
         {
+            // Setting recharge lock to 0 will cause the element of that type not to be updated
             _rechargeLock[e] = stats[e] > 0 ? 0 : 1;
         }
     }
@@ -556,7 +563,7 @@ public abstract class Entity : MonoBehaviour
 
     private void PlaySound(AudioClip audioClip)
     {
-        if (audioClip != null)
+        if (audioClip != null && _audioPlayTimer.CanTickAndReset())
             audio.PlayOneShot(audioClip);
     }
 

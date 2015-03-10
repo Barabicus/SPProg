@@ -108,6 +108,16 @@ public class MissileMotor : SpellEffect
         InitRandomVariables();
         transform.parent.forward = Direction;
 
+        Collider[] colliders = GetComponents<Collider>();
+        if (colliders.Length == 0)
+            Debug.LogError("Spell: " + effectSetting.spell.spellName + " has no colliders");
+
+        // Ensure all colliders are set to trigger
+        foreach (Collider c in colliders)
+        {
+            c.isTrigger = true;
+        }
+
     }
 
     public void OnTriggerEnter(Collider other)
@@ -115,6 +125,12 @@ public class MissileMotor : SpellEffect
         if (other.gameObject != effectSetting.spell.CastingEntity.gameObject && other.gameObject.layer != LayerMask.NameToLayer("Spell") && other.gameObject.layer != LayerMask.NameToLayer("Ground") && other.gameObject.layer != LayerMask.NameToLayer("Ignore Raycast"))
         {
             effectSetting.TriggerCollision(new ColliderEventArgs(), other);
+            if (other.gameObject.layer == LayerMask.NameToLayer("Entity"))
+            {
+                Entity e = other.gameObject.GetComponent<Entity>();
+                if (e != null)
+                    effectSetting.TriggerApplySpell(e);
+            }
         }
     }
 

@@ -38,17 +38,19 @@ public class SpellListGUI : MonoBehaviour
         {
             if (s.elementType != eType)
                 continue;
-            AddSpell(s.spellName);
+            AddSpell(s);
             spellCount++;
             if (spellCount == spellsPerPage)
                 break;
         }
     }
 
-    private void AddSpell(string name)
+    private void AddSpell(Spell spell)
     {
         Transform t = Instantiate(spellItemPrefab);
-        t.GetComponentInChildren<Text>().text = name;
+        SpellMetaInfo metaInfo = t.GetComponent<SpellMetaInfo>();
+        metaInfo.CreateMetaInfo(spell);
+        t.GetComponentInChildren<Text>().text = spell.spellName;
         t.parent = spellListBody.transform;
         _spellsInList.Add(t);
     }
@@ -65,7 +67,13 @@ public class SpellListGUI : MonoBehaviour
 
     public bool MouseOver
     {
-        set { GameplayGUI.instance.isMouseOver = value; }
+        set { GameplayGUI.instance.IsMouseOver = value; }
+    }
+
+    public void CloseGUIWindow()
+    {
+        GameplayGUI.instance.IsMouseOver = false;
+        gameObject.SetActive(false);
     }
 
     #endregion
