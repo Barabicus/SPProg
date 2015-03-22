@@ -19,6 +19,13 @@ public class SpellButton : MonoBehaviour, IDropHandler
         spell = player.spellList[spellIndex];
         ChangeSpellIcon(spell);
         GetComponent<Button>().onClick.AddListener(OnClick);
+        GameplayGUI.instance.spellChanged += instance_spellChanged;
+    }
+
+    void instance_spellChanged(Spell changedSpell, int changedIndex)
+    {
+        if (changedIndex == spellIndex)
+            UpdateButton(changedSpell);
     }
 
     private void OnClick()
@@ -32,15 +39,21 @@ public class SpellButton : MonoBehaviour, IDropHandler
         SpellMetaInfo dragSpell = data.pointerDrag.GetComponent<SpellMetaInfo>();
         if (dragSpell != null)
         {
-            ChangeSpellIcon(dragSpell.spell);
-            spell = dragSpell.spell;
+            UpdateButton(dragSpell.spell);
             player.spellList[spellIndex] = spell;
         }
     }
 
+    private void UpdateButton(Spell spell)
+    {
+        ChangeSpellIcon(spell);
+        this.spell = spell;
+    }
+
     private void ChangeSpellIcon(Spell spell)
     {
-        iconImage.overrideSprite = spell.spellIcon;
+        if (spell != null)
+            iconImage.overrideSprite = spell.spellIcon;
     }
 
 }

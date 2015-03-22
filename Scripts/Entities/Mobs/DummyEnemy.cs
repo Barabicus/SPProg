@@ -33,7 +33,7 @@ public class DummyEnemy : HumanoidEntity
     {
             if (TargetDistance.HasValue && TargetDistance.Value <= attackDistance)
             {
-                if (Time.time - _lastAttackTime >= attackSpeed && Vector3.Distance(player.transform.position, transform.position) <= attackDistance)
+                if (Vector3.Distance(player.transform.position, transform.position) <= attackDistance)
                 {
                     Spell spell;
                     if (CastSpell(attackSpell, out spell))
@@ -52,19 +52,7 @@ public class DummyEnemy : HumanoidEntity
 
     }
 
-    void Resurrect()
-    {
-        CurrentHP = maxHP;
-        LivingState = EntityLivingState.Alive;
-        MotionState = EntityMotionState.Pathfinding;
-    }
-
-    protected override void EntityKilled()
-    {
-        base.EntityKilled();
-    }
-
-    protected override bool KeepBeamAlive()
+    public override bool KeepBeamAlive()
     {
         return false;
     }

@@ -27,7 +27,7 @@ public class DummyEntity : Entity
         base.LivingUpdate();
     }
 
-    protected override bool KeepBeamAlive()
+    public override bool KeepBeamAlive()
     {
         return false;
     }

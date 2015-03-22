@@ -8,6 +8,7 @@ public class DimLight : SpellEffect {
     public float dimTime = 1f;
 
     private Light light;
+    private float _dimAmount = 0;
 
 	// Use this for initialization
     protected override void Start()
@@ -21,7 +22,8 @@ public class DimLight : SpellEffect {
     {
         while (true)
         {
-            light.intensity = Mathf.Lerp(light.intensity, 0, dimTime * Time.deltaTime);
+            light.intensity = Mathf.Lerp(light.intensity, 0, _dimAmount);
+            _dimAmount += Time.deltaTime * dimTime;
             yield return true;
         }
     }

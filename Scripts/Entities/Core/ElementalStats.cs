@@ -9,7 +9,7 @@ public struct ElementalStats
     public float water;
     public float air;
     public float earth;
-    public float kinetic;
+    public float physical;
 
     public float this[Element e]
     {
@@ -27,7 +27,7 @@ public struct ElementalStats
     {
         this.fire = fire;
         this.water = water;
-        this.kinetic = kinetic;
+        this.physical = kinetic;
         this.air = air;
         this.earth = earth;
     }
@@ -45,7 +45,7 @@ public struct ElementalStats
             case Element.Earth:
                 return earth;
             case Element.Kinetic:
-                return kinetic;
+                return physical;
             default:
                 return 0;
         }
@@ -68,7 +68,7 @@ public struct ElementalStats
                 this.earth = value;
                 break;
             case Element.Kinetic:
-                this.kinetic = value;
+                this.physical = value;
                 break;
         }
     }

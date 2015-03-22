@@ -42,9 +42,9 @@ public abstract class Entity : MonoBehaviour
     private Timer knockdownTime;
     private AudioSource audio;
     private Timer _audioPlayTimer;
+    private Spell activeBeam;
 
     protected NavMeshAgent navMeshAgent;
-    protected BeamSpell beamSpell = null;
     protected Transform selectedTarget;
     protected Animator animator;
 
@@ -128,6 +128,13 @@ public abstract class Entity : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Check to see if the beam is active. This prevents the beam being cast multiple time upon use
+    /// </summary>
+    public bool IsBeamActive
+    {
+        get { return activeBeam != null; }
+    }
     public EntityLivingState LivingState
     {
         get { return _livingState; }
@@ -192,13 +199,9 @@ public abstract class Entity : MonoBehaviour
         {
             return maxElementalCharge;
         }
-    }
-
-    public bool IsBeamActive
-    {
-        get
+        set
         {
-            return beamSpell != null;
+            maxElementalCharge = value;
         }
     }
 
@@ -246,7 +249,7 @@ public abstract class Entity : MonoBehaviour
     protected virtual void Start()
     {
         entityHealthChanged += HealthChanged;
-        _baseStats = new EntityStats(speed, maxHP);
+        _baseStats = new EntityStats(speed, 0);
         AddStatModifier(_baseStats);
         //    rigidbody.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
 
@@ -415,7 +418,7 @@ public abstract class Entity : MonoBehaviour
     /// The logic the entity should use to keep the beam alive should be implemented here
     /// </summary>
     /// <returns></returns>
-    protected abstract bool KeepBeamAlive();
+    public abstract bool KeepBeamAlive();
 
     /// <summary>
     /// Called when a spell applys itself to an entity. The spell event agrs include details
@@ -461,11 +464,9 @@ public abstract class Entity : MonoBehaviour
 
         switch (sp.SpellType)
         {
-            // Check if spell type is beam and do beam logic
             case SpellType.Beam:
-                ((BeamSpell)sp).KeepBeamAlive = () => { return KeepBeamAlive(); };
-                beamSpell = sp as BeamSpell;
-                beamSpell.OnSpellDestroy += (o, e) => { beamSpell = null; };
+                activeBeam = sp;
+                sp.OnSpellDestroy += (o, e) => { activeBeam = null; };
                 break;
             case SpellType.Attached:
                 AttachSpell(sp);
@@ -476,15 +477,21 @@ public abstract class Entity : MonoBehaviour
         SubtractSpellCost(sp);
         castSpell = sp;
         spellCastTimer = new Timer(spell.SpellCastDelay);
-        SetRechargeLock(castSpell.ElementalCost);
         if (spellCast != null)
             spellCast(sp);
-            PlaySound(castSpell.castAudio);
+        PlaySound(castSpell.castAudio);
         return true;
     }
     public void SubtractSpellCost(Spell spell)
     {
         CurrentElementalCharge -= spell.ElementalCost;
+        SetRechargeLock(spell.ElementalCost);
+    }
+
+    public void SubtractElementCost(ElementalStats element)
+    {
+        CurrentElementalCharge -= element;
+        SetRechargeLock(element);
     }
 
     public bool CanCastSpell(string spell)

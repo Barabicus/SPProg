@@ -39,8 +39,7 @@ public class EffectSetting : MonoBehaviour
             OnSpellCollision(args, other);
         if (destroyOnCollision)
         {
-            spell.DestroySpell();
-            Invoke("DestroyGameObject", destroyTimeDelay);
+            TriggerDestroy();
         }
     }
 
@@ -48,6 +47,12 @@ public class EffectSetting : MonoBehaviour
     {
         if (OnSpellApply != null)
             OnSpellApply(entity);
+    }
+
+    public void TriggerDestroy()
+    {
+        spell.DestroySpell();
+        Invoke("DestroyGameObject", destroyTimeDelay);
     }
 
     private void DestroyGameObject()

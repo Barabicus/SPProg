@@ -163,7 +163,7 @@ public class Player : HumanoidEntity
         }
     }
 
-    protected override bool KeepBeamAlive()
+    public override bool KeepBeamAlive()
     {
         return LivingState == EntityLivingState.Alive && Input.GetMouseButton(1);
     }
@@ -171,10 +171,11 @@ public class Player : HumanoidEntity
     protected override void Die()
     {
         base.Die();
+        CurrentHP = MaxHP;
+        MotionState = EntityMotionState.Static;
+        transform.position = respawnPoint.position;
         LivingState = EntityLivingState.Alive;
         MotionState = EntityMotionState.Pathfinding;
-        CurrentHP = MaxHP;
-        transform.position = respawnPoint.position;
         navMeshAgent.SetDestination(respawnPoint.position);
     }
 }

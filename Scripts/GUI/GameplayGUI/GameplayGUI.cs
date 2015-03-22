@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using UnityEngine.UI;
+using System;
 
 public class GameplayGUI : MonoBehaviour
 {
@@ -20,6 +21,8 @@ public class GameplayGUI : MonoBehaviour
 
     public Text selectedEntityText;
     public Player player;
+
+    public event Action<Spell, int> spellChanged;
 
     private bool _isMouseOver;
     private bool _mouseDragLock;
@@ -107,6 +110,13 @@ public class GameplayGUI : MonoBehaviour
             player.ChangeSpell(6);
         if (Input.GetKey(KeyCode.F))
             player.ChangeSpell(7);
+    }
+
+    public void SetPlayerSpellAtIndex(Spell spell, int index)
+    {
+        player.spellList[index] = spell;
+        if (spellChanged != null)
+            spellChanged(spell, index);
     }
 
     private void UpdateElementCharge()

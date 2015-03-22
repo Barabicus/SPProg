@@ -24,16 +24,15 @@ public class EssentialsWindow : EditorWindow
 
     void Find()
     {
-        EssentialObjects[] e = Resources.FindObjectsOfTypeAll<EssentialObjects>();
+        var pe = Resources.LoadAll<EssentialObjects>("Utility/EssentialObjects");
 
-        if (e.Length > 0)
-            ess = e[0];
+        if (pe.Length > 0)
+            ess = pe[0];
         else
         {
             Debug.Log("Essential Objects could not be found!");
             return;
         }
-
     }
 
     void OnGUI()

@@ -31,6 +31,17 @@ public class AreaMotor : TimedUpdateableSpellMotor
         }
     }
 
+    protected override void effectSetting_OnSpellCollision(ColliderEventArgs args, Collider obj)
+    {
+        base.effectSetting_OnSpellCollision(args, obj);
+        if (obj.gameObject.layer == LayerMask.NameToLayer("Entity"))
+        {
+            Entity e = obj.gameObject.GetComponent<Entity>();
+            if (e != null)
+                effectSetting.TriggerApplySpell(e);
+        }
+    }
+
     public void OnDrawGizmos()
     {
         Gizmos.color = Color.blue;

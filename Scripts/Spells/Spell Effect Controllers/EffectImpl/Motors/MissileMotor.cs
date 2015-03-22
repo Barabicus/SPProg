@@ -31,6 +31,7 @@ public class MissileMotor : SpellEffect
     [Tooltip("The Random z radius multiplier curve based over spell life time")]
     public AnimationCurve randomZRadiusCurve = AnimationCurve.Linear(0f, 1f, 1f, 1f);
 
+    [Tooltip("The random amount of sin cycles that should occur. A Higher number will lead to rapid cycles leading to a lower radius area")]
     public float minRange = 1f;
     public float randomRange = 1f;
 
@@ -125,12 +126,18 @@ public class MissileMotor : SpellEffect
         if (other.gameObject != effectSetting.spell.CastingEntity.gameObject && other.gameObject.layer != LayerMask.NameToLayer("Spell") && other.gameObject.layer != LayerMask.NameToLayer("Ground") && other.gameObject.layer != LayerMask.NameToLayer("Ignore Raycast"))
         {
             effectSetting.TriggerCollision(new ColliderEventArgs(), other);
-            if (other.gameObject.layer == LayerMask.NameToLayer("Entity"))
-            {
-                Entity e = other.gameObject.GetComponent<Entity>();
-                if (e != null)
-                    effectSetting.TriggerApplySpell(e);
-            }
+
+        }
+    }
+
+    protected override void effectSetting_OnSpellCollision(ColliderEventArgs args, Collider obj)
+    {
+        base.effectSetting_OnSpellCollision(args, obj);
+        if (obj.gameObject.layer == LayerMask.NameToLayer("Entity"))
+        {
+            Entity e = obj.gameObject.GetComponent<Entity>();
+            if (e != null)
+                effectSetting.TriggerApplySpell(e);
         }
     }
 

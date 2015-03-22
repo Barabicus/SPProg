@@ -90,9 +90,9 @@ public class StandardEntity : Entity
 
     private void Patrol()
     {
-        if (patrolPoints == null)
+        if (patrolPoints == null || patrolPoints.Count == 0)
         {
-            Debug.LogWarning("Patrol points are null for: " + gameObject.name);
+            return;
         }
         if (Vector3.Distance(patrolPoints[_currentPatrolIndex], transform.position) <= chooseNextPatrolPointDistance)
         {
@@ -120,5 +120,5 @@ public class StandardEntity : Entity
         }
     }
 
-    protected override bool KeepBeamAlive() { return false; }
+    public override bool KeepBeamAlive() { return false; }
 }

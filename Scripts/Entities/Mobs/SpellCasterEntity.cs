@@ -61,7 +61,7 @@ public class SpellCasterEntity : HumanoidEntity
             }
     }
 
-    protected override bool KeepBeamAlive()
+    public override bool KeepBeamAlive()
     {
         return isCasting;
     }

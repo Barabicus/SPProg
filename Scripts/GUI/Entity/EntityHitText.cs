@@ -117,7 +117,7 @@ public class EntityHitText : MonoBehaviour
             GameObject hit = new GameObject("HitText");
             hitText = hit.AddComponent<Text>();
             hit.transform.SetParent(canvas.transform);
-            hitText.font = Font.CreateDynamicFontFromOSFont("Arial", 14);
+            hitText.font = Font.CreateDynamicFontFromOSFont("Mickey", 14);
             hitText.rectTransform.sizeDelta = new Vector2(300, 300);
             hitText.resizeTextMaxSize = 80;
             hitText.resizeTextForBestFit = true;

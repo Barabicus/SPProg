@@ -2,7 +2,7 @@
 using System.Collections;
 
 /// <summary>
-/// Constantly causes the spell to trigger an update after the specified amount of time has passed
+/// Constantly causes the spell to trigger an apply spell update after the specified amount of time has passed
 /// </summary>
 public class AttachMotor : SpellEffect
 {
@@ -30,7 +30,8 @@ public class AttachMotor : SpellEffect
         base.UpdateSpell();
         if (targetEntity != null && Time.time - lastUpdateTime >= updateTime)
         {
-            effectSetting.spell.ApplySpell(targetEntity);
+        //    effectSetting.spell.ApplySpell(targetEntity);
+            effectSetting.TriggerApplySpell(targetEntity);
             lastUpdateTime = Time.time;
             if (singleShot)
                 enabled = false;

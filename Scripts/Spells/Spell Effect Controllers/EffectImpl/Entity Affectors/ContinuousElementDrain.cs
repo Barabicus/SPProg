@@ -18,7 +18,8 @@ public class ContinuousElementDrain : SpellEffect
         base.UpdateSpell();
         if (timer.CanTickAndReset())
         {
-            effectSetting.spell.CastingEntity.CurrentElementalCharge -= drainOnTick;
+           // effectSetting.spell.CastingEntity.CurrentElementalCharge -= drainOnTick;
+            effectSetting.spell.CastingEntity.SubtractElementCost(drainOnTick);
         }
     }
 

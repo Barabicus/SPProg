@@ -1,6 +1,9 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+/// <summary>
+/// Will cause the emit to emit particles when the collision trigger has been called
+/// </summary>
 public class TriggerEmitOnCollision : SpellEffect
 {
 

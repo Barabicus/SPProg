@@ -9,7 +9,7 @@ public class Spell : MonoBehaviour
 
     #region Fields
 
-    Rigidbody rigidbody;
+    private Rigidbody rigidbody;
 
     public string spellID;
     public string spellName = "NOTSET";
@@ -141,7 +141,7 @@ public class Spell : MonoBehaviour
     /// <summary>
     /// Called when the spell is destroyed
     /// </summary>
-    public virtual void DestroySpell()
+    public void DestroySpell()
     {
         DestroyEvent();
         enabled = false;
