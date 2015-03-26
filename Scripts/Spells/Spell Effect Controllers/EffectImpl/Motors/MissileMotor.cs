@@ -6,6 +6,8 @@ public class MissileMotor : SpellEffect
 {
     public float speed = 2f;
     public bool keepDistanceToGround = false;
+    [Tooltip("If true the missile direction will be within the same y axis as the caster. This does not apply if modified by a direction offset or random offset")]
+    public bool negateYDirection = true;
     public float minGroundDistance = 1f;
 
     [Tooltip("The speed curve for this spell effect. Y axis is modifer X axis is living time percent from 0 - 1")]
@@ -103,6 +105,7 @@ public class MissileMotor : SpellEffect
         base.Start();
         _lastTime = Time.time;
         direction = ((effectSetting.spell.SpellTargetPosition.Value) - effectSetting.spell.SpellStartPosition);
+        if(negateYDirection)
         direction.y = 0;
         direction.Normalize();
         GetComponent<Rigidbody>().isKinematic = true;

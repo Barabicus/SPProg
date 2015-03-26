@@ -35,6 +35,12 @@ public class GameplayGUI : MonoBehaviour
         set { _selectedEntity = value; }
     }
 
+    public HitTextProperties HitTextProperties
+    {
+        get;
+        private set;
+    }
+
     public bool LockPlayerControls
     {
         get
@@ -69,6 +75,7 @@ public class GameplayGUI : MonoBehaviour
     public void Awake()
     {
         instance = this;
+        HitTextProperties = Resources.LoadAll<HitTextProperties>("Utility/GUI")[0];
     }
 
     void Update()

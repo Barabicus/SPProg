@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class DummyEntity : Entity
+public class DummyEntity : HumanoidEntity
 {
     
     protected override void Start()
@@ -12,13 +12,14 @@ public class DummyEntity : Entity
     protected override void EntityKilled()
     {
         base.EntityKilled();
-        currentHP = MaxHP;
+        CurrentHP = MaxHP;
         Invoke("Resurrect", 5f);
     }
 
     void Resurrect()
     {
         LivingState = EntityLivingState.Alive;
+        MotionState = EntityMotionState.Pathfinding;
     }
 
 

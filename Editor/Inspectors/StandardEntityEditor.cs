@@ -9,7 +9,17 @@ public class StandardEntityEditor : Editor
 {
     StandardEntity entityTarget;
 
+    private SerializedProperty pathLocationMethod;
     private SerializedProperty patrolPoints;
+    private SerializedProperty randomMoveArea;
+    private SerializedProperty chooseRandomMoveTime;
+    private SerializedProperty startAtRandomPathIndex;
+    private SerializedProperty chaseDistance;
+    private SerializedProperty chooseNextPatrolPointDistance;
+    private SerializedProperty keepLookAtChaseTarget;
+    private SerializedProperty areaPivotPoint;
+    private SerializedProperty onlyUpdateWhenNearToPlayer;
+
     private ReorderableList list;
 
     void OnEnable()
@@ -17,6 +27,15 @@ public class StandardEntityEditor : Editor
         entityTarget = target as StandardEntity;
 
         patrolPoints = serializedObject.FindProperty("patrolPoints");
+        pathLocationMethod = serializedObject.FindProperty("pathLocationMethod");
+        randomMoveArea = serializedObject.FindProperty("randomMoveArea");
+        chooseRandomMoveTime = serializedObject.FindProperty("chooseRandomMoveTime");
+        startAtRandomPathIndex = serializedObject.FindProperty("startAtRandomPathIndex");
+        chaseDistance = serializedObject.FindProperty("chaseDistance");
+        chooseNextPatrolPointDistance = serializedObject.FindProperty("chooseNextPatrolPointDistance");
+        keepLookAtChaseTarget = serializedObject.FindProperty("keepLookAtChaseTarget");
+        areaPivotPoint = serializedObject.FindProperty("areaPivotPoint");
+        onlyUpdateWhenNearToPlayer = serializedObject.FindProperty("onlyUpdateWhenNearToPlayer");
 
         list = new ReorderableList(serializedObject, patrolPoints, true, true, true, true);
         list.displayAdd = false;
@@ -59,8 +78,71 @@ public class StandardEntityEditor : Editor
 
         serializedObject.Update();
 
-        list.DoLayoutList();
+        EditorGUILayout.BeginVertical("box");
 
+        EditorGUILayout.LabelField("Entity Motion Control", EditorStyles.boldLabel);
+
+        EditorGUILayout.PropertyField(onlyUpdateWhenNearToPlayer);
+
+        EditorGUILayout.BeginVertical("box");
+
+        EditorGUILayout.PropertyField(pathLocationMethod);
+
+
+        PathLocationMethod locMethod = (PathLocationMethod)pathLocationMethod.enumValueIndex;
+
+
+        switch (locMethod)
+        {
+            case PathLocationMethod.Area:
+                DrawArea();
+                break;
+            case PathLocationMethod.Patrol:
+                DrawPatrol();
+                break;
+        }
+
+        EditorGUILayout.EndVertical();
+
+        EditorGUILayout.BeginVertical("box");
+
+        EditorGUILayout.LabelField("Chase", EditorStyles.boldLabel);
+
+        DrawChase();
+
+        EditorGUILayout.EndVertical();
+
+        EditorGUILayout.EndVertical();
+
+
+
+        serializedObject.ApplyModifiedProperties();
+
+    }
+
+    private void DrawArea()
+    {
+        EditorGUILayout.PropertyField(areaPivotPoint);
+        EditorGUILayout.PropertyField(randomMoveArea);
+        EditorGUILayout.PropertyField(chooseRandomMoveTime);
+    }
+
+    private void DrawPatrol()
+    {
+        EditorGUILayout.PropertyField(startAtRandomPathIndex);
+        EditorGUILayout.PropertyField(chooseNextPatrolPointDistance);
+        DrawPatrolPoints();
+    }
+
+    private void DrawChase()
+    {
+        EditorGUILayout.PropertyField(keepLookAtChaseTarget);
+        EditorGUILayout.PropertyField(chaseDistance);
+    }
+
+    private void DrawPatrolPoints()
+    {
+        list.DoLayoutList();
 
         if (GUILayout.Button("Add Patrol Point"))
         {
@@ -72,9 +154,6 @@ public class StandardEntityEditor : Editor
                 patrolPoints.GetArrayElementAtIndex(index).vector3Value = entityTarget.transform.position;
 
         }
-
-        serializedObject.ApplyModifiedProperties();
-
     }
 
 }

@@ -8,22 +8,33 @@ using System.Collections.Generic;
 [RequireComponent(typeof(EntityHitText))]
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(AudioSource))]
-public abstract class Entity : MonoBehaviour
+public class Entity : MonoBehaviour
 {
     #region Fields
-    public float currentHP;
-    public float maxHP;
-    public float speed = 5f;
+    [SerializeField]
+    private float currentHP;
+    [SerializeField]
+    private float maxHP;
+    [SerializeField]
+    private float speed = 5f;
     [HideInInspector]
-    public float spellCastDelay = 0.1f;
-    public string EntityName = "NOTSET";
-    public Transform castPoint;
-    public ParticleSystem hitParticles;
-    public EntityFlags entityFlags;
-    public ElementalStats elementalResistance = ElementalStats.One;
-    public ElementalStats maxElementalCharge = ElementalStats.One;
-    public ElementalStats rechargeRate = ElementalStats.One;
-    public AudioClip deathAudio;
+    private float spellCastDelay = 0.1f;
+    [SerializeField]
+    private string EntityName = "NOTSET";
+    [SerializeField]
+    private Transform castPoint;
+    [SerializeField]
+    private ParticleSystem hitParticles;
+    [SerializeField]
+    private EntityFlags entityFlags;
+    [SerializeField]
+    private ElementalStats elementalResistance = ElementalStats.One;
+    [SerializeField]
+    private ElementalStats maxElementalCharge = ElementalStats.One;
+    [SerializeField]
+    private ElementalStats rechargeRate = ElementalStats.One;
+    [SerializeField]
+    private AudioClip deathAudio;
 
     private ElementalStats _currentElementalCharge;
     /// <summary>
@@ -53,12 +64,6 @@ public abstract class Entity : MonoBehaviour
     /// allow a spellrecast once that time has passed.
     /// </summary>
     protected Timer spellCastTimer;
-
-
-    #region Animation Hashes
-    private static int animSpeed = Animator.StringToHash("speed");
-    private static int animDead = Animator.StringToHash("dead");
-    #endregion
 
     #endregion
 
@@ -106,6 +111,10 @@ public abstract class Entity : MonoBehaviour
 
     public float Speed
     {
+        set
+        {
+            speed = value;
+        }
         get
         {
             return _cachedStats.speed;
@@ -120,11 +129,26 @@ public abstract class Entity : MonoBehaviour
         }
     }
 
+    public NavMeshAgent NavMeshAgent
+    {
+        get { return navMeshAgent; }
+    }
+
+    public Transform CastPoint
+    {
+        get { return castPoint; }
+    }
+
     public ElementalStats RechargeRate
     {
         get
         {
-            return rechargeRate * _rechargeLock;
+            ElementalStats et = new ElementalStats(0, 0, 0, 0, 0);
+            foreach (Element e in Enum.GetValues(typeof(Element)))
+            {
+                et[e] = _rechargeLock[e] == 1 ? 1 : 0;
+            }
+            return rechargeRate * et;
         }
     }
 
@@ -143,7 +167,6 @@ public abstract class Entity : MonoBehaviour
             switch (value)
             {
                 case EntityLivingState.Dead:
-                    animator.SetBool(animDead, true);
                     foreach (Collider c in GetComponents<Collider>())
                         c.enabled = false;
                     foreach (Transform t in transform)
@@ -155,7 +178,6 @@ public abstract class Entity : MonoBehaviour
                     EntityKilled();
                     break;
                 case EntityLivingState.Alive:
-                    animator.SetBool(animDead, false);
                     foreach (Collider c in GetComponents<Collider>())
                         c.enabled = true;
                     foreach (Transform t in transform)
@@ -277,7 +299,6 @@ public abstract class Entity : MonoBehaviour
         {
             case EntityLivingState.Alive:
                 UpdateSpeed();
-                UpdateAnimation();
                 LivingUpdate();
                 break;
             case EntityLivingState.Dead:
@@ -344,11 +365,6 @@ public abstract class Entity : MonoBehaviour
     {
         amount = Mathf.Floor(amount);
         CurrentHP += amount;
-    }
-
-    private void UpdateAnimation()
-    {
-        animator.SetFloat(animSpeed, CurrentSpeed);
     }
 
     private void UpdateSpeed()
@@ -418,7 +434,10 @@ public abstract class Entity : MonoBehaviour
     /// The logic the entity should use to keep the beam alive should be implemented here
     /// </summary>
     /// <returns></returns>
-    public abstract bool KeepBeamAlive();
+    public virtual bool KeepBeamAlive()
+    {
+        return false;
+    }
 
     /// <summary>
     /// Called when a spell applys itself to an entity. The spell event agrs include details

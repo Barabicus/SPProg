@@ -6,33 +6,29 @@ using System.Collections.Generic;
 public class EntityHitText : MonoBehaviour
 {
 
-    public Color positiveColor = Color.green;
-    public Color negativeColor = Color.red;
-    // The speed the text moves at
-    public float moveSpeed = 150f;
-    // How long the text lasts before it is destroyed
-    public float moveTime = 3f;
     /// <summary>
-    /// How long before a new text object should be created otherwise the text is just updated
+    ///  Reference to the hit text properties
     /// </summary>
-    public float newTextTime = 1f;
+    private HitTextProperties hitProperties;
 
     private Entity entity;
     private Canvas canvas;
     private float hitAmount = 0;
     private HitText currentHitText;
-    private float hitTextCreatedTime;
+    private Timer changeTextTimer;
 
     public List<HitText> _hitTexts = new List<HitText>();
 
     void Start()
     {
+        hitProperties = GameplayGUI.instance.HitTextProperties;
         entity = GetComponent<Entity>();
         entity.entityHealthChanged += entity_entityHealthChanged;
-        CreateEntityGUI();
+        changeTextTimer = new Timer(hitProperties.newTextTime);
+        CreateEntityCanvas();
     }
 
-    private void CreateEntityGUI()
+    private void CreateEntityCanvas()
     {
         GameObject entUI = new GameObject("Entity UI");
         entUI.transform.parent = transform;
@@ -58,15 +54,20 @@ public class EntityHitText : MonoBehaviour
             hitAmount += obj;
             HitText hitText = new HitText(obj, this, canvas);
             currentHitText = hitText;
+            changeTextTimer.Reset();
         }
     }
 
     void Update()
     {
-        if (Time.time - hitTextCreatedTime >= newTextTime)
+        //if (Time.time - hitTextCreatedTime >=  hitProperties.newTextTime)
+        //{
+        //    currentHitText = null;
+        //    hitTextCreatedTime = Time.time;
+        //}
+        if (changeTextTimer.CanTick)
         {
             currentHitText = null;
-            hitTextCreatedTime = Time.time;
         }
     }
 
@@ -99,7 +100,7 @@ public class EntityHitText : MonoBehaviour
         {
             get
             {
-                return Time.time - lastMoveTime >= entityHitText.moveTime;
+                return Time.time - lastMoveTime >= entityHitText.hitProperties.moveTime;
             }
         }
 
@@ -117,7 +118,7 @@ public class EntityHitText : MonoBehaviour
             GameObject hit = new GameObject("HitText");
             hitText = hit.AddComponent<Text>();
             hit.transform.SetParent(canvas.transform);
-            hitText.font = Font.CreateDynamicFontFromOSFont("Mickey", 14);
+            hitText.font = Font.CreateDynamicFontFromOSFont("", 14);
             hitText.rectTransform.sizeDelta = new Vector2(300, 300);
             hitText.resizeTextMaxSize = 80;
             hitText.resizeTextForBestFit = true;
@@ -125,16 +126,16 @@ public class EntityHitText : MonoBehaviour
             hitText.rectTransform.localScale = new Vector3(1, 1, 1);
             hitText.rectTransform.localPosition = Vector3.zero;
             hitText.text = Mathf.Abs(hitAmount).ToString();
-            hitText.color = hitAmount >= 0 ? entityHitText.positiveColor : entityHitText.negativeColor;
+            hitText.color = hitAmount >= 0 ? entityHitText.hitProperties.positiveColor : entityHitText.hitProperties.negativeColor;
         }
 
         public void AnimateHitText()
         {
             hitText.text = Mathf.Abs(hitAmount).ToString();
-            hitText.color = hitAmount >= 0 ? entityHitText.positiveColor : entityHitText.negativeColor;
-            hitText.color = Color.Lerp(hitText.color, new Color(hitText.color.r, hitText.color.g, hitText.color.b, 0), animatedTime / entityHitText.moveTime);
+            hitText.color = hitAmount >= 0 ? entityHitText.hitProperties.positiveColor : entityHitText.hitProperties.negativeColor;
+            hitText.color = Color.Lerp(hitText.color, new Color(hitText.color.r, hitText.color.g, hitText.color.b, 0), animatedTime / entityHitText.hitProperties.moveTime);
 
-            hitText.rectTransform.localPosition = new Vector3(hitText.rectTransform.localPosition.x, hitText.rectTransform.localPosition.y + (entityHitText.moveSpeed * Time.deltaTime), hitText.rectTransform.localPosition.z);
+            hitText.rectTransform.localPosition = new Vector3(hitText.rectTransform.localPosition.x, hitText.rectTransform.localPosition.y + (entityHitText.hitProperties.moveSpeed * Time.deltaTime), hitText.rectTransform.localPosition.z);
 
             animatedTime += Time.deltaTime;
         }

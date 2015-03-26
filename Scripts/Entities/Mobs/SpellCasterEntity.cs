@@ -20,7 +20,7 @@ public class SpellCasterEntity : HumanoidEntity
 
         if (Vector3.Distance(ChaseTarget.position, transform.position) <= attackDistance)
         {
-            Vector3 direction = ChaseTarget.position - castPoint.position;
+            Vector3 direction = ChaseTarget.position - CastPoint.position;
             direction.y = transform.position.y;
             direction.Normalize();
 

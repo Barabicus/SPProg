@@ -16,12 +16,15 @@ public class ElementChangeEvent : GameEvent
     public override void EnterEvent(Collider other)
     {
         base.EnterEvent(other);
+        ElementalStats stats = player.MaxElementalCharge;
         foreach (Element e in Enum.GetValues(typeof(Element)))
         {
             if (statChange[e] != -1)
-                player.maxElementalCharge[e] = statChange[e];
+                stats[e] = statChange[e];
         }
+        player.MaxElementalCharge = stats;
+
     }
-    
+
 
 }

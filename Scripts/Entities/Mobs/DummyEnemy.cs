@@ -15,6 +15,7 @@ public class DummyEnemy : HumanoidEntity
 
     protected override void Start()
     {
+        Speed += Random.Range(0f, 1f);
         base.Start();
         _lastSpeedInc = Time.time;
         player = GameplayGUI.instance.player;
@@ -55,5 +56,18 @@ public class DummyEnemy : HumanoidEntity
     public override bool KeepBeamAlive()
     {
         return false;
+    }
+
+    protected override void EntityKilled()
+    {
+        base.EntityKilled();
+      //  Invoke("Ressurect", 10f);
+    }
+
+    private void Ressurect()
+    {
+        CurrentHP = MaxHP;
+        LivingState = EntityLivingState.Alive;
+        MotionState = EntityMotionState.Pathfinding;
     }
 }

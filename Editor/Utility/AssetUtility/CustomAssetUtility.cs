@@ -26,4 +26,16 @@ public static class CustomAssetUtility
         EditorUtility.FocusProjectWindow();
         Selection.activeObject = asset;
     }
+
+    [MenuItem("Assets/Create/Hit Text Properties")]
+    public static void CreateTextProperties()
+    {
+        CustomAssetUtility.CreateAsset<HitTextProperties>();
+    }
+
+    [MenuItem("Assets/Create/Essential Objects")]
+    public static void CreateEssentialObjects()
+    {
+        CustomAssetUtility.CreateAsset<EssentialObjects>();
+    }
 }

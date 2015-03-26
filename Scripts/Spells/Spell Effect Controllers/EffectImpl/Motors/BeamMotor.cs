@@ -18,8 +18,8 @@ public class BeamMotor : SpellEffect
     {
         get
         {
-            Vector3 dir = (effectSetting.spell.CastingEntity.transform.forward).normalized;
-            dir.y = 0;
+            Vector3 dir = (transform.forward).normalized;
+        //    dir.y = 0;
             return dir;
         }
     }
@@ -46,7 +46,7 @@ public class BeamMotor : SpellEffect
         base.UpdateSpell();
         if (!CanKeepBeamOpen())
             return;
-        transform.parent.rotation = effectSetting.spell.CastingEntity.transform.rotation;
+        transform.parent.rotation = effectSetting.spell.SpellStartTransform.rotation;
         transform.parent.position = effectSetting.spell.SpellStartTransform.position;
         Debug.DrawRay(transform.position, transform.forward * distance, Color.red);
         RaycastHit hit;
