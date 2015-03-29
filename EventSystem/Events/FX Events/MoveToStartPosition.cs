@@ -11,7 +11,7 @@ public class MoveToStartPosition : GameEvent
     private Vector3 targetPosition;
     private float currentTime;
     private float direction = 0;
-    private Player player;
+    private PlayerController player;
     private float baseSnapTime;
 
     public float SnapTime

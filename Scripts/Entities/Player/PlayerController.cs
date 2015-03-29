@@ -1,7 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class Player : HumanoidEntity
+[RequireComponent(typeof(Entity))]
+public class PlayerController : EntityAI
 {
 
     #region Fields
@@ -12,9 +13,10 @@ public class Player : HumanoidEntity
     public Transform respawnPoint;
 
     private float _lastSelectTime;
+    private Entity _entity;
     #endregion
 
-    protected override void Start()
+    protected override  void Start()
     {
         base.Start();
         _lastSelectTime = Time.time;
@@ -22,16 +24,16 @@ public class Player : HumanoidEntity
     }
 
     // Update is called once per frame
-    protected override void LivingUpdate()
+    protected override void Update()
     {
-        base.LivingUpdate();
-
+        base.Update();
         if (Input.GetMouseButton(1))
             LookAtMouse();
 
         if (!GameplayGUI.instance.LockPlayerControls)
             MouseControl();
 
+        KeepBeamOpen();
         PlayerCastSpell();
     }
 
@@ -60,16 +62,15 @@ public class Player : HumanoidEntity
             {
                 // Create the spell
                 Spell spell;
-                if (CastSpell(selectedSpell, out spell))
+                if (Entity.CastSpell(selectedSpell, out spell))
                 {
-
-                    // If the selected target is not null, aim towards them
-                    // Otherwise aim towards the target point
-                    if (selectedTarget != null)
-                    {
-                        //  spell.SpellTargetPosition = selectedTarget.position;
-                        spell.SpellTarget = selectedTarget;
-                    }
+                    //// If the selected target is not null, aim towards them
+                    //// Otherwise aim towards the target point
+                    //if (selectedTarget != null)
+                    //{
+                    //    //  spell.SpellTargetPosition = selectedTarget.position;
+                    //    spell.SpellTarget = selectedTarget;
+                    //}
                     spell.SpellTargetPosition = ray.GetPoint(distance);
                 }
             }
@@ -82,7 +83,7 @@ public class Player : HumanoidEntity
         if (Input.GetMouseButton(1))
         {
             SelectEntity();
-            navMeshAgent.SetDestination(transform.position);
+            Entity.NavMeshAgent.SetDestination(transform.position);
         }
 
         if (Input.GetMouseButton(2))
@@ -94,7 +95,7 @@ public class Player : HumanoidEntity
             if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hit, 1000f, 1 << LayerMask.NameToLayer("Ground")))
             {
                 if (Vector3.Distance(transform.position, hit.point) > 1f)
-                    navMeshAgent.SetDestination(hit.point);
+                    Entity.NavMeshAgent.SetDestination(hit.point);
             }
         }
     }
@@ -108,12 +109,10 @@ public class Player : HumanoidEntity
             if (Physics.SphereCast(Camera.main.ScreenPointToRay(Input.mousePosition), 0.2f, out hit, 1000f, 1 << LayerMask.NameToLayer("Entity")))
             {
                 GameplayGUI.instance.SelectedEntity = hit.collider.GetComponent<Entity>();
-                selectedTarget = hit.collider.transform;
             }
             else
             {
                 GameplayGUI.instance.SelectedEntity = null;
-                selectedTarget = null;
             }
             _lastSelectTime = Time.time;
         }
@@ -140,16 +139,16 @@ public class Player : HumanoidEntity
         switch (spell.SpellType)
         {
             case SpellType.Area:
-                CastSpell(spell);
+                Entity.CastSpell(spell);
                 break;
             case SpellType.Attached:
-                CastSpell(spell);
+                Entity.CastSpell(spell);
                 break;
             default:
                 if (selectedSpell == spell)
                     return;
                 selectedSpell = spell;
-                spellCastTimer = new Timer(0);
+                Entity.SpellCastTimer = new Timer(0);
                 break;
         }
 
@@ -163,19 +162,23 @@ public class Player : HumanoidEntity
         }
     }
 
-    public override bool KeepBeamAlive()
+    private void KeepBeamOpen()
     {
-        return LivingState == EntityLivingState.Alive && Input.GetMouseButton(1);
+        Entity.KeepBeamOpen = Input.GetMouseButton(1);
     }
 
-    protected override void Die()
+    //public override bool KeepBeamAlive()
+    //{
+    //    return LivingState == EntityLivingState.Alive && Input.GetMouseButton(1);
+    //}
+
+    protected void Die()
     {
-        base.Die();
-        CurrentHP = MaxHP;
-        MotionState = EntityMotionState.Static;
+        Entity.CurrentHP = Entity.MaxHP;
+        Entity.MotionState = EntityMotionState.Static;
         transform.position = respawnPoint.position;
-        LivingState = EntityLivingState.Alive;
-        MotionState = EntityMotionState.Pathfinding;
-        navMeshAgent.SetDestination(respawnPoint.position);
+        Entity.LivingState = EntityLivingState.Alive;
+        Entity.MotionState = EntityMotionState.Pathfinding;
+        Entity.NavMeshAgent.SetDestination(respawnPoint.position);
     }
 }

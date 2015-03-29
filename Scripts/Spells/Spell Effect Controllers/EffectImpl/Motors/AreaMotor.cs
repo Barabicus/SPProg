@@ -23,10 +23,8 @@ public class AreaMotor : TimedUpdateableSpellMotor
         {
             if (c.gameObject != effectSetting.spell.CastingEntity.gameObject)
             {
-                Entity e = c.gameObject.GetComponent<Entity>();
-
-             //   if ((!collideWithSameFlag && (e.entityFlags & effectSetting.spell.CastingEntity.entityFlags) != 0) || collideWithSameFlag)
-                    effectSetting.TriggerCollision(new ColliderEventArgs(), c);
+                TryTriggerCollision(new ColliderEventArgs(), c);
+                //effectSetting.TriggerCollision(new ColliderEventArgs(), c);
             }
         }
     }

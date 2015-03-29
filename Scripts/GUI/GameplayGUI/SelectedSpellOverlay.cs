@@ -5,7 +5,7 @@ using UnityEngine.UI;
 public class SelectedSpellOverlay : MonoBehaviour
 {
 
-    private Player player;
+    private PlayerController player;
     private SpellButton spellbutton;
     private Image selectedImage;
 

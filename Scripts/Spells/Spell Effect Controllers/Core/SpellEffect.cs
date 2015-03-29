@@ -43,7 +43,7 @@ public abstract class SpellEffect : MonoBehaviour
 
     protected virtual void Start()
     {
-        effectSetting = transform.parent.GetComponent<EffectSetting>();
+        effectSetting = transform.GetComponentInParent<EffectSetting>();
         effectSetting.OnSpellDestroy += effectSetting_OnSpellDestroy;
         effectSetting.OnSpellCollision += effectSetting_OnSpellCollision;
         effectSetting.OnEffectDestroy += effectSetting_OnEffectDestroy;

@@ -10,7 +10,7 @@ public class SpellButton : MonoBehaviour, IDropHandler
 
     private Image iconImage;
     public Spell spell;
-    private Player player;
+    private PlayerController player;
 
     public void Start()
     {

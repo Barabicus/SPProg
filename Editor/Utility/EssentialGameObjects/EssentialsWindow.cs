@@ -5,7 +5,7 @@ using UnityEditor;
 public class EssentialsWindow : EditorWindow
 {
 
-    Player player;
+    PlayerController player;
     GameplayGUI gameplayGUI;
     RTSCamera rtsCamera;
     SpellList spellList;
@@ -58,10 +58,11 @@ public class EssentialsWindow : EditorWindow
 
             gameplayGUI = PrefabUtility.InstantiatePrefab(gameplayGUI) as GameplayGUI;
             rtsCamera = PrefabUtility.InstantiatePrefab(rtsCamera) as RTSCamera;
-            player = PrefabUtility.InstantiatePrefab(player) as Player;
+            player = PrefabUtility.InstantiatePrefab(player) as PlayerController;
             spellList = PrefabUtility.InstantiatePrefab(spellList) as SpellList;
 
             gameplayGUI.player = player;
+            gameplayGUI.rtsCamera = rtsCamera;
             rtsCamera.followTarget = player.transform;
             Debug.Log("Created");
         }

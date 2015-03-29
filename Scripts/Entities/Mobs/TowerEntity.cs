@@ -1,13 +1,13 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class TowerEntity : Entity {
+public class TowerEntity : EntityAI {
 
     public Transform rotPoint;
     public Spell attackSpell;
     public float rotateSpeed = 5f;
     public float attackRange = 50f;
-    private Player player;
+    private PlayerController player;
 
     protected override void Start()
     {
@@ -15,7 +15,7 @@ public class TowerEntity : Entity {
         player = GameplayGUI.instance.player;
     }
 
-    protected override void LivingUpdate()
+    protected override void Update()
     {
         base.LivingUpdate();
         Attack();
@@ -28,7 +28,7 @@ public class TowerEntity : Entity {
             rotPoint.transform.rotation = Quaternion.Lerp(rotPoint.transform.rotation, Quaternion.LookRotation(player.transform.position - rotPoint.transform.position), Time.deltaTime * rotateSpeed);
 
             Spell spell;
-            if (CastSpell(attackSpell, out spell))
+            if (Entity.CastSpell(attackSpell, out spell))
             {
                 spell.SpellTarget = player.transform;
                 spell.SpellTargetPosition = player.transform.position;
@@ -36,8 +36,8 @@ public class TowerEntity : Entity {
         }
     }
 
-    public override bool KeepBeamAlive()
+    public bool KeepBeamAlive()
     {
-        return Vector3.Distance(transform.position, player.transform.position) <= attackRange && LivingState == EntityLivingState.Alive;
+        return Vector3.Distance(transform.position, player.transform.position) <= attackRange && Entity.LivingState == EntityLivingState.Alive;
     }
 }

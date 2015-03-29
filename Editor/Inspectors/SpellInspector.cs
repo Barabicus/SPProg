@@ -92,6 +92,8 @@ public class SpellInspector : Editor
         DrawAddComponent<SpawnSpellOnCollision>("Spawn Spell On Collision");
         DrawAddComponent<TriggerEmitOnCollision>("Trigger Emit On Collision");
         DrawAddComponent<TriggerEnteredCollision>("Trigger Entered Collision");
+        DrawAddComponent<PlayAudioOnCollision>("Play Audio Collision");
+        DrawAddComponent<ShakeCameraOnCollision>("Shake Camera Collision");
 
         EditorGUILayout.EndVertical();
     }

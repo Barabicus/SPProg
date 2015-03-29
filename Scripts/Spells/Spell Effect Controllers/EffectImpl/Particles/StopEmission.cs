@@ -5,7 +5,8 @@ using System.Collections;
 public class StopEmission : SpellEffect
 {
     public StopEmissionTrigger stopEmissionTriggeredBy;
-    public float stopEmissionTimeDelay = 1f;
+    public float stopEmissionTimeDelay = 0f;
+    public bool emitState = false;
 
     private Timer timer;
     private ParticleSystem particleSystem;
@@ -22,7 +23,7 @@ public class StopEmission : SpellEffect
         base.effectSetting_OnSpellDestroy(sender, e);
         if (stopEmissionTriggeredBy == StopEmissionTrigger.SpellDestroy)
         {
-            _StopEmission();
+            SetEmission();
         }
     }
 
@@ -31,13 +32,13 @@ public class StopEmission : SpellEffect
         base.UpdateSpell();
         if (stopEmissionTriggeredBy == StopEmissionTrigger.Timed && timer.CanTick)
         {
-            _StopEmission();
+            SetEmission();
         }
     }
 
-    private void _StopEmission()
+    private void SetEmission()
     {
-        particleSystem.enableEmission = false;
+        particleSystem.enableEmission = emitState;
         enabled = false;
     }
 

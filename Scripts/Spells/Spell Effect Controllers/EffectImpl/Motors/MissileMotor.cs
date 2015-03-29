@@ -2,7 +2,7 @@
 using System.Collections;
 
 [RequireComponent(typeof(Rigidbody))]
-public class MissileMotor : SpellEffect
+public class MissileMotor : SpellMotor
 {
     public float speed = 2f;
     public bool keepDistanceToGround = false;
@@ -128,7 +128,9 @@ public class MissileMotor : SpellEffect
     {
         if (other.gameObject != effectSetting.spell.CastingEntity.gameObject && other.gameObject.layer != LayerMask.NameToLayer("Spell") && other.gameObject.layer != LayerMask.NameToLayer("Ground") && other.gameObject.layer != LayerMask.NameToLayer("Ignore Raycast"))
         {
-            effectSetting.TriggerCollision(new ColliderEventArgs(), other);
+
+            TryTriggerCollision(new ColliderEventArgs(), other);
+          //  effectSetting.TriggerCollision(new ColliderEventArgs(), other);
 
         }
     }

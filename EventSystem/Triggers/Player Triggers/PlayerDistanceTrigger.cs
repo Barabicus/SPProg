@@ -10,7 +10,7 @@ public class PlayerDistanceTrigger : GameEventTrigger
     public bool triggerEnterEvents = true;
     public bool triggerExitEvents = true;
 
-    private Player player;
+    private PlayerController player;
 
     public override void Start()
     {

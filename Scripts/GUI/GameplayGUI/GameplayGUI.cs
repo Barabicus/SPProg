@@ -20,7 +20,8 @@ public class GameplayGUI : MonoBehaviour
 
 
     public Text selectedEntityText;
-    public Player player;
+    public PlayerController player;
+    public RTSCamera rtsCamera;
 
     public event Action<Spell, int> spellChanged;
 
@@ -128,15 +129,15 @@ public class GameplayGUI : MonoBehaviour
 
     private void UpdateElementCharge()
     {
-        fireCharge.anchorMax = new Vector2(fireCharge.anchorMax.x, GetPercent(player.CurrentElementalCharge[Element.Fire], player.MaxElementalCharge[Element.Fire]));
-        waterCharge.anchorMax = new Vector2(waterCharge.anchorMax.x, GetPercent(player.CurrentElementalCharge[Element.Water], player.MaxElementalCharge[Element.Water]));
-        airCharge.anchorMax = new Vector2(waterCharge.anchorMax.x, GetPercent(player.CurrentElementalCharge[Element.Air], player.MaxElementalCharge[Element.Air]));
-        earthCharge.anchorMax = new Vector2(earthCharge.anchorMax.x, GetPercent(player.CurrentElementalCharge[Element.Earth], player.MaxElementalCharge[Element.Earth]));
+        fireCharge.anchorMax = new Vector2(fireCharge.anchorMax.x, GetPercent(player.Entity.CurrentElementalCharge[Element.Fire], player.Entity.MaxElementalCharge[Element.Fire]));
+        waterCharge.anchorMax = new Vector2(waterCharge.anchorMax.x, GetPercent(player.Entity.CurrentElementalCharge[Element.Water], player.Entity.MaxElementalCharge[Element.Water]));
+        airCharge.anchorMax = new Vector2(waterCharge.anchorMax.x, GetPercent(player.Entity.CurrentElementalCharge[Element.Air], player.Entity.MaxElementalCharge[Element.Air]));
+        earthCharge.anchorMax = new Vector2(earthCharge.anchorMax.x, GetPercent(player.Entity.CurrentElementalCharge[Element.Earth], player.Entity.MaxElementalCharge[Element.Earth]));
     }
 
     private void UpdatePlayer()
     {
-        playerHealth.anchorMax = new Vector2(GetPercent(player.CurrentHP, player.maxHP), playerHealth.anchorMax.y);
+        playerHealth.anchorMax = new Vector2(GetPercent(player.Entity.CurrentHP, player.Entity.MaxHP), playerHealth.anchorMax.y);
 
     }
 
@@ -158,7 +159,7 @@ public class GameplayGUI : MonoBehaviour
             selectedEntityText.text = "";
 
         // Update Health Amount
-        healthAmount.anchorMax = new Vector2(GetPercent(SelectedEntity.CurrentHP, SelectedEntity.maxHP), healthAmount.anchorMax.y);
+        healthAmount.anchorMax = new Vector2(GetPercent(SelectedEntity.CurrentHP, SelectedEntity.MaxHP), healthAmount.anchorMax.y);
 
     }
 

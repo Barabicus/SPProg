@@ -28,10 +28,10 @@ public class HumanoidAnimatorController : MonoBehaviour
     {
         switch (_entity.LivingState)
         {
-            case Entity.EntityLivingState.Alive:
+            case EntityLivingState.Alive:
                 _animator.SetBool(animDead, false);
                 break;
-            case Entity.EntityLivingState.Dead:
+            case EntityLivingState.Dead:
                 _animator.SetBool(animDead, true);
                 break;
         }

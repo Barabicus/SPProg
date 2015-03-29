@@ -4,10 +4,10 @@ using UnityEditor;
 using UnityEditorInternal;
 
 [CanEditMultipleObjects]
-[CustomEditor(typeof(StandardEntity), true)]
+[CustomEditor(typeof(StandardEntityMotion), true)]
 public class StandardEntityEditor : Editor
 {
-    StandardEntity entityTarget;
+    StandardEntityMotion entityTarget;
 
     private SerializedProperty pathLocationMethod;
     private SerializedProperty patrolPoints;
@@ -19,23 +19,38 @@ public class StandardEntityEditor : Editor
     private SerializedProperty keepLookAtChaseTarget;
     private SerializedProperty areaPivotPoint;
     private SerializedProperty onlyUpdateWhenNearToPlayer;
+    private SerializedProperty updateAreaMethod;
+    private SerializedProperty chaseTarget;
+    private SerializedProperty autoChase;
+    private SerializedProperty chaseFallOff;
+
+
+
+
 
     private ReorderableList list;
 
     void OnEnable()
     {
-        entityTarget = target as StandardEntity;
+        entityTarget = target as StandardEntityMotion;
 
-        patrolPoints = serializedObject.FindProperty("patrolPoints");
-        pathLocationMethod = serializedObject.FindProperty("pathLocationMethod");
-        randomMoveArea = serializedObject.FindProperty("randomMoveArea");
-        chooseRandomMoveTime = serializedObject.FindProperty("chooseRandomMoveTime");
-        startAtRandomPathIndex = serializedObject.FindProperty("startAtRandomPathIndex");
-        chaseDistance = serializedObject.FindProperty("chaseDistance");
-        chooseNextPatrolPointDistance = serializedObject.FindProperty("chooseNextPatrolPointDistance");
-        keepLookAtChaseTarget = serializedObject.FindProperty("keepLookAtChaseTarget");
-        areaPivotPoint = serializedObject.FindProperty("areaPivotPoint");
-        onlyUpdateWhenNearToPlayer = serializedObject.FindProperty("onlyUpdateWhenNearToPlayer");
+        patrolPoints = serializedObject.FindProperty("_patrolPoints");
+        pathLocationMethod = serializedObject.FindProperty("_pathLocationMethod");
+        randomMoveArea = serializedObject.FindProperty("_randomMoveArea");
+        chooseRandomMoveTime = serializedObject.FindProperty("_chooseRandomMoveTime");
+        startAtRandomPathIndex = serializedObject.FindProperty("_startAtRandomPathIndex");
+        chaseDistance = serializedObject.FindProperty("_chaseDistance");
+        chooseNextPatrolPointDistance = serializedObject.FindProperty("_chooseNextPatrolPointDistance");
+        keepLookAtChaseTarget = serializedObject.FindProperty("_keepLookAtChaseTarget");
+        areaPivotPoint = serializedObject.FindProperty("_areaPivotPoint");
+        onlyUpdateWhenNearToPlayer = serializedObject.FindProperty("_onlyUpdateWhenNearToPlayer");
+        updateAreaMethod = serializedObject.FindProperty("_updateAreaMethod");
+        chaseTarget = serializedObject.FindProperty("_chaseTarget");
+        autoChase = serializedObject.FindProperty("_autoChase");
+        chaseFallOff = serializedObject.FindProperty("_chaseFallOff");
+
+
+
 
         list = new ReorderableList(serializedObject, patrolPoints, true, true, true, true);
         list.displayAdd = false;
@@ -52,13 +67,13 @@ public class StandardEntityEditor : Editor
     void OnSceneGUI()
     {
 
-        for (int i = 0; i < entityTarget.patrolPoints.Count; i++)
+        for (int i = 0; i < entityTarget.PatrolPoints.Count; i++)
         {
-            entityTarget.patrolPoints[i] = Handles.PositionHandle(entityTarget.patrolPoints[i], Quaternion.identity);
+            entityTarget.PatrolPoints[i] = Handles.PositionHandle(entityTarget.PatrolPoints[i], Quaternion.identity);
             Handles.color = Color.yellow;
-            Handles.SphereCap(0, entityTarget.patrolPoints[i], Quaternion.identity, 0.75f);
+            Handles.SphereCap(0, entityTarget.PatrolPoints[i], Quaternion.identity, 0.75f);
             Handles.color = Color.red;
-            Handles.Label(entityTarget.patrolPoints[i] + new Vector3(0, 2, 0), i.ToString());
+            Handles.Label(entityTarget.PatrolPoints[i] + new Vector3(0, 2, 0), i.ToString());
         }
         EditorUtility.SetDirty(entityTarget);
 
@@ -122,9 +137,11 @@ public class StandardEntityEditor : Editor
 
     private void DrawArea()
     {
+        EditorGUILayout.PropertyField(updateAreaMethod);
         EditorGUILayout.PropertyField(areaPivotPoint);
         EditorGUILayout.PropertyField(randomMoveArea);
-        EditorGUILayout.PropertyField(chooseRandomMoveTime);
+        if ((StandardEntityMotion.UpdateAreaMethod)updateAreaMethod.enumValueIndex == StandardEntityMotion.UpdateAreaMethod.Timed)
+            EditorGUILayout.PropertyField(chooseRandomMoveTime);
     }
 
     private void DrawPatrol()
@@ -136,8 +153,11 @@ public class StandardEntityEditor : Editor
 
     private void DrawChase()
     {
+        EditorGUILayout.PropertyField(autoChase);
+        EditorGUILayout.PropertyField(chaseTarget);
         EditorGUILayout.PropertyField(keepLookAtChaseTarget);
         EditorGUILayout.PropertyField(chaseDistance);
+        EditorGUILayout.PropertyField(chaseFallOff);
     }
 
     private void DrawPatrolPoints()

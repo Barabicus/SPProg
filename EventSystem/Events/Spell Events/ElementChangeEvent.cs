@@ -5,7 +5,7 @@ using System;
 public class ElementChangeEvent : GameEvent
 {
     public ElementalStats statChange = new ElementalStats(-1, -1, -1, -1, -1);
-    private Player player;
+    private PlayerController player;
 
     public override void Start()
     {
@@ -16,13 +16,13 @@ public class ElementChangeEvent : GameEvent
     public override void EnterEvent(Collider other)
     {
         base.EnterEvent(other);
-        ElementalStats stats = player.MaxElementalCharge;
+        ElementalStats stats = player.Entity.MaxElementalCharge;
         foreach (Element e in Enum.GetValues(typeof(Element)))
         {
             if (statChange[e] != -1)
                 stats[e] = statChange[e];
         }
-        player.MaxElementalCharge = stats;
+        player.Entity.MaxElementalCharge = stats;
 
     }
 

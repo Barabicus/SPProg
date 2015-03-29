@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class BeamMotor : SpellEffect
+public class BeamMotor : SpellMotor
 {
     public float beamApplyDelay = 0.1f;
     public bool chargeOnApply = false;
@@ -58,7 +58,8 @@ public class BeamMotor : SpellEffect
             distance = hit.distance;
             if (hit.collider.gameObject.layer != LayerMask.NameToLayer("Ground") && hit.collider.gameObject.layer != LayerMask.NameToLayer("Spell"))
             {
-                effectSetting.TriggerCollision(new ColliderEventArgs(hit.point), hit.collider);
+                TryTriggerCollision(new ColliderEventArgs(hit.point), hit.collider);
+                //effectSetting.TriggerCollision(new ColliderEventArgs(hit.point), hit.collider);
             }
         }
         else
@@ -79,7 +80,7 @@ public class BeamMotor : SpellEffect
     {
         get
         {
-            return effectSetting.spell.CastingEntity.KeepBeamAlive();
+            return effectSetting.spell.CastingEntity.CanOpenBeam;
         }
     }
 

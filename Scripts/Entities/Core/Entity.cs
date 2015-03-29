@@ -20,11 +20,13 @@ public class Entity : MonoBehaviour
     [HideInInspector]
     private float spellCastDelay = 0.1f;
     [SerializeField]
-    private string EntityName = "NOTSET";
+    private string entityName = "NOTSET";
     [SerializeField]
     private Transform castPoint;
     [SerializeField]
-    private ParticleSystem hitParticles;
+    private ParticleSystem hitParticlesPrefab;
+    [SerializeField]
+    private ParticleSystem deathParticlesPrefab;
     [SerializeField]
     private EntityFlags entityFlags;
     [SerializeField]
@@ -55,43 +57,23 @@ public class Entity : MonoBehaviour
     private Timer _audioPlayTimer;
     private Spell activeBeam;
 
+ //   private Timer spellCastTimer;
+
     protected NavMeshAgent navMeshAgent;
     protected Transform selectedTarget;
     protected Animator animator;
 
-    /// <summary>
-    /// The timer that controls whether or not enough time has passed to be able to recast a spell again. This takes in spellcastdelay and will
-    /// allow a spellrecast once that time has passed.
-    /// </summary>
-    protected Timer spellCastTimer;
 
     #endregion
 
     #region Events
 
-    public event EventHandler<EntityEventArgs> entityKilled;
+    public event Action<Entity> entityKilled;
     public event Action<float> entityHealthChanged;
     /// <summary>
     /// An Event with the spell that was just cast. Note this is an instance to the actual spell that was cast and exists in game.
     /// </summary>
     public event Action<Spell> spellCast;
-
-    #endregion
-
-    #region States
-
-    public enum EntityLivingState
-    {
-        Alive,
-        Dead
-    }
-
-    public enum EntityMotionState
-    {
-        Static,
-        Pathfinding,
-        Rigidbody
-    }
 
     #endregion
 
@@ -103,12 +85,26 @@ public class Entity : MonoBehaviour
         set { _currentSpeed = value; }
     }
 
+    public string EntityName
+    {
+        get { return entityName; }
+    }
+
     public EntityStats BaseStats
     {
         get { return _baseStats; }
         set { _baseStats = value; }
     }
 
+    /// <summary>
+    /// The timer that controls whether or not enough time has passed to be able to recast a spell again. This takes in spellcastdelay and will
+    /// allow a spellrecast once that time has passed.
+    /// </summary>
+    public Timer SpellCastTimer
+    {
+        get;
+        set;
+    }
     public float Speed
     {
         set
@@ -126,6 +122,29 @@ public class Entity : MonoBehaviour
         get
         {
             return maxHP;
+        }
+    }
+
+    /// <summary>
+    /// Specified by the entity if it wants to keep the beam open
+    /// </summary>
+    public bool KeepBeamOpen
+    {
+        get;
+        set;
+    }
+
+    /// <summary>
+    /// Returns true if this beam should be kept open
+    /// </summary>
+    public bool CanOpenBeam
+    {
+        get
+        {
+            if (LivingState != EntityLivingState.Alive || !KeepBeamOpen)
+                return false;
+            else
+                return true;
         }
     }
 
@@ -167,22 +186,12 @@ public class Entity : MonoBehaviour
             switch (value)
             {
                 case EntityLivingState.Dead:
-                    foreach (Collider c in GetComponents<Collider>())
-                        c.enabled = false;
-                    foreach (Transform t in transform)
-                        foreach (Collider c in t.GetComponents<Collider>())
-                            c.enabled = false;
                     MotionState = EntityMotionState.Static;
                     if (entityKilled != null)
-                        entityKilled(this, new EntityEventArgs(this));
-                    EntityKilled();
+                        entityKilled(this);
                     break;
                 case EntityLivingState.Alive:
-                    foreach (Collider c in GetComponents<Collider>())
-                        c.enabled = true;
-                    foreach (Transform t in transform)
-                        foreach (Collider c in t.GetComponents<Collider>())
-                            c.enabled = true;
+                    MotionState = EntityMotionState.Pathfinding;
                     break;
             }
             _livingState = value;
@@ -201,6 +210,18 @@ public class Entity : MonoBehaviour
             if (currentHP == 0)
                 Die();
         }
+    }
+
+    public ParticleSystem HitParticles
+    {
+        get;
+        set;
+    }
+
+    public ParticleSystem DeathParticles
+    {
+        get;
+        set;
     }
 
     public ElementalStats CurrentElementalCharge
@@ -287,6 +308,12 @@ public class Entity : MonoBehaviour
 
         knockdownTime = new Timer(2f);
         _audioPlayTimer = new Timer(0.25f);
+        HitParticles = Instantiate(hitParticlesPrefab);
+        DeathParticles = Instantiate(deathParticlesPrefab);
+        HitParticles.transform.parent = transform;
+        DeathParticles.transform.parent = transform;
+        HitParticles.transform.localPosition = new Vector3(0, 1, 0);
+        DeathParticles.transform.localPosition = Vector3.zero;
     }
 
     #endregion
@@ -373,7 +400,7 @@ public class Entity : MonoBehaviour
         _lastPosition = transform.position;
         CurrentSpeed = moveAmount.magnitude / Time.deltaTime;
         // Normalise speed
-        CurrentSpeed /= speed;
+        CurrentSpeed /= 5f;
     }
 
     public void AddStatModifier(EntityStats stat)
@@ -409,34 +436,17 @@ public class Entity : MonoBehaviour
 
     protected virtual void HealthChanged(float amount)
     {
-        if (amount < 0 && hitParticles != null && UnityEngine.Random.Range(0, 5) == 0)
-            hitParticles.Emit(1);
+        if (amount < 0 && HitParticles != null && UnityEngine.Random.Range(0, 2) == 0)
+            HitParticles.Emit(10);
 
     }
 
-    protected virtual void Die()
+    private void Die()
     {
         LivingState = EntityLivingState.Dead;
-        if (hitParticles != null)
-            hitParticles.Emit(UnityEngine.Random.Range(5, 20));
+        if (DeathParticles != null)
+            DeathParticles.Emit(UnityEngine.Random.Range(2, 5));
         PlaySound(deathAudio);
-    }
-
-    /// <summary>
-    /// Called when this entity has been killed
-    /// </summary>
-    protected virtual void EntityKilled()
-    {
-
-    }
-
-    /// <summary>
-    /// The logic the entity should use to keep the beam alive should be implemented here
-    /// </summary>
-    /// <returns></returns>
-    public virtual bool KeepBeamAlive()
-    {
-        return false;
     }
 
     /// <summary>
@@ -495,7 +505,7 @@ public class Entity : MonoBehaviour
         // Take spell cost
         SubtractSpellCost(sp);
         castSpell = sp;
-        spellCastTimer = new Timer(spell.SpellCastDelay);
+        SpellCastTimer = new Timer(spell.SpellCastDelay);
         if (spellCast != null)
             spellCast(sp);
         PlaySound(castSpell.castAudio);
@@ -520,7 +530,7 @@ public class Entity : MonoBehaviour
 
     public bool CanCastSpell(Spell spell)
     {
-        if (!spellCastTimer.CanTick)
+        if (!SpellCastTimer.CanTick)
             return false;
         foreach (Element e in Enum.GetValues(typeof(Element)))
         {
@@ -593,6 +603,24 @@ public class Entity : MonoBehaviour
             audio.PlayOneShot(audioClip);
     }
 
+    private void EnableColliders()
+    {
+        foreach (Collider c in GetComponents<Collider>())
+            c.enabled = true;
+        foreach (Transform t in transform)
+            foreach (Collider c in t.GetComponents<Collider>())
+                c.enabled = true;
+    }
+
+    private void DisableColliders()
+    {
+        foreach (Collider c in GetComponents<Collider>())
+            c.enabled = false;
+        foreach (Transform t in transform)
+            foreach (Collider c in t.GetComponents<Collider>())
+                c.enabled = false;
+    }
+
     #endregion
 
 
@@ -616,3 +644,20 @@ public enum EntityFlags
     Three,
     Four
 }
+
+#region States
+
+public enum EntityLivingState
+{
+    Alive,
+    Dead
+}
+
+public enum EntityMotionState
+{
+    Static,
+    Pathfinding,
+    Rigidbody
+}
+
+#endregion

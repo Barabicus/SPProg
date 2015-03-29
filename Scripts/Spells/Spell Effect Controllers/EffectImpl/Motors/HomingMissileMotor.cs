@@ -26,6 +26,7 @@ public class HomingMissileMotor : MissileMotor
     {
         base.Start();
         _searchTimer = new Timer(searchTime);
+      //  CheckForTargets();
     }
 
     protected override void UpdateSpell()
@@ -33,13 +34,21 @@ public class HomingMissileMotor : MissileMotor
         base.UpdateSpell();
         if (homingTarget == null && _searchTimer.CanTickAndReset())
         {
-            foreach (Collider c in Physics.OverlapSphere(effectSetting.transform.position, homingRadius))
+            CheckForTargets();
+        }
+    }
+
+    private void CheckForTargets()
+    {
+        foreach (Collider c in Physics.OverlapSphere(effectSetting.transform.position, homingRadius))
+        {
+            if (c.gameObject.layer == LayerMask.NameToLayer("Entity") && c.gameObject != effectSetting.spell.CastingEntity.gameObject)
             {
-                if (c.gameObject.layer == LayerMask.NameToLayer("Entity") && c.gameObject != effectSetting.spell.CastingEntity.gameObject)
-                {
-                    homingTarget = c.gameObject.transform;
-                    speed = homingSpeed;
-                }
+                Entity e = c.gameObject.GetComponent<Entity>();
+                if (e.LivingState != EntityLivingState.Alive)
+                    return;
+                homingTarget = c.gameObject.transform;
+                speed = homingSpeed;
             }
         }
     }

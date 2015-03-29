@@ -9,7 +9,7 @@ public class GrantSpellEvent : GameEvent
     public override void EnterEvent(Collider other)
     {
         base.EnterEvent(other);
-        Player player = GameplayGUI.instance.player;
+        PlayerController player = GameplayGUI.instance.player;
 
         for (int i = 0; i < player.spellList.Length; i++)
         {

@@ -8,7 +8,7 @@ public class TriggerEmitOnCollision : SpellEffect
 {
 
     public int emitAmount = 100;
-    public float timeDelay = 0.2f;
+    public float timeDelay = 0f;
     private ParticleSystem particleSystem;
     private Timer timeDelayTimer;
 

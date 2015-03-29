@@ -13,7 +13,7 @@ public class ElementalApply : SpellEffect
     {
         base.effectSetting_OnSpellApply(entity);
 
-        if (entity.LivingState != Entity.EntityLivingState.Alive)
+        if (entity.LivingState != EntityLivingState.Alive)
             return;
 
         // Apply the spells elemental properties
