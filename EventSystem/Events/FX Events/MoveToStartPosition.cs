@@ -36,7 +36,7 @@ public class MoveToStartPosition : GameEvent
         targetPosition = transform.position;
         transform.position += new Vector3(0, offset, 0);
         startPosition = transform.position;
-        player = GameplayGUI.instance.player;
+        player = GameMainReferences.Instance.Player;
         baseSnapTime = snapTime;
     }
 

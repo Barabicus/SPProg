@@ -52,16 +52,17 @@ public class SpellInspector : Editor
 
     private void DrawSpellHelperFunctions()
     {
-        DrawElementalPower();
+   //     DrawElementalPower();
         DrawMotors();
+        DrawEntity();
         DrawCollisionSpells();
         DrawDisableOrDestroySpells();
     }
 
     private void DrawElementalPower()
     {
-        DrawAddType<ElementalApply>(elementalApply, HandleElementalPower, "Elemental Power");
-        DrawAddType<AddStatModifier>(statMod, HandleStatMod, "Stat Modifier");
+        DrawAddType<ElementalApply>(elementalApply, ElementalPowerCallBack, "Elemental Power");
+        DrawAddType<AddStatModifier>(statMod, StatModCallBack, "Stat Modifier");
     }
 
     private void DrawMotors()
@@ -70,15 +71,29 @@ public class SpellInspector : Editor
 
         EditorGUILayout.LabelField("Motors", EditorStyles.boldLabel);
 
-        DrawHasComponent<MissileMotor>(missileMotor, "Missile Motor");
-        DrawHasComponent<HomingMissileMotor>(homingMotor, "Homing Motor");
-        DrawHasComponent<AttachMotor>(attachMotor, "Attach Motor");
-        DrawHasComponent<AreaMotor>(areaMotor, "Area Motor");
-        DrawHasComponent<BeamMotor>(beamMotor, "Beam Motor");
-        DrawHasComponent<PhysicalMotor>(physicalMotor, "Physical Motor");
-        DrawHasComponent<SpreadMotor>(spreadMotor, "Spread Motor");
+        DrawHasComponent<MissileMotor>("Missile Motor");
+        DrawHasComponent<HomingMissileMotor>("Homing Motor");
+        DrawHasComponent<AttachMotor>("Attach Motor");
+        DrawHasComponent<AreaMotor>("Area Motor");
+        DrawHasComponent<BeamMotor>("Beam Motor");
+        DrawHasComponent<PhysicalMotor>("Physical Motor");
+        DrawHasComponent<SpreadMotor>("Spread Motor");
+     //   DrawHasComponent<BounceSpell>("Bounce Motor");
 
 
+        EditorGUILayout.EndVertical();
+    }
+
+    private void DrawEntity()
+    {
+        EditorGUILayout.BeginVertical("Box");
+
+        EditorGUILayout.LabelField("Entity", EditorStyles.boldLabel);
+        DrawAddComponent<ElementalApply>("Elemental Apply");
+        DrawAddComponent<AddStatModifier>("Add Stat Modifier");
+
+        DrawAddComponent<PlayAnimation>("Play Animation");
+        DrawAddComponent<BounceSpell>("Bounce Spell");
         EditorGUILayout.EndVertical();
     }
 
@@ -94,6 +109,8 @@ public class SpellInspector : Editor
         DrawAddComponent<TriggerEnteredCollision>("Trigger Entered Collision");
         DrawAddComponent<PlayAudioOnCollision>("Play Audio Collision");
         DrawAddComponent<ShakeCameraOnCollision>("Shake Camera Collision");
+        DrawAddComponent<AddSpellMarker>("Add Spell Marker On Collision");
+
 
         EditorGUILayout.EndVertical();
     }
@@ -102,32 +119,36 @@ public class SpellInspector : Editor
     {
         EditorGUILayout.BeginVertical("Box");
 
-        EditorGUILayout.LabelField("Disable Or Destroy", EditorStyles.boldLabel);
+        EditorGUILayout.LabelField("Game Object / Component Spells", EditorStyles.boldLabel);
 
         DrawAddComponent<DestroySpellOnCondition>("Destroy Spell On Condition");
         DrawAddComponent<DisableSpellTimed>("Disable Spell Timed");
         DrawAddComponent<StopEmission>("Stop Emission");
+        DrawAddComponent<SpellEmission>("Spell Emission");
+        DrawAddComponent<StandardGameObjectSpell>("Standard object Spell");
 
         EditorGUILayout.EndVertical();
     }
 
     #endregion
 
-    #region Assign
+    #region Call Backs
 
-    private void HandleStatMod(AddStatModifier statMod)
+    private void StatModCallBack(AddStatModifier statMod)
     {
         statMod.hpMod = EditorGUILayout.FloatField("HP Mod", statMod.hpMod);
         statMod.speedMod = EditorGUILayout.FloatField("Speed Mod", statMod.speedMod);
     }
 
-    private void HandleElementalPower(ElementalApply elemental)
+    private void ElementalPowerCallBack(ElementalApply elemental)
     {
-        elementalApply.elementalPower.fire = EditorGUILayout.FloatField("Fire", elementalApply.elementalPower.fire);
-        elementalApply.elementalPower.water = EditorGUILayout.FloatField("Water", elementalApply.elementalPower.water);
-        elementalApply.elementalPower.air = EditorGUILayout.FloatField("Air", elementalApply.elementalPower.air);
-        elementalApply.elementalPower.earth = EditorGUILayout.FloatField("Earth", elementalApply.elementalPower.earth);
-        elementalApply.elementalPower.physical = EditorGUILayout.FloatField("Physical", elementalApply.elementalPower.physical);
+        ElementalStats setStats = elementalApply.ElementalPower;
+        setStats.fire = EditorGUILayout.FloatField("Fire", setStats.fire);
+        setStats.water = EditorGUILayout.FloatField("Water", setStats.water);
+        setStats.air = EditorGUILayout.FloatField("Air", setStats.air);
+        setStats.earth = EditorGUILayout.FloatField("Earth", setStats.earth);
+        setStats.physical = EditorGUILayout.FloatField("Physical", setStats.physical);
+        elementalApply.ElementalPower = setStats;
 
     }
 
@@ -168,6 +189,11 @@ public class SpellInspector : Editor
         return default(T);
     }
 
+    /// <summary>
+    /// Draw an option to add more than one component. Will add the component and specify how many components of that time are added
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="title"></param>
     private void DrawAddComponent<T>(string title) where T : Component
     {
         EditorGUILayout.BeginHorizontal("box");
@@ -187,11 +213,20 @@ public class SpellInspector : Editor
         EditorGUILayout.EndHorizontal();
     }
 
-    private void DrawHasComponent<T>(T associatedObject, string title) where T : Component
+    /// <summary>
+    /// Draw an option to add a single component of a specified type.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="associatedObject"></param>
+    /// <param name="title"></param>
+    private void DrawHasComponent<T>(string title) where T : Component
     {
         EditorGUILayout.BeginHorizontal("box");
         // Rect rect = EditorGUILayout.GetControlRect();
         Color c;
+
+        var associatedObject = GetChildComponent<T>();
+
         if (associatedObject == null)
             c = Color.white;
         else
@@ -218,6 +253,13 @@ public class SpellInspector : Editor
         EditorGUILayout.EndHorizontal();
     }
 
+    /// <summary>
+    /// Draw an option to add a component with a specific call back for when it is added
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="associatedObject"></param>
+    /// <param name="drawAction"></param>
+    /// <param name="title"></param>
     private void DrawAddType<T>(T associatedObject, Action<T> drawAction, string title) where T : UnityEngine.Component
     {
         if (associatedObject != null)

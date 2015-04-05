@@ -5,12 +5,16 @@ using System.Collections;
 public class CloseCombatAI : EntityAI
 {
     [SerializeField]
-    private float attackDistance;
-    [SerializeField]
-    private Spell selectedSpell;
+    private float attackDistance = 2.5f;
 
-    private PlayerController player;
-    private StandardEntityMotion motion;
+    [SerializeField]
+    private float _attackSpeed = 1f;
+    [SerializeField]
+    private Spell selectedSpell = null;
+
+    private PlayerController _player;
+    private StandardEntityMotion _motion;
+    private Timer _attackTimer;
 
     public float AttackDistance
     {
@@ -21,23 +25,29 @@ public class CloseCombatAI : EntityAI
     protected override void Start()
     {
         base.Start();
-        player = GameplayGUI.instance.player;
-        motion = GetComponent<StandardEntityMotion>();
-        motion.ChaseTarget = player.transform;
+        _player = GameMainReferences.Instance.Player;
+        _motion = GetComponent<StandardEntityMotion>();
+        _motion.ChaseTarget = _player.transform;
+        _attackTimer = new Timer(_attackSpeed);
     }
 
     protected override void LivingUpdate()
     {
         base.LivingUpdate();
-        if (Vector3.Distance(transform.position, player.transform.position) <= attackDistance)
+        if (_attackTimer.CanTickAndReset())
+            TryAttack();
+    }
+
+    private void TryAttack()
+    {
+        if (_player.Entity.LivingState == EntityLivingState.Alive && Vector3.Distance(transform.position, _player.transform.position) <= attackDistance)
         {
             Spell spell;
             if (Entity.CastSpell(selectedSpell, out spell))
             {
-                spell.SpellTarget = player.transform;
+                spell.SpellTarget = _player.transform;
             }
         }
-
     }
 
 }

@@ -3,6 +3,8 @@ using System.Collections;
 
 public class HomingMissileMotor : MissileMotor
 {
+    public bool onlyTargetEnemies = true;
+    public bool ignoreEntitiesWithSpellMarker = false;
     public float searchTime = 1f;
     public float homingRadius = 10f;
     public float homingSpeed = 30f;
@@ -26,7 +28,7 @@ public class HomingMissileMotor : MissileMotor
     {
         base.Start();
         _searchTimer = new Timer(searchTime);
-      //  CheckForTargets();
+        //  CheckForTargets();
     }
 
     protected override void UpdateSpell()
@@ -36,20 +38,41 @@ public class HomingMissileMotor : MissileMotor
         {
             CheckForTargets();
         }
+
+        if (homingTarget != null)
+        {
+            if(Vector3.Distance(effectSetting.transform.position, homingTarget.position) <= 1.5f)
+                TryTriggerCollision(null, homingTarget.GetComponent<Collider>());
+        }
     }
 
     private void CheckForTargets()
     {
-        foreach (Collider c in Physics.OverlapSphere(effectSetting.transform.position, homingRadius))
+        Transform nearestTransform = null;
+        float nearestDistance = 9999999f;
+        foreach (Collider c in Physics.OverlapSphere(effectSetting.transform.position, homingRadius, 1 << LayerMask.NameToLayer("Entity")))
         {
-            if (c.gameObject.layer == LayerMask.NameToLayer("Entity") && c.gameObject != effectSetting.spell.CastingEntity.gameObject)
+            if (c.gameObject != effectSetting.spell.CastingEntity.gameObject)
             {
                 Entity e = c.gameObject.GetComponent<Entity>();
-                if (e.LivingState != EntityLivingState.Alive)
-                    return;
-                homingTarget = c.gameObject.transform;
-                speed = homingSpeed;
+                if (e == null || e.LivingState != EntityLivingState.Alive || (onlyTargetEnemies && !e.IsEnemy(effectSetting.spell.CastingEntity)) || (ignoreEntitiesWithSpellMarker &&  e.HasSpellMarker(SpellMarker)) )
+                    continue;
+
+                float distance = Vector3.Distance(e.transform.position, effectSetting.transform.position);
+                if (distance < nearestDistance)
+                {
+                    nearestDistance = distance;
+                    nearestTransform = e.transform;
+                }
+
+
             }
+        }
+
+        if (nearestTransform != null)
+        {
+            homingTarget = nearestTransform;
+            speed = homingSpeed;
         }
     }
 }

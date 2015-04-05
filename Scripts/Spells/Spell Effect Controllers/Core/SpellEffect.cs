@@ -20,6 +20,12 @@ public abstract class SpellEffect : MonoBehaviour
         get { return _currentLivingTime; }
     }
 
+    public string SpellMarker
+    {
+        get { return effectSetting.spell.spellID; }
+    }
+
+
     /// <summary>
     /// A percent from 0-1 on how long this spell has been alive compared to its live time.
     /// </summary>
@@ -38,16 +44,15 @@ public abstract class SpellEffect : MonoBehaviour
 
     protected virtual void Awake()
     {
-
-    }
-
-    protected virtual void Start()
-    {
         effectSetting = transform.GetComponentInParent<EffectSetting>();
         effectSetting.OnSpellDestroy += effectSetting_OnSpellDestroy;
         effectSetting.OnSpellCollision += effectSetting_OnSpellCollision;
         effectSetting.OnEffectDestroy += effectSetting_OnEffectDestroy;
         effectSetting.OnSpellApply += effectSetting_OnSpellApply;
+    }
+
+    protected virtual void Start()
+    {
 
     }
 

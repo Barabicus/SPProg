@@ -9,16 +9,16 @@ public class Spell : MonoBehaviour
 
     #region Fields
 
-    private Rigidbody rigidbody;
-
     public string spellID;
     public string spellName = "NOTSET";
     public float spellLiveTime;
     public float spellCastDelay;
     public SpellType spellType;
-    public HumanoidEntityAnimation spellAnimation = HumanoidEntityAnimation.Nothing;
+    [SerializeField]
+    private SpellDeathMarker _spellDeathMarker = SpellDeathMarker.None;
     public AudioClip castAudio;
     public Sprite spellIcon;
+    public string spellDescription;
     public ElementalStats elementalCost;
     public SpellElementType elementType = SpellElementType.NoElement;
     #endregion
@@ -26,6 +26,17 @@ public class Spell : MonoBehaviour
     #region Properties
     public Entity CastingEntity { get; set; }
 
+    public List<Entity> IgnoreEntities { get; set; } 
+
+    public SpellDeathMarker SpellDeathMarker
+    {
+        get { return _spellDeathMarker;}
+    }
+
+    public string SpellDescription
+    {
+        get { return spellDescription; }
+    }
 
     public Transform SpellTarget
     {
@@ -81,15 +92,6 @@ public class Spell : MonoBehaviour
         get { return spellCastDelay; }
     }
 
-    /// <summary>
-    /// Creates a transform when the spell is created. This transform will be associated with
-    /// SpellTarget when the spell is destroyed this transform is also destroyed.
-    /// </summary>
-    public virtual bool CreateTransformOnLoad
-    {
-        get { return false; }
-    }
-
     public string SpellID
     {
         get { return spellID; }
@@ -110,7 +112,10 @@ public class Spell : MonoBehaviour
     #endregion
 
 
-    public virtual void Awake() { }
+    public virtual void Awake() 
+    {
+        IgnoreEntities = new List<Entity>();
+    }
 
     public virtual void Start()
     {
@@ -118,25 +123,30 @@ public class Spell : MonoBehaviour
         Invoke("DestroySpell", SpellLiveTime);
     }
 
-    public void CastSpell(Entity castingEntity, Transform startPosition)
+    public void CastSpell(Entity castingEntity)
     {
         CastingEntity = castingEntity;
+    }
+
+    public void SetupSpellTransform(Transform startPosition)
+    {
         SpellStartTransform = startPosition;
         SpellStartPosition = startPosition.position;
         transform.position = SpellStartPosition;
         transform.rotation = CastingEntity.transform.rotation;
-        if (CreateTransformOnLoad)
-            SpellTarget = new GameObject("Target: " + gameObject.name).transform;
         gameObject.SetActive(true);
     }
 
+    public void SetupSpellVector(Vector3 startPosition)
+    {
+        SpellStartPosition = startPosition;
+        transform.position = SpellStartPosition;
+        transform.rotation = CastingEntity.transform.rotation;
+        gameObject.SetActive(true);
+    }
 
     public virtual void Update() { }
     public virtual void FixedUpdate() { }
-    public virtual void ApplySpell(Entity entity)
-    {
-        entity.SpellCastBy(new SpellEventargs(this));
-    }
 
     /// <summary>
     /// Called when the spell is destroyed
@@ -145,21 +155,10 @@ public class Spell : MonoBehaviour
     {
         DestroyEvent();
         enabled = false;
-        // Destroy the target transform if it was one that was created on load
-        if (CreateTransformOnLoad)
-            Destroy(SpellTarget.gameObject);
     }
 
 
     #region Trigger Events
-
-    /// <summary>
-    /// Called when a collision is triggered.
-    /// </summary>
-    /// <param name="other"></param>
-    public virtual void CollisionEvent(Collider other)
-    {
-    }
 
     /// <summary>
     /// Called when the spell is destroyed.
@@ -192,6 +191,14 @@ public enum SpellElementType
     Water,
     Air,
     Earth,
+}
+
+public enum SpellDeathMarker
+{
+    None,
+    Explode,
+    Freeze,
+    Burn
 }
 
 public class SpellEventargs : EventArgs

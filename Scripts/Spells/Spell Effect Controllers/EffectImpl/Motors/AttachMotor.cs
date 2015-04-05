@@ -28,9 +28,11 @@ public class AttachMotor : SpellEffect
     protected override void UpdateSpell()
     {
         base.UpdateSpell();
+        if(targetEntity != null && targetEntity.LivingState != EntityLivingState.Alive)
+            effectSetting.TriggerDestroy();
+
         if (targetEntity != null && Time.time - lastUpdateTime >= updateTime)
         {
-        //    effectSetting.spell.ApplySpell(targetEntity);
             effectSetting.TriggerApplySpell(targetEntity);
             lastUpdateTime = Time.time;
             if (singleShot)

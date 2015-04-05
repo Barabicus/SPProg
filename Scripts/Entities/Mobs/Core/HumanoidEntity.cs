@@ -8,9 +8,9 @@ public class HumanoidEntity
     //private static int animAttack02 = Animator.StringToHash("attack02");
 
 
-    //protected override void Start()
+    //protected override void OnObjectiveAdded()
     //{
-    //    base.Start();
+    //    base.OnObjectiveAdded();
     //    spellCast += SpellCastEvent;
     //}
 
@@ -31,11 +31,4 @@ public class HumanoidEntity
     //            break;
     //    }
     //}
-}
-
-public enum HumanoidEntityAnimation
-{
-    Nothing,
-    Cast01,
-    Attack02
 }

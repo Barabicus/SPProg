@@ -2,21 +2,24 @@
 using System.Collections;
 
 [RequireComponent(typeof(Entity))]
-public class HumanoidAnimatorController : MonoBehaviour
+public class HumanoidAnimatorController : EntityAnimatorController<HumanoidEntityAnimation>
 {
 
-    private Entity _entity;
-    private Animator _animator;
-
     #region Animation Hashes
+    // base
     private static int animSpeed = Animator.StringToHash("speed");
     private static int animDead = Animator.StringToHash("dead");
+    
+    // triggers
+    private static int cast01 = Animator.StringToHash("cast01");
+    private static int attack02 = Animator.StringToHash("attack02");
+
     #endregion
 
-    private void Start()
+    protected override void Start()
     {
-        _entity = GetComponent<Entity>();
-        _animator = GetComponent<Animator>();
+        base.Start();
+        Entity.HumanController = this;
     }
 
     private void Update()
@@ -26,16 +29,38 @@ public class HumanoidAnimatorController : MonoBehaviour
 
     private void UpdateAnimationValues()
     {
-        switch (_entity.LivingState)
+        switch (Entity.LivingState)
         {
             case EntityLivingState.Alive:
-                _animator.SetBool(animDead, false);
+                Animator.SetBool(animDead, false);
                 break;
             case EntityLivingState.Dead:
-                _animator.SetBool(animDead, true);
+                Animator.SetBool(animDead, true);
                 break;
         }
 
-        _animator.SetFloat(animSpeed, _entity.CurrentSpeed);
+        Animator.SetFloat(animSpeed, Entity.CurrentSpeed);
     }
+
+    public override void PlayAnimation(HumanoidEntityAnimation animation)
+    {
+        base.PlayAnimation(animation);
+        switch (animation)
+        {
+            case HumanoidEntityAnimation.Cast01:
+                Animator.SetTrigger(cast01);
+                break;
+            case HumanoidEntityAnimation.Attack02:
+                Animator.SetTrigger(attack02);
+                break;
+        }
+    }
+
+}
+
+public enum HumanoidEntityAnimation
+{
+    Nothing,
+    Cast01,
+    Attack02
 }

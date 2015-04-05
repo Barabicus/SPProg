@@ -4,7 +4,7 @@ public class EssentialObjects : ScriptableObject
 {
     public PlayerController player;
     public RTSCamera camera;
-    public SpellList spellList;
     public GameplayGUI gameplayGUI;
+    public GameMainController mainGameController;
 
 }

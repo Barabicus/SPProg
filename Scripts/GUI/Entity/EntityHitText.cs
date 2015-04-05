@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using System.Collections;
 using UnityEngine.UI;
 using System.Collections.Generic;
@@ -13,19 +14,30 @@ public class EntityHitText : MonoBehaviour
 
     private Entity entity;
     private Canvas canvas;
-    private float hitAmount = 0;
     private HitText currentHitText;
     private Timer changeTextTimer;
 
     public List<HitText> _hitTexts = new List<HitText>();
+    private int _currentHitIndex = 0;
 
     void Start()
     {
         hitProperties = GameplayGUI.instance.HitTextProperties;
         entity = GetComponent<Entity>();
-        entity.entityHealthChanged += entity_entityHealthChanged;
+        entity.EntityHealthChanged += entity_entityHealthChanged;
         changeTextTimer = new Timer(hitProperties.newTextTime);
         CreateEntityCanvas();
+        PrePoolHitTexts();
+    }
+
+    private void PrePoolHitTexts()
+    {
+        for (var i = 0; i < 4; i++)
+        {
+            HitText hitText = new HitText(this, canvas);
+            hitText.Text.gameObject.name = "HitText (" + i + ")";
+            _hitTexts.Add(hitText);
+        }
     }
 
     private void CreateEntityCanvas()
@@ -38,7 +50,6 @@ public class EntityHitText : MonoBehaviour
         rect.localScale = new Vector3(0.01f, 0.01f, 0.01f);
         rect.localPosition = new Vector3(0, 2.5f, 0);
         rect.sizeDelta = new Vector2(600, 200);
-
     }
 
     void entity_entityHealthChanged(float obj)
@@ -47,14 +58,16 @@ public class EntityHitText : MonoBehaviour
             return;
         if (currentHitText != null)
         {
-            currentHitText.hitAmount += obj;
+            currentHitText.HitAmount += obj;
         }
         else
         {
-            hitAmount += obj;
-            HitText hitText = new HitText(obj, this, canvas);
-            currentHitText = hitText;
+            currentHitText = _hitTexts[_currentHitIndex];
+            currentHitText.ResetHitText();
             changeTextTimer.Reset();
+            currentHitText.HitAmount = obj;
+            _currentHitIndex++;
+            _currentHitIndex = _currentHitIndex == _hitTexts.Count ? 0 : _currentHitIndex;
         }
     }
 
@@ -73,71 +86,87 @@ public class EntityHitText : MonoBehaviour
 
     void LateUpdate()
     {
+
+
         // Update the rotation of all hit texts to face the camera
-        for(int i = _hitTexts.Count - 1; i >= 0; i--)
+        for (int i = 0; i < _hitTexts.Count; i++)
         {
-            if (_hitTexts[i].ShouldDestroy)
+            if (_hitTexts[i].ShouldDestroy && _hitTexts[i].IsActive)
             {
-                Destroy(_hitTexts[i].hitText.gameObject);
-                _hitTexts.RemoveAt(i);
+                //  Destroy(_hitTexts[i].hitText.gameObject);
+                _hitTexts[i].Text.gameObject.SetActive(false);
                 continue;
             }
-            _hitTexts[i].hitText.rectTransform.rotation = Camera.main.transform.rotation;
-            _hitTexts[i].AnimateHitText();
+
+            if (_hitTexts[i].IsActive)
+                _hitTexts[i].AnimateHitText();
         }
     }
 
 
     public class HitText
     {
-        private EntityHitText entityHitText;
-        private float lastMoveTime;
-        public Text hitText;
-        public float hitAmount;
-        private float animatedTime;
+        private EntityHitText _entityHitText;
+        private float _animatedTime;
+        private Timer _moveTimer;
+
+        public float HitAmount { get; set; }
+
+        public Text Text { get; set; }
+
+        public bool IsActive { get { return Text.IsActive(); } }
 
         public bool ShouldDestroy
         {
-            get
-            {
-                return Time.time - lastMoveTime >= entityHitText.hitProperties.moveTime;
-            }
+            get { return _moveTimer.CanTick; }
         }
 
-        public HitText(float hitAmount, EntityHitText entityHitText, Canvas canvas)
+        public HitText(EntityHitText entityHitText, Canvas canvas)
         {
-            lastMoveTime = Time.time;
-            this.entityHitText = entityHitText;
-            entityHitText._hitTexts.Add(this);
-            this.hitAmount = hitAmount;
+            _entityHitText = entityHitText;
+            _moveTimer = new Timer(_entityHitText.hitProperties.moveTime);
+            this._entityHitText = entityHitText;
             CreateHitText(canvas);
+            Text.gameObject.SetActive(false);
+        }
+
+        public void ResetHitText()
+        {
+            Text.rectTransform.localPosition = Vector3.zero;
+            Text.color = HitAmount >= 0 ? _entityHitText.hitProperties.positiveColor : _entityHitText.hitProperties.negativeColor;
+            _moveTimer.Reset();
+            Text.gameObject.SetActive(true);
+            HitAmount = 0;
+            _animatedTime = 0;
         }
 
         void CreateHitText(Canvas canvas)
         {
             GameObject hit = new GameObject("HitText");
-            hitText = hit.AddComponent<Text>();
+            Text = hit.AddComponent<Text>();
             hit.transform.SetParent(canvas.transform);
-            hitText.font = Font.CreateDynamicFontFromOSFont("", 14);
-            hitText.rectTransform.sizeDelta = new Vector2(300, 300);
-            hitText.resizeTextMaxSize = 80;
-            hitText.resizeTextForBestFit = true;
-            hitText.alignment = TextAnchor.MiddleCenter;
-            hitText.rectTransform.localScale = new Vector3(1, 1, 1);
-            hitText.rectTransform.localPosition = Vector3.zero;
-            hitText.text = Mathf.Abs(hitAmount).ToString();
-            hitText.color = hitAmount >= 0 ? entityHitText.hitProperties.positiveColor : entityHitText.hitProperties.negativeColor;
+            Text.font = Font.CreateDynamicFontFromOSFont("", 14);
+            Text.rectTransform.sizeDelta = new Vector2(300, 300);
+            Text.resizeTextMaxSize = 80;
+            Text.resizeTextForBestFit = true;
+            Text.alignment = TextAnchor.MiddleCenter;
+            Text.rectTransform.localScale = new Vector3(1, 1, 1);
+            Text.rectTransform.localPosition = Vector3.zero;
+            Text.text = Mathf.Abs(HitAmount).ToString();
+            Text.color = HitAmount >= 0 ? _entityHitText.hitProperties.positiveColor : _entityHitText.hitProperties.negativeColor;
         }
 
         public void AnimateHitText()
         {
-            hitText.text = Mathf.Abs(hitAmount).ToString();
-            hitText.color = hitAmount >= 0 ? entityHitText.hitProperties.positiveColor : entityHitText.hitProperties.negativeColor;
-            hitText.color = Color.Lerp(hitText.color, new Color(hitText.color.r, hitText.color.g, hitText.color.b, 0), animatedTime / entityHitText.hitProperties.moveTime);
+            Text.rectTransform.rotation = Camera.main.transform.rotation;
 
-            hitText.rectTransform.localPosition = new Vector3(hitText.rectTransform.localPosition.x, hitText.rectTransform.localPosition.y + (entityHitText.hitProperties.moveSpeed * Time.deltaTime), hitText.rectTransform.localPosition.z);
+            Text.text = Mathf.Abs(HitAmount).ToString();
+            Text.color = HitAmount >= 0 ? _entityHitText.hitProperties.positiveColor : _entityHitText.hitProperties.negativeColor;
+            Text.color = Color.Lerp(Text.color, new Color(Text.color.r, Text.color.g, Text.color.b, 0), _animatedTime / _entityHitText.hitProperties.moveTime);
 
-            animatedTime += Time.deltaTime;
+            Text.rectTransform.localPosition = new Vector3(Text.rectTransform.localPosition.x, Text.rectTransform.localPosition.y + (_entityHitText.hitProperties.moveSpeed * Time.deltaTime), Text.rectTransform.localPosition.z);
+
+            _animatedTime += Time.deltaTime;
         }
     }
 

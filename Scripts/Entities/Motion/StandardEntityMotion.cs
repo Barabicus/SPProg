@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 [RequireComponent(typeof(Entity))]
-public class StandardEntityMotion : EntityAI
+public class StandardEntityMotion : EntityMotion
 {
 
     [HideInInspector]
@@ -29,6 +29,9 @@ public class StandardEntityMotion : EntityAI
     private float _chaseFallOff = 50f;
     [SerializeField]
     [HideInInspector]
+    private float _chaseStoppingDistance = -1;
+    [SerializeField]
+    [HideInInspector]
     private float _chooseNextPatrolPointDistance = 2f;
     [SerializeField]
     [HideInInspector]
@@ -47,14 +50,13 @@ public class StandardEntityMotion : EntityAI
     private Transform _chaseTarget;
     [SerializeField]
     [HideInInspector]
-    public bool _autoChase;
+    private bool _autoChase;
 
     private int _currentPatrolIndex = 0;
     private Vector3 _startPosition;
     private Timer _randomMoveTimer;
     private PathLocationMethod _prevLocationMethod;
     private PlayerController _player;
-    private Entity _entity;
 
     #region Properties
 
@@ -80,18 +82,29 @@ public class StandardEntityMotion : EntityAI
         set { _chaseTarget = value; }
     }
 
+    public float ChaseStoppingDistance
+    {
+        get { return _chaseStoppingDistance; }
+        set { _chaseStoppingDistance = value; }
+    }
+
+    public float BaseStoppingDistance
+    {
+        get;
+        set;
+    }
+
     public PathLocationMethod LocationMethod
     {
         get { return _pathLocationMethod; }
         set
         {
+            if (value == PathLocationMethod.Chase)
+                Entity.NavMeshAgent.stoppingDistance = ChaseStoppingDistance;
+            else
+                Entity.NavMeshAgent.stoppingDistance = BaseStoppingDistance;
             _pathLocationMethod = value;
         }
-    }
-
-    public Entity TargetEntity
-    {
-        get { return _entity; }
     }
 
     /// <summary>
@@ -108,20 +121,28 @@ public class StandardEntityMotion : EntityAI
         }
     }
 
+    public bool AutoChase
+    {
+        get { return _autoChase; }
+        set { _autoChase = value; }
+    }
+
 
     #endregion
 
     protected override void Start()
     {
         base.Start();
-        _entity = GetComponent<Entity>();
-        _player = GameplayGUI.instance.player;
+        _player = GameMainReferences.Instance.Player;
+        BaseStoppingDistance = Entity.NavMeshAgent.stoppingDistance;
+        if (ChaseStoppingDistance == -1)
+            ChaseStoppingDistance = BaseStoppingDistance;
         if (_areaPivotPoint != null)
             _startPosition = _areaPivotPoint.position;
         else
             _startPosition = transform.position;
         _randomMoveTimer = new Timer(_chooseRandomMoveTime);
-        _prevLocationMethod = _pathLocationMethod;
+        _prevLocationMethod = LocationMethod;
         if (_startAtRandomPathIndex)
             _currentPatrolIndex = Random.Range(0, _patrolPoints.Count);
 
@@ -133,24 +154,30 @@ public class StandardEntityMotion : EntityAI
     protected override void Update()
     {
         base.Update();
-        if (TargetEntity.MotionState == EntityMotionState.Pathfinding)
+        if (Entity.MotionState == EntityMotionState.Pathfinding)
             FindPath();
     }
 
     private void FindPath()
     {
-        if (_onlyUpdateWhenNearToPlayer && Vector3.Distance(transform.position, _player.transform.position) > 80f)
-            return;
-
-        if (_autoChase && ChaseTarget != null)
+        if (AutoChase && ChaseTarget != null)
             if (Vector3.Distance(ChaseTarget.position, transform.position) <= _chaseDistance)
             {
                 LocationMethod = PathLocationMethod.Chase;
             }
 
 
-        if (LocationMethod == PathLocationMethod.Chase && Vector3.Distance(ChaseTarget.position, transform.position) >= _chaseFallOff)
+        if (LocationMethod == PathLocationMethod.Chase && (Vector3.Distance(ChaseTarget.position, transform.position) >= _chaseFallOff || !AutoChase))
             LocationMethod = _prevLocationMethod;
+
+        // Don't find a new path when the player is not close
+        if (_onlyUpdateWhenNearToPlayer && Vector3.Distance(transform.position, _player.transform.position) > 80f)
+        {
+            Entity.NavMeshAgent.enabled = false;
+            return;
+        }
+
+        Entity.NavMeshAgent.enabled = true;
 
         switch (LocationMethod)
         {
@@ -175,7 +202,7 @@ public class StandardEntityMotion : EntityAI
                     ChooseNewAreaLocation();
                 break;
             case UpdateAreaMethod.OnReached:
-                if (Vector3.Distance(TargetEntity.NavMeshAgent.destination, transform.position) <= TargetEntity.NavMeshAgent.stoppingDistance)
+                if (Vector3.Distance(Entity.NavMeshAgent.destination, transform.position) <= Entity.NavMeshAgent.stoppingDistance)
                     ChooseNewAreaLocation();
                 break;
         }
@@ -190,7 +217,7 @@ public class StandardEntityMotion : EntityAI
         if (Physics.Raycast(ray, out hit, 1000f, 1 << LayerMask.NameToLayer("Ground")))
         {
             Debug.DrawRay(hit.point, Vector3.up * 5f, Color.red, 2f);
-            TargetEntity.NavMeshAgent.SetDestination(hit.point);
+            Entity.NavMeshAgent.SetDestination(hit.point);
         }
     }
 
@@ -204,7 +231,7 @@ public class StandardEntityMotion : EntityAI
         {
             AdvancePatrolIndex();
         }
-        TargetEntity.NavMeshAgent.SetDestination(_patrolPoints[_currentPatrolIndex]);
+        Entity.NavMeshAgent.SetDestination(_patrolPoints[_currentPatrolIndex]);
     }
 
     private void AdvancePatrolIndex()
@@ -218,17 +245,17 @@ public class StandardEntityMotion : EntityAI
     {
         if (_chaseTarget != null)
         {
-            if (_keepLookAtChaseTarget && TargetEntity.NavMeshAgent.remainingDistance <= TargetEntity.NavMeshAgent.stoppingDistance)
+            if (_keepLookAtChaseTarget && Entity.NavMeshAgent.remainingDistance <= Entity.NavMeshAgent.stoppingDistance)
             {
                 Entity.EntityLookAt(ChaseTarget.position);
             }
-            TargetEntity.NavMeshAgent.SetDestination(_chaseTarget.position);
+            Entity.NavMeshAgent.SetDestination(_chaseTarget.position);
         }
     }
 
     private void OnDrawGizmosSelected()
     {
-        if (_pathLocationMethod == PathLocationMethod.Area)
+        if (LocationMethod == PathLocationMethod.Area)
         {
             Vector3 drawPoint;
             if (Application.isPlaying)

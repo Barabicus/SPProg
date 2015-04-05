@@ -8,7 +8,7 @@ public class EssentialsWindow : EditorWindow
     PlayerController player;
     GameplayGUI gameplayGUI;
     RTSCamera rtsCamera;
-    SpellList spellList;
+    GameMainController mainGameController;
     EssentialObjects ess;
 
     [MenuItem("Window/Essential GameObjects")]
@@ -59,11 +59,14 @@ public class EssentialsWindow : EditorWindow
             gameplayGUI = PrefabUtility.InstantiatePrefab(gameplayGUI) as GameplayGUI;
             rtsCamera = PrefabUtility.InstantiatePrefab(rtsCamera) as RTSCamera;
             player = PrefabUtility.InstantiatePrefab(player) as PlayerController;
-            spellList = PrefabUtility.InstantiatePrefab(spellList) as SpellList;
+            mainGameController = PrefabUtility.InstantiatePrefab(mainGameController) as GameMainController;
 
-            gameplayGUI.player = player;
-            gameplayGUI.rtsCamera = rtsCamera;
+            var gameMainReferences = mainGameController.GetComponentInChildren<GameMainReferences>();
+            // Setup references
+            gameMainReferences.Player = player;
+            gameMainReferences.RTSCamera = rtsCamera;
             rtsCamera.followTarget = player.transform;
+
             Debug.Log("Created");
         }
 
@@ -76,7 +79,7 @@ public class EssentialsWindow : EditorWindow
         player = ess.player;
         gameplayGUI = ess.gameplayGUI;
         rtsCamera = ess.camera;
-        spellList = ess.spellList;
+        mainGameController = ess.mainGameController;
 
         if (player == null)
         {
@@ -96,9 +99,9 @@ public class EssentialsWindow : EditorWindow
             loaded = false;
         }
 
-        if (spellList == null)
+        if (mainGameController == null)
         {
-            Debug.Log("SpellList was null");
+            Debug.Log("Game Main Controller was nulll");
             loaded = false;
         }
 

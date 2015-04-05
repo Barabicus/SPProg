@@ -15,7 +15,7 @@ public class PlayerDistanceTrigger : GameEventTrigger
     public override void Start()
     {
         base.Start();
-        player = GameplayGUI.instance.player;
+        player = GameMainReferences.Instance.Player;
     }
 
     public void Update()

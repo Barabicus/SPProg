@@ -6,6 +6,8 @@ public abstract class SpellMotor : SpellEffect, ISpellMotor
 
     [SerializeField]
     private MotorEntityTriggerState _entityTriggerState = MotorEntityTriggerState.Living;
+    [SerializeField]
+    private bool onlyCollideWithEnemies = true;
 
     public MotorEntityTriggerState EntityTriggerState
     {
@@ -14,9 +16,16 @@ public abstract class SpellMotor : SpellEffect, ISpellMotor
 
     public void TryTriggerCollision(ColliderEventArgs args, Collider c)
     {
+        if (c.gameObject.layer == LayerMask.NameToLayer("MoodBox"))
+            return;
+
         if (c.gameObject.layer == LayerMask.NameToLayer("Entity"))
         {
             Entity e = c.gameObject.GetComponent<Entity>();
+
+            if (e == null || onlyCollideWithEnemies && !effectSetting.spell.CastingEntity.IsEnemy(e) || effectSetting.spell.IgnoreEntities.Contains(e))
+                return;
+
             switch (EntityTriggerState)
             {
                 case MotorEntityTriggerState.Dead:

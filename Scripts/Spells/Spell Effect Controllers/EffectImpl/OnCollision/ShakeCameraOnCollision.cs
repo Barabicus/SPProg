@@ -11,7 +11,7 @@ public class ShakeCameraOnCollision : SpellEffect
     protected override void effectSetting_OnSpellCollision(ColliderEventArgs args, Collider obj)
     {
         base.effectSetting_OnSpellCollision(args, obj);
-        GameplayGUI.instance.rtsCamera.TriggerShake(shakeTime, shakeAmount);
+        GameMainReferences.Instance.RTSCamera.TriggerShake(shakeTime, shakeAmount);
     }
 
 }

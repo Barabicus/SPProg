@@ -11,7 +11,7 @@ public class SelectedSpellOverlay : MonoBehaviour
 
     private void Start()
     {
-        player = GameplayGUI.instance.player;
+        player = GameMainReferences.Instance.Player;
         spellbutton = transform.parent.GetComponentInChildren<SpellButton>();
         selectedImage = GetComponent<Image>();
     }

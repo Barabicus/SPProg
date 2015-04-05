@@ -22,7 +22,7 @@ public class AddStatModifier : SpellEffect
     protected override void Start()
     {
         base.Start();
-        _incrementStat = new EntityStats(speedMod, hpMod);
+        _incrementStat = new EntityStats(speedMod);
     }
 
     protected override void effectSetting_OnSpellApply(Entity entity)

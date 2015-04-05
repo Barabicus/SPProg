@@ -2,7 +2,7 @@
 using System.Collections;
 
 [RequireComponent(typeof(Entity))]
-public class PlayerController : EntityAI
+public class PlayerController : EntityComponent
 {
 
     #region Fields
@@ -16,7 +16,7 @@ public class PlayerController : EntityAI
     private Entity _entity;
     #endregion
 
-    protected override  void Start()
+    protected override void Start()
     {
         base.Start();
         _lastSelectTime = Time.time;
@@ -27,6 +27,12 @@ public class PlayerController : EntityAI
     protected override void Update()
     {
         base.Update();
+        if (Entity.LivingState == EntityLivingState.Alive)
+            DoUpdate();
+    }
+
+    private void DoUpdate()
+    {
         if (Input.GetMouseButton(1))
             LookAtMouse();
 
@@ -172,9 +178,15 @@ public class PlayerController : EntityAI
     //    return LivingState == EntityLivingState.Alive && Input.GetMouseButton(1);
     //}
 
-    protected void Die()
+    protected override void EntityKilled(Entity e)
     {
-        Entity.CurrentHP = Entity.MaxHP;
+        base.EntityKilled(e);
+        Invoke("Resurrect", 3f);
+    }
+
+    private void Resurrect()
+    {
+        Entity.CurrentHp = Entity.MaxHp;
         Entity.MotionState = EntityMotionState.Static;
         transform.position = respawnPoint.position;
         Entity.LivingState = EntityLivingState.Alive;

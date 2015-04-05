@@ -7,8 +7,6 @@ using System.Collections;
 public class SpreadMotor : TimedUpdateableSpellMotor
 {
     public float radius = 5f;
-
-
     protected override void UpdateSpell()
     {
         base.UpdateSpell();
@@ -27,7 +25,8 @@ public class SpreadMotor : TimedUpdateableSpellMotor
                 if (ent.CanAttachSpell(effectSetting.spell))
                 {
                     Spell sp = SpellList.Instance.GetNewSpell(effectSetting.spell);
-                    sp.CastSpell(effectSetting.spell.CastingEntity, ent.transform);
+                    sp.CastSpell(effectSetting.spell.CastingEntity);
+                    sp.SetupSpellTransform(ent.transform);
                     ent.AttachSpell(sp);
                 }
             }

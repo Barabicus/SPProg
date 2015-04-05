@@ -23,10 +23,7 @@ public class StandardEntityEditor : Editor
     private SerializedProperty chaseTarget;
     private SerializedProperty autoChase;
     private SerializedProperty chaseFallOff;
-
-
-
-
+    private SerializedProperty chaseStoppingDistance;
 
     private ReorderableList list;
 
@@ -48,8 +45,7 @@ public class StandardEntityEditor : Editor
         chaseTarget = serializedObject.FindProperty("_chaseTarget");
         autoChase = serializedObject.FindProperty("_autoChase");
         chaseFallOff = serializedObject.FindProperty("_chaseFallOff");
-
-
+        chaseStoppingDistance = serializedObject.FindProperty("_chaseStoppingDistance");
 
 
         list = new ReorderableList(serializedObject, patrolPoints, true, true, true, true);
@@ -157,6 +153,7 @@ public class StandardEntityEditor : Editor
         EditorGUILayout.PropertyField(chaseTarget);
         EditorGUILayout.PropertyField(keepLookAtChaseTarget);
         EditorGUILayout.PropertyField(chaseDistance);
+        EditorGUILayout.PropertyField(chaseStoppingDistance);
         EditorGUILayout.PropertyField(chaseFallOff);
     }
 

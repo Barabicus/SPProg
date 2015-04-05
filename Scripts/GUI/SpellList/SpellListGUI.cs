@@ -6,18 +6,17 @@ using System.Collections.Generic;
 
 public class SpellListGUI : MonoBehaviour
 {
-    public SpellList spellList;
-
     public Transform spellListBody;
     public Transform spellItemPrefab;
     public int spellsPerPage = 5;
+    public ScrollRect spellScroll;
 
     private List<Transform> _spellsInList = new List<Transform>();
 
 
     private void Start()
     {
-
+        CreateSpellList(SpellElementType.Fire);
     }
 
     #region Spell Methods
@@ -34,7 +33,7 @@ public class SpellListGUI : MonoBehaviour
             RemoveSpell(_spellsInList[i]);
 
         int spellCount = 0;
-        foreach (Spell s in spellList.spells)
+        foreach (Spell s in SpellList.Instance.Spells)
         {
             if (s.elementType != eType)
                 continue;
@@ -43,6 +42,11 @@ public class SpellListGUI : MonoBehaviour
             if (spellCount == spellsPerPage)
                 break;
         }
+
+        Canvas.ForceUpdateCanvases();
+        spellScroll.verticalScrollbar.value = 1f;
+        Canvas.ForceUpdateCanvases();
+
     }
 
     private void AddSpell(Spell spell)

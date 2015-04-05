@@ -9,7 +9,8 @@ public class SpawnSpell : SpellEffect
     {
         base.Start();
         Spell sp = SpellList.Instance.GetNewSpell(spawnSpell);
-        sp.CastSpell(effectSetting.spell.CastingEntity, transform);
+        sp.CastSpell(effectSetting.spell.CastingEntity);
+        sp.SetupSpellTransform(transform);
         sp.SpellTarget = effectSetting.spell.SpellTarget;
         sp.SpellTargetPosition = effectSetting.spell.SpellTargetPosition;
         enabled = false;

@@ -10,7 +10,7 @@ public class ElementChangeEvent : GameEvent
     public override void Start()
     {
         base.Start();
-        player = GameplayGUI.instance.player;
+        player = GameMainReferences.Instance.Player;
     }
 
     public override void EnterEvent(Collider other)

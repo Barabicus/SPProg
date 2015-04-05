@@ -38,4 +38,16 @@ public static class CustomAssetUtility
     {
         CustomAssetUtility.CreateAsset<EssentialObjects>();
     }
+
+    [MenuItem("Assets/Create/Spell List Info")]
+    public static void CreateSpellListInfo()
+    {
+        CustomAssetUtility.CreateAsset<SpellListInfo>();
+    }
+
+    [MenuItem("Assets/Create/GameConfig Info")]
+    public static void CreateGameConfigInfo()
+    {
+        CustomAssetUtility.CreateAsset<GameConfigInfo>();
+    }
 }

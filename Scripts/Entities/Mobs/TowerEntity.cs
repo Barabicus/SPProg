@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class TowerEntity : EntityAI {
+public class TowerEntity : EntityComponent {
 
     public Transform rotPoint;
     public Spell attackSpell;
@@ -12,7 +12,7 @@ public class TowerEntity : EntityAI {
     protected override void Start()
     {
         base.Start();
-        player = GameplayGUI.instance.player;
+        player = GameMainReferences.Instance.Player;
     }
 
     protected override void Update()

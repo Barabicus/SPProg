@@ -2,6 +2,7 @@
 using System.Collections;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using System;
 
 public class SpellButton : MonoBehaviour, IDropHandler
 {
@@ -15,7 +16,7 @@ public class SpellButton : MonoBehaviour, IDropHandler
     public void Start()
     {
         iconImage = GetComponent<Image>();
-        player = GameplayGUI.instance.player;
+        player = GameMainReferences.Instance.Player;
         spell = player.spellList[spellIndex];
         ChangeSpellIcon(spell);
         GetComponent<Button>().onClick.AddListener(OnClick);

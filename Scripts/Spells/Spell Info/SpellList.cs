@@ -1,11 +1,10 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 public class SpellList : MonoBehaviour
 {
-
-    public Spell[] spells;
 
     public static SpellList Instance;
 
@@ -14,22 +13,22 @@ public class SpellList : MonoBehaviour
     public void Awake()
     {
         Instance = this;
-        _spellDict = new Dictionary<string, Spell>();
-
-        foreach (Spell spell in spells)
-        {
-            if (!_spellDict.ContainsKey(spell.SpellID))
-                _spellDict.Add(spell.SpellID, spell);
-            else
-                Debug.LogWarning("Spell already exists: " + spell.spellID);
-            spell.gameObject.SetActive(false);
-        }
-
+        _spellDict = Resources.LoadAll<SpellListInfo>("Utility")[0].SpellDictionary;
     }
+
+    public Spell[] Spells
+    {
+        get { return SpellDictionary.Values.ToArray(); }
+    }
+
+    public Dictionary<string, Spell> SpellDictionary
+    {
+        get { return _spellDict;}
+    } 
 
     public Spell GetNewSpell(string spell)
     {
-        return  Instantiate(_spellDict[spell]);
+        return Instantiate(_spellDict[spell]);
     }
 
     public Spell GetNewSpell(Spell spell)
@@ -47,11 +46,4 @@ public class SpellList : MonoBehaviour
         return _spellDict[spell.SpellID];
     }
 
-}
-
-public enum SpellID{
-    Fireball,
-    Steam,
-    PhysicalAttack,
-    IceShard
 }

@@ -34,7 +34,6 @@ public class EffectSetting : MonoBehaviour
     /// <param name="other"></param>
     public void TriggerCollision(ColliderEventArgs args, Collider other)
     {
-        spell.CollisionEvent(other);
         if (OnSpellCollision != null)
             OnSpellCollision(args, other);
         if (destroyOnCollision)

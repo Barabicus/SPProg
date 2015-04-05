@@ -8,7 +8,8 @@ public class SpawnSpellOnCollision : SpellEffect
     {
         base.effectSetting_OnSpellCollision(args, obj);
         Spell sp = SpellList.Instance.GetNewSpell(spawnSpell);
-        sp.CastSpell(effectSetting.spell.CastingEntity, transform);
+        sp.CastSpell(effectSetting.spell.CastingEntity);
+        sp.SetupSpellTransform(transform);
         enabled = false;
     }
 }

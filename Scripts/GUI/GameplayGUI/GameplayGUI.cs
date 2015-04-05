@@ -20,8 +20,6 @@ public class GameplayGUI : MonoBehaviour
 
 
     public Text selectedEntityText;
-    public PlayerController player;
-    public RTSCamera rtsCamera;
 
     public event Action<Spell, int> spellChanged;
 
@@ -29,6 +27,7 @@ public class GameplayGUI : MonoBehaviour
     private bool _mouseDragLock;
 
     private Entity _selectedEntity;
+    private PlayerController player;
 
     public Entity SelectedEntity
     {
@@ -77,6 +76,7 @@ public class GameplayGUI : MonoBehaviour
     {
         instance = this;
         HitTextProperties = Resources.LoadAll<HitTextProperties>("Utility/GUI")[0];
+        player = GameMainReferences.Instance.Player;
     }
 
     void Update()
@@ -137,7 +137,7 @@ public class GameplayGUI : MonoBehaviour
 
     private void UpdatePlayer()
     {
-        playerHealth.anchorMax = new Vector2(GetPercent(player.Entity.CurrentHP, player.Entity.MaxHP), playerHealth.anchorMax.y);
+        playerHealth.anchorMax = new Vector2(GetPercent(player.Entity.CurrentHp, player.Entity.MaxHp), playerHealth.anchorMax.y);
 
     }
 
@@ -159,7 +159,7 @@ public class GameplayGUI : MonoBehaviour
             selectedEntityText.text = "";
 
         // Update Health Amount
-        healthAmount.anchorMax = new Vector2(GetPercent(SelectedEntity.CurrentHP, SelectedEntity.MaxHP), healthAmount.anchorMax.y);
+        healthAmount.anchorMax = new Vector2(GetPercent(SelectedEntity.CurrentHp, SelectedEntity.MaxHp), healthAmount.anchorMax.y);
 
     }
 
@@ -171,6 +171,11 @@ public class GameplayGUI : MonoBehaviour
     public void SetMouseOver(bool value)
     {
         IsMouseOver = value;
+    }
+
+    public void QuitApplication()
+    {
+        Application.Quit();
     }
 
 }

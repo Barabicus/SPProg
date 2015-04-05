@@ -126,12 +126,9 @@ public class MissileMotor : SpellMotor
 
     public void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject != effectSetting.spell.CastingEntity.gameObject && other.gameObject.layer != LayerMask.NameToLayer("Spell") && other.gameObject.layer != LayerMask.NameToLayer("Ground") && other.gameObject.layer != LayerMask.NameToLayer("Ignore Raycast"))
+        if (other.gameObject != effectSetting.spell.CastingEntity.gameObject && other.gameObject.layer != LayerMask.NameToLayer("Spell") && other.gameObject.layer != LayerMask.NameToLayer("Ignore Raycast"))
         {
-
             TryTriggerCollision(new ColliderEventArgs(), other);
-          //  effectSetting.TriggerCollision(new ColliderEventArgs(), other);
-
         }
     }
 
