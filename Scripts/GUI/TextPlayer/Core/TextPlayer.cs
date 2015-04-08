@@ -10,12 +10,14 @@ public class TextPlayer : MonoBehaviour
     public Text talkText;
     public Image panelImage;
     public float playTextTime = 2f;
-    public event Action textFinished;
+    public event Action TextFinished;
 
     private Queue<string> textQueue = new Queue<string>();
     private string currentText;
     private Timer timer;
     private Color panelStartColor;
+
+    public event Action FinishedPlaying;
 
     protected virtual void Awake() { }
 
@@ -33,14 +35,20 @@ public class TextPlayer : MonoBehaviour
 
     public void PlayNextText()
     {
-        if (textQueue.Count > 0)
-            currentText = textQueue.Dequeue();
-        else
-            currentText = null;
+        if (textQueue.Count == 0 && currentText != null && TextFinished != null)
+            TextFinished();
 
+        if (textQueue.Count > 0)
+        {
+            currentText = textQueue.Dequeue();
+        }
+        else
+        {
+            currentText = null;
+            if (FinishedPlaying != null)
+                FinishedPlaying();
+        }
         talkText.text = currentText;
-        if (currentText == null && textFinished != null)
-            textFinished();
         timer.Reset();
 
     }

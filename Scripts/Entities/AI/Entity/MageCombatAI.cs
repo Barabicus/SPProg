@@ -6,10 +6,13 @@ using System.Collections;
 public class MageCombatAI : EntityAI
 {
 
+    [SerializeField] private Spell[] _Spells;
+
     public Spell fireSpell;
     public Spell waterSpell;
     public Spell healSpell;
     public float attackDistance;
+    public float attackSpellTime = 0.5f;
 
     private PlayerController _player;
     private StandardEntityMotion _motion;
@@ -49,7 +52,7 @@ public class MageCombatAI : EntityAI
                     _switchSpellTimer = new Timer(3f);
                     break;
                 default:
-                    _switchSpellTimer = new Timer(0.5f);
+                    _switchSpellTimer = new Timer(attackSpellTime);
                     break;
             }
         }
@@ -101,7 +104,7 @@ public class MageCombatAI : EntityAI
         _player = GameMainReferences.Instance.Player;
         _motion = GetComponent<StandardEntityMotion>();
         _motion.ChaseTarget = _player.transform;
-        _switchSpellTimer = new Timer(0.5f);
+        _switchSpellTimer = new Timer(attackSpellTime);
     }
 
     protected override void LivingUpdate()

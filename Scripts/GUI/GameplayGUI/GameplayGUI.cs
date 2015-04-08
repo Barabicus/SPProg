@@ -178,4 +178,9 @@ public class GameplayGUI : MonoBehaviour
         Application.Quit();
     }
 
+    public void LoadMainLevel()
+    {
+        Application.LoadLevel(0);
+    }
+
 }

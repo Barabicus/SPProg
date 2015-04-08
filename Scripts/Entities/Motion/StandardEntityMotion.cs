@@ -121,6 +121,11 @@ public class StandardEntityMotion : EntityMotion
         }
     }
 
+    public bool IsInChaseDistance
+    {
+        get { return Vector3.Distance(ChaseTarget.position, transform.position) <= _chaseDistance; }
+    }
+
     public bool AutoChase
     {
         get { return _autoChase; }
@@ -161,7 +166,7 @@ public class StandardEntityMotion : EntityMotion
     private void FindPath()
     {
         if (AutoChase && ChaseTarget != null)
-            if (Vector3.Distance(ChaseTarget.position, transform.position) <= _chaseDistance)
+            if (IsInChaseDistance)
             {
                 LocationMethod = PathLocationMethod.Chase;
             }
@@ -190,8 +195,13 @@ public class StandardEntityMotion : EntityMotion
             case PathLocationMethod.Area:
                 UpdateArea();
                 break;
+                case PathLocationMethod.Custom:
+                DoCustomUpdate();
+                break;
         }
     }
+
+    protected virtual void DoCustomUpdate() { }
 
     private void UpdateArea()
     {
@@ -274,5 +284,6 @@ public enum PathLocationMethod
     None,
     Area,
     Patrol,
-    Chase
+    Chase,
+    Custom
 }

@@ -5,9 +5,6 @@ public class AddStatModifier : SpellEffect
 {
 
     public float speedMod = 0f;
-    [Tooltip("Used to Directly affect the entity's health regardless of elemental resistence. This can be used for heals")]
-    public float hpMod = 0f;
-
 
     /// <summary>
     /// How much each apply will increment the entity stat

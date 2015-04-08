@@ -43,7 +43,7 @@ public class ElementalApply : SpellEffect
         if (ent.LivingState != EntityLivingState.Alive)
             return;
 
-        // Apply the spells elemental properties
+        // Apply the _spellAIProprties elemental properties
         ent.ApplyElementalSpell(this);
 
     }

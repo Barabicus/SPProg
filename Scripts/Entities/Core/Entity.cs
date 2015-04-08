@@ -23,6 +23,8 @@ public class Entity : MonoBehaviour
     [SerializeField]
     private string _entityID;
     [SerializeField]
+    private bool _isInvincible = false;
+    [SerializeField]
     private bool loadHealthBar = true;
     [SerializeField]
     private bool loadSpeechBubble = false;
@@ -66,7 +68,7 @@ public class Entity : MonoBehaviour
     private Timer _audioPlayTimer;
     private Spell _activeBeam;
     private NavMeshAgent _navMeshAgent;
-
+    private Timer _updateSpeedTimer;
 
     protected Transform SelectedTarget;
     protected Animator Animator;
@@ -162,6 +164,11 @@ public class Entity : MonoBehaviour
         }
     }
 
+    public float CurrentHealthNormalised
+    {
+        get { return CurrentHp / MaxHp; }
+    }
+
     /// <summary>
     /// Specified by the entity if it wants to keep the beam open
     /// </summary>
@@ -240,6 +247,8 @@ public class Entity : MonoBehaviour
         get { return _currentHp; }
         set
         {
+            if (_isInvincible)
+                return;
             float oldHealth = _currentHp;
             _currentHp = Mathf.Clamp(value, 0f, MaxHp);
             if (EntityHealthChanged != null)
@@ -339,6 +348,7 @@ public class Entity : MonoBehaviour
         Animator = GetComponent<Animator>();
         _rigidbody = GetComponent<Rigidbody>();
         _audio = GetComponent<AudioSource>();
+        _updateSpeedTimer = new Timer(UnityEngine.Random.Range(0.15f, 0.35f));
     }
 
     protected virtual void Start()
@@ -378,8 +388,8 @@ public class Entity : MonoBehaviour
         {
             SpeechBubble =
                 Instantiate(GameMainReferences.Instance.GameConfigInfo.EntitySpeechBubblePrefab);
-
-            SpeechBubble.transform.SetParent(transform);
+            SpeechBubble.Entity = this;
+            //  SpeechBubble.transform.SetParent(transform);
         }
 
         if (loadHealthBar)
@@ -399,7 +409,6 @@ public class Entity : MonoBehaviour
         switch (LivingState)
         {
             case EntityLivingState.Alive:
-                UpdateSpeed();
                 LivingUpdate();
                 break;
             case EntityLivingState.Dead:
@@ -425,6 +434,9 @@ public class Entity : MonoBehaviour
     /// </summary>
     protected virtual void LivingUpdate()
     {
+        if (_updateSpeedTimer.CanTickAndReset())
+            UpdateSpeed();
+
         if (!SpellsIgnoreElementalCost)
         {
             UpdateRechargeLock();
@@ -544,7 +556,7 @@ public class Entity : MonoBehaviour
 
 
 
-    #region Spells
+    #region _spellAIProprties
 
     public bool HasSpellMarker(string spellID)
     {

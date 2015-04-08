@@ -119,7 +119,7 @@ public class SpellInspector : Editor
     {
         EditorGUILayout.BeginVertical("Box");
 
-        EditorGUILayout.LabelField("Game Object / Component Spells", EditorStyles.boldLabel);
+        EditorGUILayout.LabelField("Game Object / Component _spellAIProprties", EditorStyles.boldLabel);
 
         DrawAddComponent<DestroySpellOnCondition>("Destroy Spell On Condition");
         DrawAddComponent<DisableSpellTimed>("Disable Spell Timed");
@@ -136,7 +136,6 @@ public class SpellInspector : Editor
 
     private void StatModCallBack(AddStatModifier statMod)
     {
-        statMod.hpMod = EditorGUILayout.FloatField("HP Mod", statMod.hpMod);
         statMod.speedMod = EditorGUILayout.FloatField("Speed Mod", statMod.speedMod);
     }
 

@@ -102,7 +102,7 @@ public class BeamMotor : SpellMotor
 
     private bool CanKeepBeamOpen()
     {
-        // The spell cast delay can mess up with beam spells. If it can't tick this will return false in that case
+        // The spell cast delay can mess up with beam _spellAIProprties. If it can't tick this will return false in that case
         // the current beam will stop. Be careful when using cast delay with beams.
         if (!effectSetting.spell.CastingEntity.CanCastSpell(effectSetting.spell) || !KeepBeamAlive)
         {

@@ -12,14 +12,24 @@ public class EffectSetting : MonoBehaviour
     public event Action<ColliderEventArgs, Collider> OnSpellCollision;
     public event Action<Entity> OnSpellApply;
     public event Action OnEffectDestroy;
+    public event Action OnSpellCast;
+    public event Action OnSpellReset;
 
     void Start()
     {
         spell = GetComponent<Spell>();
         spell.OnSpellDestroy += spell_OnSpellDestroy;
+        StartCoroutine(TriggerSpellCast());
     }
 
-    void spell_OnSpellDestroy(object sender, SpellEventargs e)
+    private IEnumerator TriggerSpellCast()
+    {
+        yield return null;
+        if (OnSpellCast != null)
+            OnSpellCast();
+    }
+
+    private void spell_OnSpellDestroy(object sender, SpellEventargs e)
     {
         if (OnSpellDestroy != null)
             OnSpellDestroy(sender, e);
@@ -27,8 +37,9 @@ public class EffectSetting : MonoBehaviour
         Invoke("DestroyGameObject", destroyTimeDelay);
     }
 
+
     /// <summary>
-    /// Calling this will trigger a collision in all of the spells effects
+    /// Calling this will trigger a collision in all of the _spellAIProprties effects
     /// </summary>
     /// <param name="args"></param>
     /// <param name="other"></param>
@@ -58,8 +69,25 @@ public class EffectSetting : MonoBehaviour
     {
         if (OnEffectDestroy != null)
             OnEffectDestroy();
-        Destroy(gameObject);
+
+        gameObject.SetActive(false);
+
+        TriggerSpellReset();
+
+      //  Destroy(gameObject);
     }
 
+    private void TriggerSpellReset()
+    {
+        if (OnSpellReset != null)
+            OnSpellReset();
+        ResetEffect();
+    }
+
+    private void ResetEffect()
+    {
+        Debug.Log("pool");
+        SpellPool.Instance.PoolSpell(spell);
+    }
 
 }

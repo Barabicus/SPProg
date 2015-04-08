@@ -19,6 +19,11 @@ public class PlayAnimation : SpellEffectStandard
             e.HumanController.PlayAnimation(HumanAnimation);
     }
 
+    public void Reset()
+    {
+        triggerEvent = TriggerEvent.Cast;
+    }
+
 }
 
 

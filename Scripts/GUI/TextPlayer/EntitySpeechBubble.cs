@@ -1,23 +1,26 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class EntitySpeechBubble : TextPlayer {
+public class EntitySpeechBubble : TextPlayer
+{
 
-    private Canvas Canvas { get; set; }
-    private Entity Entity { get; set; }
+    [SerializeField]
+    private Transform _container;
+
+    // private Canvas Canvas { get; set; }
+    public Entity Entity { get; set; }
 
     protected override void Start()
     {
         base.Start();
-        Canvas = GetComponent<Canvas>();
-        transform.localPosition = new Vector3(0, 4.5f, 0);
-        Entity = transform.parent.GetComponent<Entity>();
+        //  Canvas = GetComponent<Canvas>();
     }
 
     private void LateUpdate()
     {
-
         // Face the camera
-        Canvas.transform.rotation = Camera.main.transform.rotation;
+        //  _container.rotation = Camera.main.transform.rotation;
+        if (Entity != null)
+            _container.position = RectTransformUtility.WorldToScreenPoint(Camera.main, Entity.transform.position + new Vector3(0, 4.5f, 0));
     }
 }

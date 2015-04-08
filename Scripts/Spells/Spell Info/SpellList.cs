@@ -9,11 +9,21 @@ public class SpellList : MonoBehaviour
     public static SpellList Instance;
 
     private Dictionary<string, Spell> _spellDict;
+    private SpellPool _spellPool;
 
     public void Awake()
     {
         Instance = this;
         _spellDict = Resources.LoadAll<SpellListInfo>("Utility")[0].SpellDictionary;
+    }
+
+    public void Start()
+    {
+        _spellPool = SpellPool.Instance;
+        foreach (var value in _spellDict.Values)
+        {
+            _spellPool.InitSpellPool(value);
+        }
     }
 
     public Spell[] Spells
@@ -28,7 +38,10 @@ public class SpellList : MonoBehaviour
 
     public Spell GetNewSpell(string spell)
     {
-        return Instantiate(_spellDict[spell]);
+        Spell sp = _spellPool.GetSpellFromPool(spell);
+        if (sp == null)
+            sp = Instantiate(_spellDict[spell]);
+        return sp;
     }
 
     public Spell GetNewSpell(Spell spell)

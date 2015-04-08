@@ -5,14 +5,19 @@ using System.Collections;
 public class HumanoidAnimatorController : EntityAnimatorController<HumanoidEntityAnimation>
 {
 
+    private AnimatorStateInfo _layer1StateInfo;
+
     #region Animation Hashes
     // base
     private static int animSpeed = Animator.StringToHash("speed");
     private static int animDead = Animator.StringToHash("dead");
     
     // triggers
-    private static int cast01 = Animator.StringToHash("cast01");
-    private static int attack02 = Animator.StringToHash("attack02");
+    private static int cast01 = Animator.StringToHash("cast-01");
+    private static int cast02 = Animator.StringToHash("cast-02");
+    private static int cast03 = Animator.StringToHash("cast-03");
+
+    private static int attack02 = Animator.StringToHash("attack-02");
 
     #endregion
 
@@ -20,6 +25,7 @@ public class HumanoidAnimatorController : EntityAnimatorController<HumanoidEntit
     {
         base.Start();
         Entity.HumanController = this;
+        _layer1StateInfo = Animator.GetCurrentAnimatorStateInfo(1);
     }
 
     private void Update()
@@ -48,10 +54,16 @@ public class HumanoidAnimatorController : EntityAnimatorController<HumanoidEntit
         switch (animation)
         {
             case HumanoidEntityAnimation.Cast01:
-                Animator.SetTrigger(cast01);
+                Animator.Play(cast01);
+                break;
+            case HumanoidEntityAnimation.Cast02:
+                Animator.Play(cast02);
+                break;
+            case HumanoidEntityAnimation.Cast03:
+                Animator.Play(cast03);
                 break;
             case HumanoidEntityAnimation.Attack02:
-                Animator.SetTrigger(attack02);
+                Animator.Play(attack02);
                 break;
         }
     }
@@ -62,5 +74,7 @@ public enum HumanoidEntityAnimation
 {
     Nothing,
     Cast01,
-    Attack02
+    Attack02,
+    Cast02,
+    Cast03
 }

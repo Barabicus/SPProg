@@ -28,7 +28,7 @@ public class SpellListGUI : MonoBehaviour
 
     public void CreateSpellList(SpellElementType eType)
     {
-        // Remove all spells in the list
+        // Remove all _spellAIProprties in the list
         for (int i = _spellsInList.Count - 1; i >= 0; i--)
             RemoveSpell(_spellsInList[i]);
 

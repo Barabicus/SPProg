@@ -18,7 +18,7 @@ public class Spell : MonoBehaviour
     private SpellDeathMarker _spellDeathMarker = SpellDeathMarker.None;
     public AudioClip castAudio;
     public Sprite spellIcon;
-    public string spellDescription;
+    public string spellDescription = "NOT IMPLEMENTED";
     public ElementalStats elementalCost;
     public SpellElementType elementType = SpellElementType.NoElement;
     #endregion

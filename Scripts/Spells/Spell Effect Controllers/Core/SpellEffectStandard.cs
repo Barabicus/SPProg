@@ -19,13 +19,21 @@ public class SpellEffectStandard : SpellEffect
         Collision,
         SpellApply,
         SpellDestroy,
-        EffectDestroy
+        EffectDestroy,
+        Cast
     }
 
     protected override void Start()
     {
         base.Start();
         timedEvent = new Timer(timeTrigger);
+    }
+
+    protected override void effectSetting_OnSpellCast()
+    {
+        base.effectSetting_OnSpellCast();
+        if(triggerEvent == TriggerEvent.Cast)
+            EventTriggered();
     }
 
     protected override void effectSetting_OnSpellCollision(ColliderEventArgs args, Collider obj)
