@@ -8,33 +8,32 @@ public class EffectSetting : MonoBehaviour
     public Spell spell;
     public bool destroyOnCollision;
     public float destroyTimeDelay = 0f;
-    public event EventHandler<SpellEventargs> OnSpellDestroy;
+    public event Action OnSpellStart;
+    public event Action OnSpellDestroy;
     public event Action<ColliderEventArgs, Collider> OnSpellCollision;
     public event Action<Entity> OnSpellApply;
     public event Action OnEffectDestroy;
     public event Action OnSpellCast;
     public event Action OnSpellReset;
 
-    void Start()
+    public void InitializeEffect()
     {
         spell = GetComponent<Spell>();
         spell.OnSpellDestroy += spell_OnSpellDestroy;
-        StartCoroutine(TriggerSpellCast());
+
+        foreach (var componentsInChild in transform.GetComponentsInChildren<SpellEffect>(true))
+        {
+            componentsInChild.InitializeEffect(this);
+        }
+
     }
 
-    private IEnumerator TriggerSpellCast()
+    public void TriggerSpellCast()
     {
-        yield return null;
+        if (OnSpellStart != null)
+            OnSpellStart();
         if (OnSpellCast != null)
             OnSpellCast();
-    }
-
-    private void spell_OnSpellDestroy(object sender, SpellEventargs e)
-    {
-        if (OnSpellDestroy != null)
-            OnSpellDestroy(sender, e);
-
-        Invoke("DestroyGameObject", destroyTimeDelay);
     }
 
 
@@ -49,7 +48,7 @@ public class EffectSetting : MonoBehaviour
             OnSpellCollision(args, other);
         if (destroyOnCollision)
         {
-            TriggerDestroy();
+            TriggerDestroySpell();
         }
     }
 
@@ -59,25 +58,35 @@ public class EffectSetting : MonoBehaviour
             OnSpellApply(entity);
     }
 
-    public void TriggerDestroy()
+    public void TriggerDestroySpell()
     {
         spell.DestroySpell();
+    }
+
+
+    private void spell_OnSpellDestroy(Spell spell)
+    {
+        if (OnSpellDestroy != null)
+            OnSpellDestroy();
+
         Invoke("DestroyGameObject", destroyTimeDelay);
     }
 
     private void DestroyGameObject()
     {
+        CancelInvoke();
         if (OnEffectDestroy != null)
             OnEffectDestroy();
 
         gameObject.SetActive(false);
 
-        TriggerSpellReset();
+        spell.TriggerSpellReset();
+        TriggerEffectReset();
 
       //  Destroy(gameObject);
     }
 
-    private void TriggerSpellReset()
+    private void TriggerEffectReset()
     {
         if (OnSpellReset != null)
             OnSpellReset();
@@ -86,8 +95,8 @@ public class EffectSetting : MonoBehaviour
 
     private void ResetEffect()
     {
-        Debug.Log("pool");
         SpellPool.Instance.PoolSpell(spell);
+        spell.OnSpellDestroy += spell_OnSpellDestroy;
     }
 
 }

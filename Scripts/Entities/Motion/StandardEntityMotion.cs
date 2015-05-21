@@ -50,7 +50,10 @@ public class StandardEntityMotion : EntityMotion
     private Transform _chaseTarget;
     [SerializeField]
     [HideInInspector]
-    private bool _autoChase;
+    private bool _triggerDistanceActive = false;
+    [SerializeField]
+    [HideInInspector]
+    private PathLocationMethod _distanceTriggerMethod;
 
     private int _currentPatrolIndex = 0;
     private Vector3 _startPosition;
@@ -73,7 +76,7 @@ public class StandardEntityMotion : EntityMotion
 
     public bool ChaseEnabled
     {
-        get { return _autoChase; }
+        get { return _triggerDistanceActive; }
     }
 
     public Transform ChaseTarget
@@ -86,6 +89,12 @@ public class StandardEntityMotion : EntityMotion
     {
         get { return _chaseStoppingDistance; }
         set { _chaseStoppingDistance = value; }
+    }
+
+    public PathLocationMethod DistanceTriggerMethod
+    {
+        get { return _distanceTriggerMethod; }
+        set { _distanceTriggerMethod = value; }
     }
 
     public float BaseStoppingDistance
@@ -104,6 +113,7 @@ public class StandardEntityMotion : EntityMotion
             else
                 Entity.NavMeshAgent.stoppingDistance = BaseStoppingDistance;
             _pathLocationMethod = value;
+            _prevLocationMethod = value;
         }
     }
 
@@ -126,10 +136,10 @@ public class StandardEntityMotion : EntityMotion
         get { return Vector3.Distance(ChaseTarget.position, transform.position) <= _chaseDistance; }
     }
 
-    public bool AutoChase
+    public bool TriggerDistanceActive
     {
-        get { return _autoChase; }
-        set { _autoChase = value; }
+        get { return _triggerDistanceActive; }
+        set { _triggerDistanceActive = value; }
     }
 
 
@@ -151,7 +161,7 @@ public class StandardEntityMotion : EntityMotion
         if (_startAtRandomPathIndex)
             _currentPatrolIndex = Random.Range(0, _patrolPoints.Count);
 
-        if(LocationMethod == PathLocationMethod.Area)
+        if (LocationMethod == PathLocationMethod.Area)
             ChooseNewAreaLocation();
 
     }
@@ -165,14 +175,14 @@ public class StandardEntityMotion : EntityMotion
 
     private void FindPath()
     {
-        if (AutoChase && ChaseTarget != null)
-            if (IsInChaseDistance)
-            {
-                LocationMethod = PathLocationMethod.Chase;
-            }
+        if (TriggerDistanceActive && ChaseTarget != null && IsInChaseDistance)
+        {
+            //   LocationMethod = PathLocationMethod.Chase;
+            LocationMethod = DistanceTriggerMethod;
+        }
 
 
-        if (LocationMethod == PathLocationMethod.Chase && (Vector3.Distance(ChaseTarget.position, transform.position) >= _chaseFallOff || !AutoChase))
+        if (ChaseTarget != null && (Vector3.Distance(ChaseTarget.position, transform.position) >= _chaseFallOff || !TriggerDistanceActive))
             LocationMethod = _prevLocationMethod;
 
         // Don't find a new path when the player is not close
@@ -195,7 +205,7 @@ public class StandardEntityMotion : EntityMotion
             case PathLocationMethod.Area:
                 UpdateArea();
                 break;
-                case PathLocationMethod.Custom:
+            case PathLocationMethod.Custom:
                 DoCustomUpdate();
                 break;
         }

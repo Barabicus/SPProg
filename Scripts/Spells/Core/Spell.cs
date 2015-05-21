@@ -26,11 +26,13 @@ public class Spell : MonoBehaviour
     #region Properties
     public Entity CastingEntity { get; set; }
 
-    public List<Entity> IgnoreEntities { get; set; } 
+    public List<Entity> IgnoreEntities { get; set; }
+
+    public EffectSetting SpellEffectSetting { get; set; }
 
     public SpellDeathMarker SpellDeathMarker
     {
-        get { return _spellDeathMarker;}
+        get { return _spellDeathMarker; }
     }
 
     public string SpellDescription
@@ -56,7 +58,7 @@ public class Spell : MonoBehaviour
     public Vector3 SpellStartPosition
     {
         get;
-        set;
+        private set;
     }
 
     /// <summary>
@@ -66,7 +68,7 @@ public class Spell : MonoBehaviour
     public Transform SpellStartTransform
     {
         get;
-        set;
+        private set;
     }
 
     public ElementalStats ElementalCost
@@ -100,53 +102,48 @@ public class Spell : MonoBehaviour
 
     #endregion
 
-    #region States
-
-
-
-    #endregion
 
     #region Events
-
-    public event EventHandler<SpellEventargs> OnSpellDestroy;
+    public event Action<Spell> OnSpellDestroy;
     #endregion
 
 
-    public virtual void Awake() 
+    public void Awake()
+    {
+    }
+
+    public void Start()
+    {
+
+    }
+
+    /// <summary>
+    /// This is called when a spell is first created. This is similiar to Awake but ensure it is called as the spell is created.
+    /// </summary>
+    public void InitializeSpell()
     {
         IgnoreEntities = new List<Entity>();
-    }
-
-    public virtual void Start()
-    {
         gameObject.layer = 10;
-        Invoke("DestroySpell", SpellLiveTime);
+        SpellEffectSetting = GetComponent<EffectSetting>();
+        SpellEffectSetting.InitializeEffect();
     }
 
-    public void CastSpell(Entity castingEntity)
+    public void CastSpell(Entity castingEntity, Transform startPosition = null, Vector3? startVector = null, Transform spellTarget = null, Vector3? spellTargetPosition = null)
     {
         CastingEntity = castingEntity;
-    }
 
-    public void SetupSpellTransform(Transform startPosition)
-    {
         SpellStartTransform = startPosition;
-        SpellStartPosition = startPosition.position;
+        SpellStartPosition = startVector.HasValue ? startVector.Value : startPosition.position;
+        SpellTarget = spellTarget;
+        SpellTargetPosition = spellTargetPosition;
         transform.position = SpellStartPosition;
         transform.rotation = CastingEntity.transform.rotation;
+        OnSpellCast();
+        Debug.Log("Active: " + gameObject.active);
         gameObject.SetActive(true);
     }
 
-    public void SetupSpellVector(Vector3 startPosition)
-    {
-        SpellStartPosition = startPosition;
-        transform.position = SpellStartPosition;
-        transform.rotation = CastingEntity.transform.rotation;
-        gameObject.SetActive(true);
-    }
-
-    public virtual void Update() { }
-    public virtual void FixedUpdate() { }
+    #region Trigger Events
 
     /// <summary>
     /// Called when the spell is destroyed
@@ -157,16 +154,32 @@ public class Spell : MonoBehaviour
         enabled = false;
     }
 
-
-    #region Trigger Events
-
     /// <summary>
     /// Called when the spell is destroyed.
     /// </summary>
-    public virtual void DestroyEvent()
+    public void DestroyEvent()
     {
+        CancelInvoke();
         if (OnSpellDestroy != null)
-            OnSpellDestroy(this, new SpellEventargs(this));
+            OnSpellDestroy(this);
+    }
+
+    public void TriggerSpellReset()
+    {
+        OnSpellDestroy = null;
+        IgnoreEntities.Clear();
+    }
+
+    private IEnumerator TriggerSpellCast()
+    {
+        yield return null;
+        OnSpellCast();
+    }
+
+    private void OnSpellCast()
+    {
+        Invoke("DestroySpell", SpellLiveTime);
+        SpellEffectSetting.TriggerSpellCast();
     }
 
     #endregion

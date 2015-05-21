@@ -32,9 +32,9 @@ public class BeamMotor : SpellMotor
         }
     }
 
-    protected override void Start()
+    protected override void OnSpellStart()
     {
-        base.Start();
+        base.OnSpellStart();
         CanKeepBeamOpen();
         beamDelayTimer = new Timer(beamApplyDelay);
 
@@ -66,9 +66,9 @@ public class BeamMotor : SpellMotor
             distance = Mathf.Min(distance + (speed * Time.deltaTime), maxDistance);
     }
 
-    protected override void effectSetting_OnSpellDestroy(object sender, SpellEventargs e)
+    protected override void effectSetting_OnSpellDestroy()
     {
-        base.effectSetting_OnSpellDestroy(sender, e);
+        base.effectSetting_OnSpellDestroy();
         enabled = false;
     }
 
@@ -106,7 +106,7 @@ public class BeamMotor : SpellMotor
         // the current beam will stop. Be careful when using cast delay with beams.
         if (!effectSetting.spell.CastingEntity.CanCastSpell(effectSetting.spell) || !KeepBeamAlive)
         {
-            effectSetting.TriggerDestroy();
+            effectSetting.TriggerDestroySpell();
             return false;
         }
         return true;

@@ -30,8 +30,8 @@ public class TowerEntity : EntityComponent {
             Spell spell;
             if (Entity.CastSpell(attackSpell, out spell))
             {
-                spell.SpellTarget = player.transform;
-                spell.SpellTargetPosition = player.transform.position;
+                //spell.SpellTarget = player.transform;
+                //spell.SpellTargetPosition = player.transform.position;
             }
         }
     }

@@ -12,16 +12,16 @@ public class DestroySpellOnCondition : SpellEffect
     {
         base.UpdateSpell();
         if (fireIsZero && effectSetting.spell.CastingEntity.CurrentElementalCharge.fire == 0)
-            effectSetting.TriggerDestroy();
+            effectSetting.TriggerDestroySpell();
 
         if (waterIsZero && effectSetting.spell.CastingEntity.CurrentElementalCharge.water == 0)
-            effectSetting.TriggerDestroy();
+            effectSetting.TriggerDestroySpell();
 
         if (airIsZero && effectSetting.spell.CastingEntity.CurrentElementalCharge.air == 0)
-            effectSetting.TriggerDestroy();
+            effectSetting.TriggerDestroySpell();
 
         if (earthIsZero && effectSetting.spell.CastingEntity.CurrentElementalCharge.earth == 0)
-            effectSetting.TriggerDestroy();
+            effectSetting.TriggerDestroySpell();
 
     }
 

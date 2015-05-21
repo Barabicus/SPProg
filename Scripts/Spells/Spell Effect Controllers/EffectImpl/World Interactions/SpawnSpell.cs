@@ -5,14 +5,14 @@ public class SpawnSpell : SpellEffect
 {
     public Spell spawnSpell;
 
-    protected override void Start()
+    protected override void OnSpellStart()
     {
-        base.Start();
+        base.OnSpellStart();
         Spell sp = SpellList.Instance.GetNewSpell(spawnSpell);
-        sp.CastSpell(effectSetting.spell.CastingEntity);
-        sp.SetupSpellTransform(transform);
-        sp.SpellTarget = effectSetting.spell.SpellTarget;
-        sp.SpellTargetPosition = effectSetting.spell.SpellTargetPosition;
+        sp.CastSpell(effectSetting.spell.CastingEntity, transform, transform.position, effectSetting.spell.SpellTarget, effectSetting.spell.SpellTargetPosition);
+       // sp.SetupSpellTransform(transform);
+        //sp.SpellTarget = effectSetting.spell.SpellTarget;
+        //sp.SpellTargetPosition = effectSetting.spell.SpellTargetPosition;
         enabled = false;
     }
 

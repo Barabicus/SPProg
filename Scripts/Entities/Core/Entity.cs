@@ -29,6 +29,8 @@ public class Entity : MonoBehaviour
     [SerializeField]
     private bool loadSpeechBubble = false;
     [SerializeField]
+    private bool loadMinimapIcon = true;
+    [SerializeField]
     private Transform _castPoint = null;
     [SerializeField]
     private ParticleSystem _hitParticlesPrefab = null;
@@ -398,6 +400,12 @@ public class Entity : MonoBehaviour
             HealthBar.transform.SetParent(transform);
         }
 
+        if (loadMinimapIcon)
+        {
+            var miniMapIcon = Instantiate(GameMainReferences.Instance.GameConfigInfo.EntityMinimapIcon);
+            miniMapIcon.Entity = this;
+        }
+
     }
 
     #endregion
@@ -434,8 +442,8 @@ public class Entity : MonoBehaviour
     /// </summary>
     protected virtual void LivingUpdate()
     {
-        if (_updateSpeedTimer.CanTickAndReset())
-            UpdateSpeed();
+        //   if (_updateSpeedTimer.CanTickAndReset())
+        UpdateSpeed();
 
         if (!SpellsIgnoreElementalCost)
         {
@@ -556,7 +564,7 @@ public class Entity : MonoBehaviour
 
 
 
-    #region _spellAIProprties
+    #region Spells
 
     public bool HasSpellMarker(string spellID)
     {
@@ -613,7 +621,7 @@ public class Entity : MonoBehaviour
         return CastSpell(SpellList.Instance.GetSpell(spell), out castSpell);
     }
 
-    public bool CastSpell(Spell spell, out Spell castSpell)
+    public bool CastSpell(Spell spell, out Spell castSpell, Transform spellTarget = null, Vector3? spellTargetPosition = null)
     {
         if (!CanCastSpell(spell) || IsBeamActive || (spell.SpellType == SpellType.Attached && !CanAttachSpell(spell)))
         {
@@ -621,15 +629,18 @@ public class Entity : MonoBehaviour
             return false;
         }
 
+        if (spell.spellType == SpellType.Attached)
+            spellTarget = transform;
+
         Spell sp = SpellList.Instance.GetNewSpell(spell);
-        sp.CastSpell(this);
-        sp.SetupSpellTransform(_castPoint);
+        sp.CastSpell(this, CastPoint, null, spellTarget, spellTargetPosition);
+        // sp.SetupSpellTransform(_castPoint);
 
         switch (sp.SpellType)
         {
             case SpellType.Beam:
                 _activeBeam = sp;
-                sp.OnSpellDestroy += (o, e) => { _activeBeam = null; };
+                sp.OnSpellDestroy += (s) => { _activeBeam = null; };
                 break;
             case SpellType.Attached:
                 AttachSpell(sp);
@@ -703,9 +714,9 @@ public class Entity : MonoBehaviour
         spell.OnSpellDestroy += RemoveAttachedSpell;
     }
 
-    private void RemoveAttachedSpell(object sender, SpellEventargs e)
+    private void RemoveAttachedSpell(Spell spell)
     {
-        _attachedSpells.Remove(e.spell.SpellID);
+        _attachedSpells.Remove(spell.SpellID);
     }
 
     #endregion

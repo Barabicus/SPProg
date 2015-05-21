@@ -20,7 +20,7 @@ public class SpellListInfoInspector : Editor {
 
         _list.drawHeaderCallback = (Rect rect) =>
         {
-            EditorGUI.LabelField(rect, "_spellAIProprties");
+            EditorGUI.LabelField(rect, "Spells");
         };
 
         _list.drawElementCallback = ListDrawCallBack;
@@ -55,7 +55,7 @@ public class SpellListInfoInspector : Editor {
 
         }
 
-        if (GUILayout.Button("Try Load All _spellAIProprties"))
+        if (GUILayout.Button("Try Load All Spells"))
             TryLoadAllSpells();
 
         serializedObject.ApplyModifiedProperties();
@@ -64,7 +64,7 @@ public class SpellListInfoInspector : Editor {
 
     private void TryLoadAllSpells()
     {
-        var spells = Resources.LoadAll("Prefabs/_spellAIProprties/SpellImpl", typeof(Spell));
+        var spells = Resources.LoadAll("Prefabs/Spells/SpellImpl", typeof(Spell));
         foreach (Spell s in spells)
         {
             if (CanAddSpell(s))

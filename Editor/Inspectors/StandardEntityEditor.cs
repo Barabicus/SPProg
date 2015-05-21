@@ -14,16 +14,17 @@ public class StandardEntityEditor : Editor
     private SerializedProperty randomMoveArea;
     private SerializedProperty chooseRandomMoveTime;
     private SerializedProperty startAtRandomPathIndex;
-    private SerializedProperty chaseDistance;
+    private SerializedProperty triggerDistance;
     private SerializedProperty chooseNextPatrolPointDistance;
     private SerializedProperty keepLookAtChaseTarget;
     private SerializedProperty areaPivotPoint;
     private SerializedProperty onlyUpdateWhenNearToPlayer;
     private SerializedProperty updateAreaMethod;
     private SerializedProperty chaseTarget;
-    private SerializedProperty autoChase;
-    private SerializedProperty chaseFallOff;
+    private SerializedProperty triggerDistanceActive;
+    private SerializedProperty triggerFallOff;
     private SerializedProperty chaseStoppingDistance;
+    private SerializedProperty distanceTriggerMethod;
 
     private ReorderableList list;
 
@@ -36,16 +37,17 @@ public class StandardEntityEditor : Editor
         randomMoveArea = serializedObject.FindProperty("_randomMoveArea");
         chooseRandomMoveTime = serializedObject.FindProperty("_chooseRandomMoveTime");
         startAtRandomPathIndex = serializedObject.FindProperty("_startAtRandomPathIndex");
-        chaseDistance = serializedObject.FindProperty("_chaseDistance");
+        triggerDistance = serializedObject.FindProperty("_chaseDistance");
         chooseNextPatrolPointDistance = serializedObject.FindProperty("_chooseNextPatrolPointDistance");
         keepLookAtChaseTarget = serializedObject.FindProperty("_keepLookAtChaseTarget");
         areaPivotPoint = serializedObject.FindProperty("_areaPivotPoint");
         onlyUpdateWhenNearToPlayer = serializedObject.FindProperty("_onlyUpdateWhenNearToPlayer");
         updateAreaMethod = serializedObject.FindProperty("_updateAreaMethod");
         chaseTarget = serializedObject.FindProperty("_chaseTarget");
-        autoChase = serializedObject.FindProperty("_autoChase");
-        chaseFallOff = serializedObject.FindProperty("_chaseFallOff");
+        triggerDistanceActive = serializedObject.FindProperty("_triggerDistanceActive");
+        triggerFallOff = serializedObject.FindProperty("_chaseFallOff");
         chaseStoppingDistance = serializedObject.FindProperty("_chaseStoppingDistance");
+        distanceTriggerMethod = serializedObject.FindProperty("_distanceTriggerMethod");
 
 
         list = new ReorderableList(serializedObject, patrolPoints, true, true, true, true);
@@ -111,15 +113,18 @@ public class StandardEntityEditor : Editor
             case PathLocationMethod.Patrol:
                 DrawPatrol();
                 break;
+                case PathLocationMethod.Chase:
+                DrawChase();
+                break;
         }
 
         EditorGUILayout.EndVertical();
 
         EditorGUILayout.BeginVertical("box");
 
-        EditorGUILayout.LabelField("Chase", EditorStyles.boldLabel);
+        EditorGUILayout.LabelField("Distance Trigger", EditorStyles.boldLabel);
 
-        DrawChase();
+        DrawDistanceTrigger();
 
         EditorGUILayout.EndVertical();
 
@@ -149,12 +154,17 @@ public class StandardEntityEditor : Editor
 
     private void DrawChase()
     {
-        EditorGUILayout.PropertyField(autoChase);
         EditorGUILayout.PropertyField(chaseTarget);
         EditorGUILayout.PropertyField(keepLookAtChaseTarget);
-        EditorGUILayout.PropertyField(chaseDistance);
         EditorGUILayout.PropertyField(chaseStoppingDistance);
-        EditorGUILayout.PropertyField(chaseFallOff);
+    }
+
+    private void DrawDistanceTrigger()
+    {
+        EditorGUILayout.PropertyField(triggerDistanceActive);
+        EditorGUILayout.PropertyField(distanceTriggerMethod);
+        EditorGUILayout.PropertyField(triggerDistance);
+        EditorGUILayout.PropertyField(triggerFallOff);
     }
 
     private void DrawPatrolPoints()

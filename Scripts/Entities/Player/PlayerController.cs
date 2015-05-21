@@ -68,17 +68,7 @@ public class PlayerController : EntityComponent
             {
                 // Create the spell
                 Spell spell;
-                if (Entity.CastSpell(selectedSpell, out spell))
-                {
-                    //// If the selected target is not null, aim towards them
-                    //// Otherwise aim towards the target point
-                    //if (selectedTarget != null)
-                    //{
-                    //    //  spell.SpellTargetPosition = selectedTarget.position;
-                    //    spell.SpellTarget = selectedTarget;
-                    //}
-                    spell.SpellTargetPosition = ray.GetPoint(distance);
-                }
+                Entity.CastSpell(selectedSpell, out spell, null, ray.GetPoint(distance));
             }
         }
     }

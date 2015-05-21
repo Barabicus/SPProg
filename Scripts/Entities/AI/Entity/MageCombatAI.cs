@@ -67,16 +67,16 @@ public class MageCombatAI : EntityAI
             switch (value)
             {
                 case MageState.Attack:
-                    _motion.AutoChase = true;
+                    _motion.TriggerDistanceActive = true;
                     CurrentSpellState = MageSpellState.None;
                     _switchSpellTimer.Reset();
                     break;
                 case MageState.Idle:
-                    _motion.AutoChase = true;
+                    _motion.TriggerDistanceActive = true;
                     CurrentSpellState = MageSpellState.None;
                     break;
                 case MageState.Retreat:
-                    _motion.AutoChase = false;
+                    _motion.TriggerDistanceActive = false;
                     CurrentSpellState = MageSpellState.Heal;
                     break;
             }
@@ -198,8 +198,8 @@ public class MageCombatAI : EntityAI
         Spell spell;
         if (Entity.CastSpell(CurrentSpell, out spell))
         {
-            spell.SpellTarget = _player.Entity.transform;
-            spell.SpellTargetPosition = _player.Entity.transform.position;
+            //spell.SpellTarget = _player.Entity.transform;
+            //spell.SpellTargetPosition = _player.Entity.transform.position;
         }
 
     }

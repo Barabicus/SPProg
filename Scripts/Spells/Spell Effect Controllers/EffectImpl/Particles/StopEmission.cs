@@ -11,16 +11,16 @@ public class StopEmission : SpellEffect
     private Timer timer;
     private ParticleSystem particleSystem;
 
-    protected override void Start()
+    protected override void OnSpellStart()
     {
-        base.Start();
+        base.OnSpellStart();
         particleSystem = GetComponent<ParticleSystem>();
         timer = new Timer(stopEmissionTimeDelay);
     }
 
-    protected override void effectSetting_OnSpellDestroy(object sender, SpellEventargs e)
+    protected override void effectSetting_OnSpellDestroy()
     {
-        base.effectSetting_OnSpellDestroy(sender, e);
+        base.effectSetting_OnSpellDestroy();
         if (stopEmissionTriggeredBy == StopEmissionTrigger.SpellDestroy)
         {
             SetEmission();

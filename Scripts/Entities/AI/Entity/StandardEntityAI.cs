@@ -107,12 +107,7 @@ public class StandardEntityAI : EntityAI
     private void CastSpell(Spell castSpell)
     {
         Spell spell;
-        if (Entity.CastSpell(castSpell, out spell))
-        {
-            spell.SpellTarget = _player.Entity.transform;
-            spell.SpellTargetPosition = _player.Entity.transform.position;
-        }
-
+        Entity.CastSpell(castSpell, out spell, _player.Entity.transform, _player.Entity.transform.position);
     }
 }
 

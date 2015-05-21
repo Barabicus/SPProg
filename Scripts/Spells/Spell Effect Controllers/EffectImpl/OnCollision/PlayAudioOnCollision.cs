@@ -8,9 +8,9 @@ public class PlayAudioOnCollision : SpellEffect
 
     private AudioSource _audioSource;
 
-    protected override void Start()
+    protected override void OnSpellStart()
     {
-        base.Start();
+        base.OnSpellStart();
         _audioSource = GetComponent<AudioSource>();
     }
 

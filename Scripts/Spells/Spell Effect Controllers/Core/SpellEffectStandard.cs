@@ -13,6 +13,8 @@ public class SpellEffectStandard : SpellEffect
 
     private Timer timedEvent;
 
+    private bool r_enabled;
+
     public enum TriggerEvent
     {
         Timed,
@@ -23,16 +25,23 @@ public class SpellEffectStandard : SpellEffect
         Cast
     }
 
-    protected override void Start()
+    public override void InitializeEffect(EffectSetting effectSetting)
     {
-        base.Start();
+        base.InitializeEffect(effectSetting);
+        r_enabled = enabled;
+    }
+
+    protected override void OnSpellStart()
+    {
+        base.OnSpellStart();
+        enabled = r_enabled;
         timedEvent = new Timer(timeTrigger);
     }
 
     protected override void effectSetting_OnSpellCast()
     {
         base.effectSetting_OnSpellCast();
-        if(triggerEvent == TriggerEvent.Cast)
+        if (triggerEvent == TriggerEvent.Cast)
             EventTriggered();
     }
 
@@ -43,9 +52,9 @@ public class SpellEffectStandard : SpellEffect
             EventTriggered();
     }
 
-    protected override void effectSetting_OnSpellDestroy(object sender, SpellEventargs e)
+    protected override void effectSetting_OnSpellDestroy()
     {
-        base.effectSetting_OnSpellDestroy(sender, e);
+        base.effectSetting_OnSpellDestroy();
         if (triggerEvent == TriggerEvent.SpellDestroy)
             EventTriggered();
     }
@@ -60,7 +69,7 @@ public class SpellEffectStandard : SpellEffect
     protected override void effectSetting_OnSpellApply(Entity entity)
     {
         base.effectSetting_OnSpellApply(entity);
-        if(triggerEvent == TriggerEvent.SpellApply)
+        if (triggerEvent == TriggerEvent.SpellApply)
             EventTriggered();
     }
 
@@ -69,17 +78,16 @@ public class SpellEffectStandard : SpellEffect
         base.UpdateSpell();
         if (triggerEvent == TriggerEvent.Timed && timedEvent.CanTickAndReset())
         {
-            EventTriggered();
             if (isSingleShot)
                 enabled = false;
+            EventTriggered();
         }
     }
 
     private void EventTriggered()
     {
         DoEventTriggered();
-        if(isSingleShot)
-            Destroy(this);
+
     }
 
     protected virtual void DoEventTriggered()

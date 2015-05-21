@@ -45,6 +45,7 @@ public class HumanoidAnimatorController : EntityAnimatorController<HumanoidEntit
                 break;
         }
 
+
         Animator.SetFloat(animSpeed, Entity.CurrentSpeed);
     }
 

@@ -20,10 +20,6 @@ public class SpellList : MonoBehaviour
     public void Start()
     {
         _spellPool = SpellPool.Instance;
-        foreach (var value in _spellDict.Values)
-        {
-            _spellPool.InitSpellPool(value);
-        }
     }
 
     public Spell[] Spells
@@ -40,7 +36,10 @@ public class SpellList : MonoBehaviour
     {
         Spell sp = _spellPool.GetSpellFromPool(spell);
         if (sp == null)
+        {
             sp = Instantiate(_spellDict[spell]);
+            sp.InitializeSpell();
+        }
         return sp;
     }
 

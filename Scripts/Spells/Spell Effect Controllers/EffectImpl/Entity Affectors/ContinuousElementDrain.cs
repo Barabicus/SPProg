@@ -7,9 +7,9 @@ public class ContinuousElementDrain : SpellEffect
     public ElementalStats drainOnTick = ElementalStats.Zero;
 
     private Timer timer;
-    protected override void Start()
+    protected override void OnSpellStart()
     {
-        base.Start();
+        base.OnSpellStart();
         timer = new Timer(tickTime);        
     }
 

@@ -22,6 +22,12 @@ public class BounceSpell : SpellEffect
     }
 
 
+    protected override void OnSpellStart()
+    {
+        base.OnSpellStart();
+        _currentBounces = 0;
+    }
+
     protected override void effectSetting_OnSpellApply(Entity entity)
     {
         base.effectSetting_OnSpellApply(entity);
@@ -48,6 +54,9 @@ public class BounceSpell : SpellEffect
                 if (SpellMarker != null && targetEnt.HasSpellMarker(SpellMarker))
                     continue;
 
+                if(!targetEnt.IsEnemy(effectSetting.spell.CastingEntity))
+                    continue;
+
                 Vector3 startVector = new Vector3(hitEnt.transform.position.x, effectSetting.spell.transform.position.y, hitEnt.transform.position.z);
                 Spell sp = null;
 
@@ -60,10 +69,9 @@ public class BounceSpell : SpellEffect
                         sp = SpellList.Instance.GetNewSpell(customSpell);
                         break;
                 }
-                sp.CastSpell(effectSetting.spell.CastingEntity);
-                sp.SetupSpellVector(startVector);
-                sp.SpellTarget = targetEnt.transform;
-                sp.SpellTargetPosition = targetEnt.transform.position;
+                sp.CastSpell(effectSetting.spell.CastingEntity, null, startVector, targetEnt.transform, targetEnt.transform.position);
+               
+                //Ignore the entity the spell was bounced from
                 sp.IgnoreEntities.Add(hitEnt);
 
                 if (bounceLimit)

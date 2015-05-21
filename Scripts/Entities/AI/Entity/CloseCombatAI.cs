@@ -42,11 +42,11 @@ public class CloseCombatAI : EntityAI
     {
         if (_player.Entity.LivingState == EntityLivingState.Alive && Vector3.Distance(transform.position, _player.transform.position) <= attackDistance)
         {
-            Spell spell;
-            if (Entity.CastSpell(selectedSpell, out spell))
-            {
-                spell.SpellTarget = _player.transform;
-            }
+            //Spell spell;
+            //if (Entity.CastSpell(selectedSpell, out spell))
+            //{
+            //    spell.SpellTarget = _player.transform;
+            //}
         }
     }
 

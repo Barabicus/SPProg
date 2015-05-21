@@ -8,8 +8,16 @@ public class SpellEmission : SpellEffectStandard
     public EmissionEvent emissionEvent;
     public int emitAmount = 0;
 
+    public bool playing;
+
     private ParticleSystem particleSystem;
 
+    #region Start State
+
+    private bool r_emit;
+    private bool r_playing;
+
+    #endregion
     public enum EmissionEvent
     {
         DeactivateEmission,
@@ -19,10 +27,30 @@ public class SpellEmission : SpellEffectStandard
         Stop
     }
 
-    protected override void Start()
+    public override void InitializeEffect(EffectSetting effectSetting)
     {
-        base.Start();
-        particleSystem = GetComponent<ParticleSystem>();
+        base.InitializeEffect(effectSetting);
+                particleSystem = GetComponent<ParticleSystem>();
+        r_playing = particleSystem.playOnAwake;
+        r_emit = particleSystem.enableEmission;
+    }
+
+    protected override void OnSpellStart()
+    {
+        base.OnSpellStart();
+        if(r_playing)
+            particleSystem.Play();
+        else
+        {
+            particleSystem.Stop();
+        }
+
+        particleSystem.enableEmission = r_emit;
+    }
+
+    private void Update()
+    {
+        playing = particleSystem.isPlaying;
     }
 
 

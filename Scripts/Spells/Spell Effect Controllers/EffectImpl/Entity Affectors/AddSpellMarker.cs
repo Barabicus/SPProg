@@ -11,7 +11,16 @@ public class AddSpellMarker : SpellEffectStandard
     /// </summary>
     private bool _addMarker;
 
-    private bool _hasAddedMarker = false;
+    private bool _hasAddedMarker;
+
+    protected override void OnSpellStart()
+    {
+        base.OnSpellStart();
+        _addMarker = false;
+        _hasAddedMarker = false;
+        _triggerFired = false;
+        _targetEntity = null;
+    }
 
     protected override void effectSetting_OnSpellApply(Entity entity)
     {
@@ -31,7 +40,9 @@ public class AddSpellMarker : SpellEffectStandard
         // Prevent the spell marker being removed more than once by this
         _triggerFired = true;
         if (_hasAddedMarker)
+        {
             _targetEntity.RemoveSpellMarker(SpellMarker);
+        }
     }
 
     private void LateUpdate()

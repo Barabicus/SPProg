@@ -7,10 +7,12 @@ public abstract class TimedUpdateableEffect : SpellEffect
     public float updateDelay = 2f;
     private Timer timer;
 
-    protected override void Start()
+    protected override void OnSpellStart()
     {
-        base.Start();
+        base.OnSpellStart();
         timer = new Timer(updateDelay);
+        enabled = true;
+        Debug.Log(gameObject);
     }
 
     protected override void Update()

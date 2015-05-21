@@ -104,7 +104,6 @@ public class SpellInspector : Editor
         EditorGUILayout.LabelField("Collision Events", EditorStyles.boldLabel);
 
         DrawAddComponent<AttachOnCollision>("Attach On Collision");
-        DrawAddComponent<SpawnSpellOnCollision>("Spawn Spell On Collision");
         DrawAddComponent<TriggerEmitOnCollision>("Trigger Emit On Collision");
         DrawAddComponent<TriggerEnteredCollision>("Trigger Entered Collision");
         DrawAddComponent<PlayAudioOnCollision>("Play Audio Collision");
@@ -122,7 +121,6 @@ public class SpellInspector : Editor
         EditorGUILayout.LabelField("Game Object / Component _spellAIProprties", EditorStyles.boldLabel);
 
         DrawAddComponent<DestroySpellOnCondition>("Destroy Spell On Condition");
-        DrawAddComponent<DisableSpellTimed>("Disable Spell Timed");
         DrawAddComponent<StopEmission>("Stop Emission");
         DrawAddComponent<SpellEmission>("Spell Emission");
         DrawAddComponent<StandardGameObjectSpell>("Standard object Spell");

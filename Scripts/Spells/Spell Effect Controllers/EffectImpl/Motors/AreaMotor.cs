@@ -5,9 +5,9 @@ public class AreaMotor : TimedUpdateableSpellMotor
 {
     public float radius = 5f;
 
-    protected override void Start()
+    protected override void OnSpellStart()
     {
-        base.Start();
+        base.OnSpellStart();
     }
 
     protected override void UpdateSpell()

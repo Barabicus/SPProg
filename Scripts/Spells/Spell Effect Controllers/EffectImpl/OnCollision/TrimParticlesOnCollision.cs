@@ -6,9 +6,9 @@ public class TrimParticlesOnCollision : SpellEffect
 
     private ParticleSystem particleSystem;
 
-    protected override void Start()
+    protected override void OnSpellStart()
     {
-        base.Start();
+        base.OnSpellStart();
         particleSystem = GetComponent<ParticleSystem>();
     }
 

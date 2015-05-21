@@ -42,24 +42,34 @@ public abstract class SpellEffect : MonoBehaviour
         get { return onlyUpdateOnSpellEnabled && !effectSetting.spell.enabled; }
     }
 
-    protected virtual void Awake()
+    public virtual void InitializeEffect(EffectSetting effectSetting)
     {
-        effectSetting = transform.GetComponentInParent<EffectSetting>();
-        effectSetting.OnSpellDestroy += effectSetting_OnSpellDestroy;
+        this.effectSetting = effectSetting;
+        effectSetting.OnSpellDestroy += () => effectSetting_OnSpellDestroy();
         effectSetting.OnSpellCollision += effectSetting_OnSpellCollision;
         effectSetting.OnEffectDestroy += effectSetting_OnEffectDestroy;
         effectSetting.OnSpellApply += effectSetting_OnSpellApply;
         effectSetting.OnSpellCast += effectSetting_OnSpellCast;
         effectSetting.OnSpellReset += effectSetting_OnSpellReset;
+        effectSetting.OnSpellStart += OnSpellStart;
     }
 
-    protected virtual void Start()
+    /// <summary>
+    /// This is called when the spell start event is called from EffectSetting
+    /// </summary>
+    protected virtual void OnSpellStart()
     {
+        InitSpellVariables();
+    }
 
+    protected virtual void InitSpellVariables()
+    {
+        
     }
 
     protected virtual void effectSetting_OnSpellReset()
     {
+        InitSpellVariables();
     }
 
     protected virtual void effectSetting_OnSpellCast()
@@ -78,7 +88,7 @@ public abstract class SpellEffect : MonoBehaviour
     {
     }
 
-    protected virtual void effectSetting_OnSpellDestroy(object sender, SpellEventargs e)
+    protected virtual void effectSetting_OnSpellDestroy()
     {
     }
 

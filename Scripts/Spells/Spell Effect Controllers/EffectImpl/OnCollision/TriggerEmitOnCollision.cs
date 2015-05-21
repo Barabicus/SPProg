@@ -13,9 +13,9 @@ public class TriggerEmitOnCollision : SpellEffect
     private Timer timeDelayTimer;
 
     // Use this for initialization
-    protected override void Start()
+    protected override void OnSpellStart()
     {
-        base.Start();
+        base.OnSpellStart();
         particleSystem = GetComponent<ParticleSystem>();
         timeDelayTimer = new Timer(timeDelay);
     }

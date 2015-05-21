@@ -100,18 +100,10 @@ public class MissileMotor : SpellMotor
         get { return Time.time - _lastTime; }
     }
 
-    protected override void Start()
+    public override void InitializeEffect(EffectSetting effectSetting)
     {
-        base.Start();
-        _lastTime = Time.time;
-        direction = ((effectSetting.spell.SpellTargetPosition.Value) - effectSetting.spell.SpellStartPosition);
-        if(negateYDirection)
-        direction.y = 0;
-        direction.Normalize();
+        base.InitializeEffect(effectSetting);
         GetComponent<Rigidbody>().isKinematic = true;
-        InitRandomVariables();
-        transform.parent.forward = Direction;
-
         Collider[] colliders = GetComponents<Collider>();
         if (colliders.Length == 0)
             Debug.LogError("Spell: " + effectSetting.spell.spellName + " has no colliders");
@@ -121,7 +113,20 @@ public class MissileMotor : SpellMotor
         {
             c.isTrigger = true;
         }
+    }
 
+    protected override void OnSpellStart()
+    {
+        base.OnSpellStart();
+        shouldMove = true;
+        _lastTime = Time.time;
+        direction = ((effectSetting.spell.SpellTargetPosition.Value) - effectSetting.spell.SpellStartPosition);
+        if (negateYDirection)
+            direction.y = 0;
+        direction.Normalize();
+
+        InitRandomVariables();
+        transform.parent.forward = Direction;
     }
 
     public void OnTriggerEnter(Collider other)
@@ -206,9 +211,9 @@ public class MissileMotor : SpellMotor
         }
     }
 
-    protected override void effectSetting_OnSpellDestroy(object sender, SpellEventargs e)
+    protected override void effectSetting_OnSpellDestroy()
     {
-        base.effectSetting_OnSpellDestroy(sender, e);
+        base.effectSetting_OnSpellDestroy();
         shouldMove = false;
     }
 

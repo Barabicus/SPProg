@@ -14,12 +14,21 @@ public class CircleMotion : SpellEffect
     private float rot = 1f;
     private float currentHeight;
     private float currentRotSpeed;
+    private float r_radius;
 
-
-    protected override void Start()
+    public override void InitializeEffect(EffectSetting effectSetting)
     {
-        base.Start();
+        base.InitializeEffect(effectSetting);
+        r_radius = radius;
+    }
+
+    protected override void OnSpellStart()
+    {
+        base.OnSpellStart();
         currentRotSpeed = Random.Range(0, rotSpeedRange) + rotSpeedMin;
+        rot = 1f;
+        currentHeight = 0f;
+        radius = r_radius;
 
         if (Random.Range(0, 2) == 0)
             currentRotSpeed *= -1;

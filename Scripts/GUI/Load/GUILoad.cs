@@ -24,7 +24,7 @@ public class GUILoad : MonoBehaviour
         {
             return;
         }
-        loadingAmount.text = _loadingProgress.ToString();
+        loadingAmount.text = _loadingProgress.ToString() + "%";
         ProgressBar.anchorMax = new Vector2(GetPercent(_loadingProgress, 100f), ProgressBar.anchorMax.y);
         _loadingProgress = (int)(_async.progress * 100f);
     }

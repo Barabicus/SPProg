@@ -7,9 +7,9 @@ public class BeamChaser : SpellEffect {
     BeamMotor beamMotor;
     public GameObject chaser;
 
-    protected override void Start()
+    protected override void OnSpellStart()
     {
-        base.Start();
+        base.OnSpellStart();
         beamMotor = GetComponent<BeamMotor>();
         if (chaser == null)
             Debug.LogError("Chaser is not set for: " + transform.parent.name);

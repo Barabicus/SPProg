@@ -16,9 +16,9 @@ public class LineRendererToBeam : SpellEffect
         get { return Vector3.Distance(effectSetting.spell.SpellStartTransform.position, beamMotor.BeamLocation) / (lineCount - 1); }
     }
 
-    protected override void Start()
+    protected override void OnSpellStart()
     {
-        base.Start();
+        base.OnSpellStart();
         lineRenderer = GetComponent<LineRenderer>();
         lineRenderer.SetVertexCount(lineCount);
 

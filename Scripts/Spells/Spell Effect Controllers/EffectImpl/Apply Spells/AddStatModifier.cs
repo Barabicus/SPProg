@@ -16,10 +16,12 @@ public class AddStatModifier : SpellEffect
     private EntityStats _addedStat;
     private Entity targetedEntity;
 
-    protected override void Start()
+    protected override void OnSpellStart()
     {
-        base.Start();
+        base.OnSpellStart();
         _incrementStat = new EntityStats(speedMod);
+        _addedStat = default(EntityStats);
+        targetedEntity = null;
     }
 
     protected override void effectSetting_OnSpellApply(Entity entity)
@@ -35,9 +37,9 @@ public class AddStatModifier : SpellEffect
         }
     }
 
-    protected override void effectSetting_OnSpellDestroy(object sender, SpellEventargs e)
+    protected override void effectSetting_OnSpellDestroy()
     {
-        base.effectSetting_OnSpellDestroy(sender, e);
+        base.effectSetting_OnSpellDestroy();
         if (targetedEntity != null)
         {
             targetedEntity.RemoveStatModifier(_addedStat);

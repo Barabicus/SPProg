@@ -21,8 +21,8 @@ public class AttachOnCollision : SpellEffect
                 if (ent.CanAttachSpell(atch))
                 {
                     Spell sp = SpellList.Instance.GetNewSpell(atch);
-                    sp.CastSpell(effectSetting.spell.CastingEntity);
-                    sp.SetupSpellTransform(obj.transform);
+                    sp.CastSpell(effectSetting.spell.CastingEntity, obj.transform, null, obj.transform);
+                   // sp.SetupSpellTransform(obj.transform);
                     ent.AttachSpell(sp);
                 }
             }

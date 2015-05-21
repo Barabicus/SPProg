@@ -4,18 +4,26 @@ using System.Collections;
 /// <summary>
 /// Constantly causes the spell to trigger an apply spell update after the specified amount of time has passed
 /// </summary>
-public class AttachMotor : SpellEffect
+public class AttachMotor : SpellMotor
 {
     public bool singleShot = false;
     public float updateTime = 1f;
     private float lastUpdateTime;
 
     private Entity targetEntity;
+    private bool r_enabled;
 
-    protected override void Start()
+    public override void InitializeEffect(EffectSetting effectSetting)
     {
-        base.Start();
-        targetEntity = effectSetting.transform.parent.GetComponent<Entity>();
+        base.InitializeEffect(effectSetting);
+        r_enabled = enabled;
+    }
+
+    protected override void OnSpellStart()
+    {
+        base.OnSpellStart();
+        enabled = r_enabled;
+        targetEntity = effectSetting.spell.SpellTarget.GetComponent<Entity>();
         if (targetEntity == null)
         {
             Debug.LogError("Target entity for " + name + " was not an entity. Parent: " + transform.parent.name);
@@ -29,7 +37,7 @@ public class AttachMotor : SpellEffect
     {
         base.UpdateSpell();
         if(targetEntity != null && targetEntity.LivingState != EntityLivingState.Alive)
-            effectSetting.TriggerDestroy();
+            effectSetting.TriggerDestroySpell();
 
         if (targetEntity != null && Time.time - lastUpdateTime >= updateTime)
         {
