@@ -21,7 +21,7 @@ public class PlayAnimation : SpellEffectStandard
 
     public void Reset()
     {
-        triggerEvent = TriggerEvent.Cast;
+        triggerEvent = SpellEffectTriggerEvent.Cast;
     }
 
 }

@@ -1,27 +1,30 @@
 ﻿using UnityEngine;
 using System.Collections;
-
+/// <summary>
+/// Handles the adding and removing of stat modifiers to the Enity. The applied stats will remain as long as the spell persists.
+/// </summary>
 public class AddStatModifier : SpellEffect
 {
 
-    public float speedMod = 0f;
-
+    [SerializeField]
     /// <summary>
     /// How much each apply will increment the entity stat
     /// </summary>
-    private EntityStats _incrementStat;
+    private EntityStats _statModifier;
     /// <summary>
     /// The total stats added when the spell is finished it will revert the applied stats
     /// </summary>
-    private EntityStats _addedStat;
     private Entity targetedEntity;
+
+    public EntityStats StatModifier
+    {
+        get { return _statModifier; }
+        set { _statModifier = value; }
+    }
 
     protected override void OnSpellStart()
     {
         base.OnSpellStart();
-        _incrementStat = new EntityStats(speedMod);
-        _addedStat = default(EntityStats);
-        targetedEntity = null;
     }
 
     protected override void effectSetting_OnSpellApply(Entity entity)
@@ -32,8 +35,7 @@ public class AddStatModifier : SpellEffect
 
         if (targetedEntity != null && targetedEntity == entity)
         {
-            entity.AddStatModifier(_incrementStat);
-            _addedStat += _incrementStat;
+            entity.ApplyStatModifier(effectSetting.spell.SpellID, _statModifier);
         }
     }
 
@@ -42,7 +44,7 @@ public class AddStatModifier : SpellEffect
         base.effectSetting_OnSpellDestroy();
         if (targetedEntity != null)
         {
-            targetedEntity.RemoveStatModifier(_addedStat);
+            targetedEntity.RemoveAllStatModifiers(effectSetting.spell.SpellID);
         }
     }
 

@@ -22,7 +22,7 @@ public class SpreadMotor : TimedUpdateableSpellMotor
             {
                 Entity ent = c.gameObject.GetComponent<Entity>();
 
-                if (ent.CanAttachSpell(effectSetting.spell))
+                if (ent.HasAttachedSpell(effectSetting.spell))
                 {
                     Spell sp = SpellList.Instance.GetNewSpell(effectSetting.spell);
                     sp.CastSpell(effectSetting.spell.CastingEntity, ent.transform);

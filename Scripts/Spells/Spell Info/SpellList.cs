@@ -35,11 +35,6 @@ public class SpellList : MonoBehaviour
     public Spell GetNewSpell(string spell)
     {
         Spell sp = _spellPool.GetSpellFromPool(spell);
-        if (sp == null)
-        {
-            sp = Instantiate(_spellDict[spell]);
-            sp.InitializeSpell();
-        }
         return sp;
     }
 

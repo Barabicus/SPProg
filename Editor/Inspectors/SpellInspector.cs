@@ -22,6 +22,7 @@ public class SpellInspector : Editor
     void OnEnable()
     {
         spellTarget = target as Spell;
+
     }
 
     public override void OnInspectorGUI()
@@ -52,7 +53,7 @@ public class SpellInspector : Editor
 
     private void DrawSpellHelperFunctions()
     {
-   //     DrawElementalPower();
+        DrawElementalPower();
         DrawMotors();
         DrawEntity();
         DrawCollisionSpells();
@@ -118,7 +119,7 @@ public class SpellInspector : Editor
     {
         EditorGUILayout.BeginVertical("Box");
 
-        EditorGUILayout.LabelField("Game Object / Component _spellAIProprties", EditorStyles.boldLabel);
+        EditorGUILayout.LabelField("Disable & Destroy", EditorStyles.boldLabel);
 
         DrawAddComponent<DestroySpellOnCondition>("Destroy Spell On Condition");
         DrawAddComponent<StopEmission>("Stop Emission");
@@ -134,7 +135,9 @@ public class SpellInspector : Editor
 
     private void StatModCallBack(AddStatModifier statMod)
     {
-        statMod.speedMod = EditorGUILayout.FloatField("Speed Mod", statMod.speedMod);
+        EntityStats setStats = statMod.StatModifier;
+        setStats.Speed = EditorGUILayout.FloatField("Speed Mod", setStats.Speed);
+        statMod.StatModifier = setStats;
     }
 
     private void ElementalPowerCallBack(ElementalApply elemental)

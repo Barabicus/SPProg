@@ -57,7 +57,7 @@ public class AddSpellMarker : SpellEffectStandard
 
     public void Reset()
     {
-        triggerEvent = TriggerEvent.EffectDestroy;
+        triggerEvent = SpellEffectTriggerEvent.EffectDestroy;
     }
 
 }

@@ -63,7 +63,6 @@ public class Entity : MonoBehaviour
     private Rigidbody _rigidbody = null;
     private EntityMotionState _entityMotionState = EntityMotionState.Static;
     private EntityStats _baseStats;
-    private List<EntityStats> _statModifiers = new List<EntityStats>();
     private EntityStats _cachedStats;
     private Timer _knockdownTime;
     private AudioSource _audio;
@@ -71,9 +70,12 @@ public class Entity : MonoBehaviour
     private Spell _activeBeam;
     private NavMeshAgent _navMeshAgent;
     private Timer _updateSpeedTimer;
+    private Dictionary<string, List<EntityStats>> _entityStatModifiers;
 
     protected Transform SelectedTarget;
     protected Animator Animator;
+
+    private const string _baseStatsID = "entity_base_stats";
 
     #endregion
 
@@ -96,6 +98,12 @@ public class Entity : MonoBehaviour
     #region Properties
 
     private List<string> SpellMarkers { get; set; }
+    /// <summary>
+    /// The modifiers such as Debuffs or Buffs that are modifying the Entity's stats. It is associated with a spell and uses
+    /// the spell ID to look up the spell. Each spell may apply many different stats depending if the spell is stackable or not. 
+    /// When the spell is removed it iterates through all the Modifiers associated with the spell and removes them.
+    /// </summary>
+    public Dictionary<string, List<EntityStats>> EntityStatModifiers { get { return _entityStatModifiers; } }
 
     public bool SpellsIgnoreElementalCost
     {
@@ -137,6 +145,12 @@ public class Entity : MonoBehaviour
         set { _baseStats = value; }
     }
 
+    public EntityStats CachedStats
+    {
+        get { return _cachedStats; }
+        private set { _cachedStats = value; }
+    }
+
     /// <summary>
     /// The timer that controls whether or not enough time has passed to be able to recast a spellID again. This takes in spellcastdelay and will
     /// allow a spellrecast once that time has passed.
@@ -148,16 +162,14 @@ public class Entity : MonoBehaviour
     }
     public float Speed
     {
-        set
-        {
-            _speed = value;
-        }
         get
         {
-            return _cachedStats.speed;
+            return CachedStats.Speed;
         }
     }
-
+    /// <summary>
+    /// This is the maximum HP of the Enity.
+    /// </summary>
     public float MaxHp
     {
         get
@@ -165,7 +177,10 @@ public class Entity : MonoBehaviour
             return _maxHp;
         }
     }
-
+    /// <summary>
+    /// A normalised value of the Entity's health. This only returns a value
+    /// and cannot be set. If you need to set the health do so through the CurrentHP property.
+    /// </summary>
     public float CurrentHealthNormalised
     {
         get { return CurrentHp / MaxHp; }
@@ -193,17 +208,25 @@ public class Entity : MonoBehaviour
                 return true;
         }
     }
-
+    /// <summary>
+    /// The nav mesh agent associated with the Entity
+    /// </summary>
     public NavMeshAgent NavMeshAgent
     {
         get { return _navMeshAgent; }
     }
-
+    /// <summary>
+    /// This is where the Entity will cast spells froms
+    /// </summary>
     public Transform CastPoint
     {
         get { return _castPoint; }
     }
-
+    /// <summary>
+    /// This is the recharge rate of the Entity's elements. It will return the value
+    /// that the Entity should increment it's current charge, taking into account if the 
+    /// respective element is locked or not.
+    /// </summary>
     public ElementalStats RechargeRate
     {
         get
@@ -224,6 +247,10 @@ public class Entity : MonoBehaviour
     {
         get { return _activeBeam != null; }
     }
+    /// <summary>
+    /// This is the current living state of the Entity. Setting this will also properly
+    /// handle setting up the state of the Entity to match the living state.
+    /// </summary>
     public EntityLivingState LivingState
     {
         get { return _livingState; }
@@ -243,7 +270,10 @@ public class Entity : MonoBehaviour
             _livingState = value;
         }
     }
-
+    /// <summary>
+    /// This returns the current HP of the Enity. It will also properly handle setting the HP based on the
+    /// Entity's state.
+    /// </summary>
     public float CurrentHp
     {
         get { return _currentHp; }
@@ -351,19 +381,18 @@ public class Entity : MonoBehaviour
         _rigidbody = GetComponent<Rigidbody>();
         _audio = GetComponent<AudioSource>();
         _updateSpeedTimer = new Timer(UnityEngine.Random.Range(0.15f, 0.35f));
+        _entityStatModifiers = new Dictionary<string, List<EntityStats>>();
     }
 
     protected virtual void Start()
     {
         EntityHealthChanged += HealthChanged;
-        _baseStats = new EntityStats(_speed);
-        AddStatModifier(_baseStats);
-        //    rigidbody.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
+        BaseStats = new EntityStats(_speed);
+        ApplyStatModifier(_baseStatsID, BaseStats);
 
         MotionState = EntityMotionState.Pathfinding;
         _lastPosition = transform.position;
         _currentElementalCharge = MaxElementalCharge;
-        //  maxElementalCharge = new ElementalStats(50, 50, 50);
 
         // Ensure HP is properly clamped
         _currentHp = Mathf.Clamp(_currentHp, 0f, _maxHp); ;
@@ -409,7 +438,6 @@ public class Entity : MonoBehaviour
     }
 
     #endregion
-
 
     #region Updates
     protected virtual void Update()
@@ -489,7 +517,9 @@ public class Entity : MonoBehaviour
         amount = Mathf.Floor(amount);
         CurrentHp += amount;
     }
-
+    /// <summary>
+    /// Updates the current speed the Entity is moving at. This is useful for animation.
+    /// </summary>
     private void UpdateSpeed()
     {
         var moveAmount = transform.position - _lastPosition;
@@ -499,23 +529,53 @@ public class Entity : MonoBehaviour
         //  CurrentSpeed /= 5f;
     }
 
-    public void AddStatModifier(EntityStats stat)
+    /// <summary>
+    /// Modifies the EntityStats to add the amount passed in. It will automatically update the state of the Entity to reflect
+    /// the new stats.
+    /// </summary>
+    /// <param name="stat"></param>
+    public void ApplyStatModifier(string id, EntityStats stat)
     {
-        _statModifiers.Add(stat);
-        _cachedStats += stat;
+        if (!_entityStatModifiers.ContainsKey(id))
+        {
+            _entityStatModifiers.Add(id, new List<EntityStats>());
+        }
+        _entityStatModifiers[id].Add(stat);
+        // Apply the stat to the cached stats
+        CachedStats += stat;
+        // Update the stats of the Entity to reflect the new stats
         UpdateStatComponents();
     }
-
-    public void RemoveStatModifier(EntityStats stat)
+    /// <summary>
+    /// Removes all EnityStats applied using the specified ID. It will automatically update the state of the Entity to reflect
+    /// the new stats.
+    /// </summary>
+    /// <param name="stat"></param>
+    public void RemoveAllStatModifiers(string id)
     {
-        _statModifiers.Remove(stat);
-        _cachedStats = _cachedStats.Difference(stat);
+        if (!_entityStatModifiers.ContainsKey(id))
+        {
+            Debug.LogError("Trying to remove modifier with invalid ID");
+        }
+        else
+        {
+            // Iterate through all EntityStats and remove them from the cached stats
+            foreach (EntityStats s in _entityStatModifiers[id])
+            {
+                CachedStats = CachedStats.Difference(s);
+            }
+            // Clear the list
+            _entityStatModifiers[id].Clear();
+        }
+        // Update the stats of the Entity to reflect the new stats
         UpdateStatComponents();
     }
-
+    /// <summary>
+    /// Updates the Entity to match the cached stats
+    /// </summary>
     private void UpdateStatComponents()
     {
-        _navMeshAgent.speed = Mathf.Max(_cachedStats.speed, 1f);
+        _navMeshAgent.speed = Mathf.Max(CachedStats.Speed, 1f);
     }
 
     public void Knockdown(float force, Vector3 explodePosition, float radius)
@@ -620,15 +680,27 @@ public class Entity : MonoBehaviour
     {
         return CastSpell(SpellList.Instance.GetSpell(spell), out castSpell);
     }
-
+    /// <summary>
+    /// This creates a new spell that the Entity cast itself. This mean the spell will recognise this Enity
+    /// as the spell caster. It ensures that the Entity can only cast the spell if possible and returns if it cannot.
+    /// It also handles the casting of different types of spells. For example if an attached spell is cast it will 
+    /// attach it appropriately 
+    /// </summary>
+    /// <param name="spell"></param>
+    /// <param name="castSpell"></param>
+    /// <param name="spellTarget"></param>
+    /// <param name="spellTargetPosition"></param>
+    /// <returns></returns>
     public bool CastSpell(Spell spell, out Spell castSpell, Transform spellTarget = null, Vector3? spellTargetPosition = null)
     {
-        if (!CanCastSpell(spell) || IsBeamActive || (spell.SpellType == SpellType.Attached && !CanAttachSpell(spell)))
+        if (!CanCastSpell(spell) || IsBeamActive )
         {
             castSpell = null;
             return false;
         }
 
+        // If it is an attached spell and we already have an attached spell check if it is refreshable and if
+        // so refresh it and return.
         if (spell.spellType == SpellType.Attached)
             spellTarget = transform;
 
@@ -694,24 +766,35 @@ public class Entity : MonoBehaviour
         return true;
     }
 
-    public bool CanAttachSpell(Spell spell)
+    public bool HasAttachedSpell(Spell spell)
     {
-        return CanAttachSpell(spell.SpellID);
+        return HasAttachedSpell(spell.SpellID);
     }
 
-    public bool CanAttachSpell(string spellId)
+    public bool HasAttachedSpell(string spellId)
     {
-        return !_attachedSpells.ContainsKey(spellId);
+        return _attachedSpells.ContainsKey(spellId);
     }
 
     public void AttachSpell(Spell spell)
     {
-        if (!CanAttachSpell(spell))
+        if (HasAttachedSpell(spell))
             Debug.LogError("Spell already contained and should not be attached!");
         _attachedSpells.Add(spell.SpellID, spell);
         spell.transform.parent = transform;
         spell.transform.position = transform.position;
         spell.OnSpellDestroy += RemoveAttachedSpell;
+    }
+
+    public void RefreshAttachedSpell(Spell spell)
+    {
+        if (!HasAttachedSpell(spell))
+        {
+            Debug.LogError("Attached spell does not exist!");
+            return;
+        }
+        _attachedSpells[spell.SpellID].SpellDestroyTimer.Reset();
+
     }
 
     private void RemoveAttachedSpell(Spell spell)

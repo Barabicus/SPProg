@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
-
+/// <summary>
+/// Activates or deactivates specified gameObjects
+/// </summary>
 public class StandardGameObjectSpell : SpellEffectStandard
 {
     public GameObjectEvent gameObjectEvent;

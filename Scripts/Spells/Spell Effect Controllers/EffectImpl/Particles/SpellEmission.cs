@@ -8,8 +8,6 @@ public class SpellEmission : SpellEffectStandard
     public EmissionEvent emissionEvent;
     public int emitAmount = 0;
 
-    public bool playing;
-
     private ParticleSystem particleSystem;
 
     #region Start State
@@ -47,12 +45,6 @@ public class SpellEmission : SpellEffectStandard
 
         particleSystem.enableEmission = r_emit;
     }
-
-    private void Update()
-    {
-        playing = particleSystem.isPlaying;
-    }
-
 
     protected override void DoEventTriggered()
     {
