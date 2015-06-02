@@ -160,7 +160,7 @@ public class PlayerController : EntityComponent
 
     private void KeepBeamOpen()
     {
-        Entity.KeepBeamOpen = Input.GetMouseButton(1);
+        Entity.IsCastingTriggered = Input.GetMouseButton(1);
     }
 
     //public override bool KeepBeamAlive()

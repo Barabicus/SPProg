@@ -3,7 +3,7 @@ using System.Collections;
 using UnityEngine.Serialization;
 
 /// <summary>
-/// The standard spell effect allows us a standard of setting up and handling specific spell related effect events.
+/// The standard spell effect allows us a standard of setting up and handling specific spell related events.
 /// Inheriting from this class means we can easily listen for when a Event is triggered and deal with it appropriately. 
 /// Using this we can generalise many different spell effects to behave the same but respond to different triggers.
 /// </summary>
@@ -92,7 +92,6 @@ public abstract class SpellEffectStandard : SpellEffect
     private void EventTriggered()
     {
         DoEventTriggered();
-
     }
 
     protected virtual void DoEventTriggered()

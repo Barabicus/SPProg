@@ -87,7 +87,6 @@ public class Entity : MonoBehaviour
     /// This event fires when an elemental spell has been cast on the entity
     /// </summary>
     public event Action<Entity, Spell> ElementalSpellCastOnEntity;
-    public event Action<Spell> EntityCastedSpell;
     /// <summary>
     /// Much like ElementalSpellCastOnEntity this event fires when an elemental spell has been cast on an entity but results in the death of the entity
     /// </summary>
@@ -194,7 +193,6 @@ public class Entity : MonoBehaviour
         get;
         set;
     }
-
     /// <summary>
     /// Returns true if this beam should be kept open
     /// </summary>
@@ -367,6 +365,7 @@ public class Entity : MonoBehaviour
         get;
         set;
     }
+    public bool IsCastingTriggered { get; set; }
 
     #endregion
 
@@ -382,6 +381,7 @@ public class Entity : MonoBehaviour
         _audio = GetComponent<AudioSource>();
         _updateSpeedTimer = new Timer(UnityEngine.Random.Range(0.15f, 0.35f));
         _entityStatModifiers = new Dictionary<string, List<EntityStats>>();
+        SpellCastTimer = new Timer(0f);
     }
 
     protected virtual void Start()
@@ -693,20 +693,36 @@ public class Entity : MonoBehaviour
     /// <returns></returns>
     public bool CastSpell(Spell spell, out Spell castSpell, Transform spellTarget = null, Vector3? spellTargetPosition = null)
     {
-        if (!CanCastSpell(spell) || IsBeamActive )
+        if (!CanCastSpell(spell) || IsBeamActive)
         {
             castSpell = null;
             return false;
         }
 
-        // If it is an attached spell and we already have an attached spell check if it is refreshable and if
-        // so refresh it and return.
+        // If we are attaching a spell ensure the spell target is set to this transform.
         if (spell.spellType == SpellType.Attached)
             spellTarget = transform;
 
+        Spell sp = null;
+        if (spell.SpellType != SpellType.Attached || (spell.SpellType == SpellType.Attached && !HasAttachedSpell(spell)))
+            sp = CreateNewSpellFromEntity(spell, spellTarget, spellTargetPosition);
+        else
+            RefreshAttachedSpell(spell);
+
+        // Take spellID cost
+        if (!SpellsIgnoreElementalCost)
+            SubtractSpellCost(spell);
+        castSpell = sp;
+        SpellCastTimer.TickTime = spell.SpellCastDelay;
+        SpellCastTimer.Reset();
+        PlaySound(spell.castAudio);
+        return true;
+    }
+
+    private Spell CreateNewSpellFromEntity(Spell spell, Transform spellTarget, Vector3? spellTargetPosition)
+    {
         Spell sp = SpellList.Instance.GetNewSpell(spell);
         sp.CastSpell(this, CastPoint, null, spellTarget, spellTargetPosition);
-        // sp.SetupSpellTransform(_castPoint);
 
         switch (sp.SpellType)
         {
@@ -718,17 +734,9 @@ public class Entity : MonoBehaviour
                 AttachSpell(sp);
                 break;
         }
-
-        // Take spellID cost
-        if (!SpellsIgnoreElementalCost)
-            SubtractSpellCost(sp);
-        castSpell = sp;
-        SpellCastTimer = new Timer(spell.SpellCastDelay);
-        if (EntityCastedSpell != null)
-            EntityCastedSpell(sp);
-        PlaySound(castSpell.castAudio);
-        return true;
+        return sp;
     }
+
     public void SubtractSpellCost(Spell spell)
     {
         CurrentElementalCharge -= spell.ElementalCost;

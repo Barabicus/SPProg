@@ -111,6 +111,7 @@ public class EffectSetting : MonoBehaviour
     /// </summary>
     private void ResetEffect()
     {
+        transform.parent = null;
         SpellPool.Instance.PoolSpell(spell);
         spell.OnSpellDestroy += spell_OnSpellDestroy;
     }

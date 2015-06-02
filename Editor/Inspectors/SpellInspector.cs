@@ -79,6 +79,7 @@ public class SpellInspector : Editor
         DrawHasComponent<BeamMotor>("Beam Motor");
         DrawHasComponent<PhysicalMotor>("Physical Motor");
         DrawHasComponent<SpreadMotor>("Spread Motor");
+        DrawHasComponent<RayCastMotor>("RayCast Motor");
      //   DrawHasComponent<BounceSpell>("Bounce Motor");
 
 

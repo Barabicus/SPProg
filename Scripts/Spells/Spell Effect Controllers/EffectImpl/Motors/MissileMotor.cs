@@ -36,7 +36,10 @@ public class MissileMotor : SpellMotor
     [Tooltip("The random amount of sin cycles that should occur. A Higher number will lead to rapid cycles leading to a lower radius area")]
     public float minRange = 1f;
     public float randomRange = 1f;
-
+    [Tooltip("This will trigger a collision on the OnTriggerStay event if true. This means as long as an Entity remains within the spell collider it will contiously trigger")]
+    public bool triggerCollisionOnSpellStay = false;
+    [Tooltip("This is how frequent the spell can re-trigger collision events. Typically a missile will be destroyed when it collides with something but if it doesn't use this to set how frequent it will trigger collisions")]
+    public float retriggerTime = 0.1f;
 
 
 
@@ -48,6 +51,8 @@ public class MissileMotor : SpellMotor
 
     private float xRandDir = 0f, yRandDir = 0f, zRandDir = 0f;
     private float xRandSpeed, yRandSpeed, zRandSpeed;
+
+    private Timer _triggerTimer;
 
 
     public virtual Vector3 Direction
@@ -104,6 +109,7 @@ public class MissileMotor : SpellMotor
     {
         base.InitializeEffect(effectSetting);
         GetComponent<Rigidbody>().isKinematic = true;
+        _triggerTimer = new Timer(retriggerTime);
         Collider[] colliders = GetComponents<Collider>();
         if (colliders.Length == 0)
             Debug.LogError("Spell: " + effectSetting.spell.spellName + " has no colliders");
@@ -131,9 +137,23 @@ public class MissileMotor : SpellMotor
 
     public void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject != effectSetting.spell.CastingEntity.gameObject && other.gameObject.layer != LayerMask.NameToLayer("Spell") && other.gameObject.layer != LayerMask.NameToLayer("Ignore Raycast"))
+        TriggerSpell(other);
+    }
+
+    public void OnTriggerStay(Collider other)
+    {
+        if (triggerCollisionOnSpellStay)
+            TriggerSpell(other);
+    }
+
+    private void TriggerSpell(Collider other)
+    {
+        if (_triggerTimer.CanTickAndReset())
         {
-            TryTriggerCollision(new ColliderEventArgs(), other);
+            if (other.gameObject != effectSetting.spell.CastingEntity.gameObject && other.gameObject.layer != LayerMask.NameToLayer("Spell") && other.gameObject.layer != LayerMask.NameToLayer("Ignore Raycast"))
+            {
+                TryTriggerCollision(new ColliderEventArgs(), other);
+            }
         }
     }
 
@@ -169,7 +189,6 @@ public class MissileMotor : SpellMotor
                 }
             }
         }
-
     }
 
     private void InitRandomVariables()

@@ -16,6 +16,7 @@ public abstract class TimedUpdateableSpellMotor : TimedUpdateableEffect, ISpellM
 
     public void TryTriggerCollision(ColliderEventArgs args, Collider c)
     {
+        // Don't trigger with a mood box
         if (c.gameObject.layer == LayerMask.NameToLayer("MoodBox"))
             return;
 

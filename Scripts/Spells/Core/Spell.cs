@@ -12,8 +12,6 @@ public class Spell : MonoBehaviour
     public string spellID;
     public string spellName = "NOTSET";
     public float spellLiveTime;
-    [SerializeField]
-    private bool _reapplyRefreshes = true;
     public float spellCastDelay;
     public SpellType spellType;
     [SerializeField]

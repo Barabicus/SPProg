@@ -12,6 +12,7 @@ public class AttachMotor : SpellMotor
 
     private Entity targetEntity;
     private bool r_enabled;
+    private bool _fired;
 
     public override void InitializeEffect(EffectSetting effectSetting)
     {
@@ -23,6 +24,7 @@ public class AttachMotor : SpellMotor
     {
         base.OnSpellStart();
         enabled = r_enabled;
+        _fired = false;
         targetEntity = effectSetting.spell.SpellTarget.GetComponent<Entity>();
         if (targetEntity == null)
         {
@@ -36,15 +38,24 @@ public class AttachMotor : SpellMotor
     protected override void UpdateSpell()
     {
         base.UpdateSpell();
-        if(targetEntity != null && targetEntity.LivingState != EntityLivingState.Alive)
+        if (targetEntity != null && targetEntity.LivingState != EntityLivingState.Alive)
+        {
             effectSetting.TriggerDestroySpell();
+        }
 
+        if (!_fired)
+            DoApply();
+
+    }
+
+    private void DoApply()
+    {
         if (targetEntity != null && Time.time - lastUpdateTime >= updateTime)
         {
             effectSetting.TriggerApplySpell(targetEntity);
             lastUpdateTime = Time.time;
             if (singleShot)
-                enabled = false;
+                _fired = true;
         }
     }
 

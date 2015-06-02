@@ -5,11 +5,11 @@ public class AttachOnCollision : SpellEffect
 {
     public Spell[] attachSpells;
 
-    protected override void effectSetting_OnSpellCollision(ColliderEventArgs args, Collider obj)
+    protected override void effectSetting_OnSpellApply(Entity entity)
     {
-        base.effectSetting_OnSpellCollision(args, obj);
-        Entity ent = obj.GetComponent<Entity>();
-        if (ent != null)
+        base.effectSetting_OnSpellApply(entity);
+
+        if (entity != null)
         {
             foreach (Spell atch in attachSpells)
             {
@@ -18,16 +18,19 @@ public class AttachOnCollision : SpellEffect
                     Debug.LogError("Trying to attach spell: " + atch.SpellID + " which is of type: " + atch.SpellType);
                     continue;
                 }
-                if (ent.HasAttachedSpell(atch))
+                if (!entity.HasAttachedSpell(atch))
                 {
                     Spell sp = SpellList.Instance.GetNewSpell(atch);
-                    sp.CastSpell(effectSetting.spell.CastingEntity, obj.transform, null, obj.transform);
-                   // sp.SetupSpellTransform(obj.transform);
-                    ent.AttachSpell(sp);
+                    sp.CastSpell(effectSetting.spell.CastingEntity, entity.transform, null, entity.transform);
+                    // sp.SetupSpellTransform(obj.transform);
+                    entity.AttachSpell(sp);
+                }
+                else
+                {
+                    entity.RefreshAttachedSpell(atch);
                 }
             }
         }
-
     }
 
 }
